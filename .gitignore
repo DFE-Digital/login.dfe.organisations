@@ -59,4 +59,4 @@ typings/
 
 #config
 /config/
-!/config/login.dfe.directories.dev.json
+!/config/login.dfe.organisations.dev.json
