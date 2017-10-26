@@ -5,11 +5,14 @@ const bodyParser = require('body-parser');
 const https = require('https');
 const config = require('./infrastructure/config')();
 const logger = require('./infrastructure/logger');
+const services = require('./app/services/api');
 
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+app.use('/services', services);
 
 if (config.hostingEnvironment.env === 'dev') {
   app.proxy = true;
