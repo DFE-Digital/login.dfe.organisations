@@ -57,6 +57,9 @@ typings/
 # dotenv environment variables file
 .env
 
+# dev env
+.idea
+
 #config
 /config/
 !/config/login.dfe.organisations.dev.json

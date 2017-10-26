@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const https = require('https');
 const config = require('./infrastructure/config')();
 const logger = require('./infrastructure/logger');
-const services = require('./app/services/api');
+const services = require('./app/services');
 
 const app = express();
 
