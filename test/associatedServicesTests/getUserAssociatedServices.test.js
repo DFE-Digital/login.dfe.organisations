@@ -9,6 +9,7 @@ describe('When getting associated services to a user', () => {
   let servicesStorage;
   let getUserServicesStub;
   const expectedUserId = '7654321';
+  const expectedServiceName = 'service 1';
 
   beforeEach(() => {
     res = httpMocks.createResponse();
@@ -22,7 +23,7 @@ describe('When getting associated services to a user', () => {
       return {
         services: [
           {
-            Name: '123EDC',
+            name: expectedServiceName,
           }
         ]
       };
@@ -59,5 +60,11 @@ describe('When getting associated services to a user', () => {
 
     expect(res.statusCode).toBe(404);
     expect(getUserServicesStub.mock.calls[0][0]).toBe('ABC123');
+  });
+  it('then if the request is valid the data is returned in the response', async () => {
+    await getUserAssociatedServices(req, res);
+
+    expect(res.statusCode).toBe(200);
+    expect(res._getData().services[0].name).toBe(expectedServiceName);
   });
 });
