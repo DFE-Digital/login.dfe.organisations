@@ -14,7 +14,7 @@ const routeExport = () => {
 
   // Map routed to functions.
   // router.get('/:userId', getUserAssociatedServices);
-  router.get('/unassociatedWithUser', unassociatedWithUser);
+  router.get('/unassociatedWithUser/:userId', unassociatedWithUser);
 
   return router;
 };
