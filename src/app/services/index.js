@@ -2,9 +2,9 @@
 
 const express = require('express');
 const apiAuth = require('login.dfe.api.auth');
-const config = require('../../infrastructure/config/index')();
+const config = require('./../../infrastructure/config/index')();
 const getUserAssociatedServices = require('./getUserAssociatedServices');
-const getUnassociatedWithUserServices = require('./getUnassociatedWithUserServices');
+const getUnassociatedWithUserServices = require('./getUserUnassociatedServices');
 
 const router = express.Router();
 
