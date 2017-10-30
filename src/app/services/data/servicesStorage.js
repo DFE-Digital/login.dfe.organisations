@@ -152,6 +152,9 @@ class ServicesStorage {
     }
   }
 
+  async getUserUnassociatedServices(id){
+
+  }
 }
 
 module.exports = ServicesStorage;

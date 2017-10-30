@@ -1,5 +1,5 @@
-const logger = require('./../../../infrastructure/logger');
-const ServicesStorage = require('./../data/servicesStorage');
+const logger = require('./../../infrastructure/logger/index');
+const ServicesStorage = require('./data/servicesStorage');
 
 const getUserAssociatedServices = async (req, res) => {
   try {
