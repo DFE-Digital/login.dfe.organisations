@@ -31,7 +31,7 @@ describe('When getting associated services to a user', () => {
 
     servicesStorage = require('./../../src/app/services/data/servicesStorage');
     servicesStorage.mockImplementation(() => ({
-      getUserServices: getUserServicesStub
+      getUserAssociatedServices: getUserServicesStub
     }));
   });
   it('then a bad request is returned if the userid is not supplied', async () => {
