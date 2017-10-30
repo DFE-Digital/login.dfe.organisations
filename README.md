@@ -31,6 +31,16 @@ The postgres instance can be installed using brew.
 1) Once installed from terminal run ``` brew install postgres ```
 1) Then ```brew services start postgresql``` to start a local instance of postgres
 
+The following configuration must then be supplied as detailed in login.dfe.organisations.dev.json
+
+```
+  "database":{
+    "host" :"localhost",
+    "username":"my-username",
+    "password":"my-password"
+  }
+```
+
 The necessary tables will be created when ran.
 
 ### Endpoints
