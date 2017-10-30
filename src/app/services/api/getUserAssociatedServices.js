@@ -9,7 +9,7 @@ const getUserAssociatedServices = async (req, res) => {
     }
 
     const storage = new ServicesStorage();
-    const services = await storage.getUserServices(req.params.uid);
+    const services = await storage.getUserAssociatedServices(req.params.uid);
 
     if(!services){
       res.status(404);
