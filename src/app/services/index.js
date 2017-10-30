@@ -3,7 +3,7 @@
 const express = require('express');
 const apiAuth = require('login.dfe.api.auth');
 const config = require('../../infrastructure/config/index')();
-// const getUserAssociatedServices = require('./getUserAssociatedServices');
+const getUserAssociatedServices = require('./getUserAssociatedServices');
 const unassociatedWithUser = require('./unassociatedWithUser');
 
 const router = express.Router();
@@ -13,7 +13,7 @@ const routeExport = () => {
   router.use(apiAuth(router, config));
 
   // Map routed to functions.
-  // router.get('/:userId', getUserAssociatedServices);
+   router.get('/associated-with-user/:uid', getUserAssociatedServices);
   router.get('/unassociatedWithUser/:userId', unassociatedWithUser);
 
   return router;
