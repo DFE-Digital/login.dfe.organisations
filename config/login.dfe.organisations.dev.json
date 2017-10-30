@@ -19,5 +19,10 @@
       "ok": "green",
       "error": "red"
     }
+  },
+  "database":{
+    "host" :"localhost",
+    "username":"my-username",
+    "password":"my-password"
   }
 }

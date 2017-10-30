@@ -12,7 +12,7 @@ const routeExport = () => {
   router.use(apiAuth(router, config));
 
   // Map routed to functions.
-   router.get('/associated-with-user/:userId', getUserAssociatedServices);
+   router.get('/associated-with-user/:uid', getUserAssociatedServices);
 
   return router;
 };
