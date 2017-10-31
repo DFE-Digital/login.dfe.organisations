@@ -7,6 +7,11 @@ const logger = require('./../../../infrastructure/logger');
 const config = require('./../../../infrastructure/config')();
 const assert = require('assert');
 
+const roles = [
+  { id: 0, name: 'End user' },
+  { id: 10000, name: 'Approver' },
+];
+
 let sequelize;
 let organisation;
 let userServicesDataModel;
@@ -68,11 +73,15 @@ class ServicesStorage {
         primaryKey: true,
         allowNull: false,
       },
+      role_id: {
+        type: Sequelize.SMALLINT,
+        allowNull: false,
+        defaultValue: 0,
+      },
       status: {
         type: Sequelize.SMALLINT,
         allowNull: false,
       },
-
     }, {
       timestamps: false,
       tableName: 'user_services',
@@ -115,15 +124,15 @@ class ServicesStorage {
       const userServices = await userServicesDataModel.findAll(
         {
           where: {
-            user_id: id,
+            user_id: {
+              [Op.eq]: id,
+            },
           },
+          include: ['Organisation', 'Service'],
         });
 
       const userServiceObject = await Promise.all(userServices.map(async (userService) => {
         if (userService) {
-          const org = await userService.getOrganisation();
-          const service = await userService.getService();
-
           const objectToAdd = {
             userService: {
               id: userService.getDataValue('id'),
@@ -131,16 +140,19 @@ class ServicesStorage {
               status: userService.getDataValue('status'),
             },
             organisation: {
-              id: org.getDataValue('id'),
-              name: org.getDataValue('name'),
+              id: userService.Organisation.getDataValue('id'),
+              name: userService.Organisation.getDataValue('name'),
             },
             service: {
-              id: service.getDataValue('id'),
-              name: service.getDataValue('name'),
-              description: service.getDataValue('description'),
+              id: userService.Service.getDataValue('id'),
+              name: userService.Service.getDataValue('name'),
+              description: userService.Service.getDataValue('description'),
             },
+            role: roles.find(item => item.id === userService.getDataValue('role_id')),
           };
           return objectToAdd;
+        } else {
+          return null;
         }
       }));
 
