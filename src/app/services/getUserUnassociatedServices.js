@@ -10,7 +10,7 @@ const action = async (req, res) => {
     }
 
     const storage = new ServicesStorage();
-    const services = storage.getUserUnassociatedServices(req.params.uid);
+    const services = await storage.getUserUnassociatedServices(req.params.uid);
 
     if(!services){
       res.status(404);
