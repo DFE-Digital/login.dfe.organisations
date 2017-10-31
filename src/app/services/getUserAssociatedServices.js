@@ -3,7 +3,7 @@ const ServicesStorage = require('./data/servicesStorage');
 
 const getUserAssociatedServices = async (req, res) => {
   try {
-    if(!req.params.uid) {
+    if (!req.params.uid) {
       res.status(400).send();
       return;
     }
@@ -11,7 +11,7 @@ const getUserAssociatedServices = async (req, res) => {
     const storage = new ServicesStorage();
     const services = await storage.getUserAssociatedServices(req.params.uid);
 
-    if(!services){
+    if (!services) {
       res.status(404).send();
       return;
     }
