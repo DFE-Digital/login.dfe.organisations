@@ -31,12 +31,23 @@ The postgres instance can be installed using brew.
 1) Once installed from terminal run ``` brew install postgres ```
 1) Then ```brew services start postgresql``` to start a local instance of postgres
 
+A schema called **services** should be created, then the following script can be created for the user
+
+```
+CREATE USER db_user WITH PASSWORD '[YOUR_PASSWORD]';
+alter default privileges in schema services grant all on tables to db_user;
+
+
+GRANT ALL PRIVILEGES ON SCHEMA services TO GROUP db_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA services TO GROUP db_user;
+```
+
 The following configuration must then be supplied as detailed in login.dfe.organisations.dev.json
 
 ```
   "database":{
     "host" :"localhost",
-    "username":"my-username",
+    "username":"db_user",
     "password":"my-password"
   }
 ```
