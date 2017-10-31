@@ -58,6 +58,7 @@ class ServicesStorage {
               name: userService.Service.getDataValue('name'),
               description: userService.Service.getDataValue('description'),
             },
+            role: this.schema.roles.find(item => item.id === userService.getDataValue('role_id')),
           };
         }
         return [];
