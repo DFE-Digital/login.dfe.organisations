@@ -1,4 +1,5 @@
 jest.mock('./../../src/app/services/data/servicesStorage');
+jest.mock('./../../src/infrastructure/logger');
 
 const httpMocks = require('node-mocks-http');
 const getUnassociatedUserAssociatedServices = require('../../src/app/services/getUserUnassociatedServices');
@@ -8,6 +9,7 @@ describe('When getting services available to a user', () => {
   let res;
   let servicesStorage;
   let getUnassociatedUserServicesStub;
+  let logger;
   const expectedUserId = '7654321';
   const expectedServiceName = 'service 1';
 
@@ -28,6 +30,9 @@ describe('When getting services available to a user', () => {
         ]
       };
     });
+
+    logger = require('./../../src/infrastructure/logger');
+    logger.error = (() => ({  }));
 
     servicesStorage = require('./../../src/app/services/data/servicesStorage');
     servicesStorage.mockImplementation(() => ({
