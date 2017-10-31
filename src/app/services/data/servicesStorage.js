@@ -45,7 +45,7 @@ class ServicesStorage {
         allowNull: false
       },
       description: {
-      type: Sequelize.STRING,
+        type: Sequelize.STRING,
         allowNull: false
       },
     }, {
@@ -116,11 +116,8 @@ class ServicesStorage {
           }
         });
 
-
-      let userServiceObject = [];
-
-      await Promise.all(userServices.map(async (userService) => {
-        if (!userService) {
+      let userServiceObject = await Promise.all(userServices.map(async (userService) => {
+        if (userService) {
           const org = await userService.getOrganisation();
           const service = await userService.getService();
 
@@ -136,17 +133,17 @@ class ServicesStorage {
             },
             service: {
               id: service.getDataValue('id'),
-              name: service.getDataValue('name')
+              name: service.getDataValue('name'),
+              description: service.getDataValue('description')
             }
           };
-
-          userServiceObject.push(objectToAdd);
+          return objectToAdd;
         }
       }));
 
 
       //todo check if this is necessary
-      //await sequelize.close();
+      await sequelize.close();
 
       return userServiceObject.length !== 0 ? userServiceObject : null;
 
@@ -169,10 +166,12 @@ class ServicesStorage {
           where: {
             user_id: id
           },
-          attributes: [ 'service_id' ]
+          attributes: ['service_id']
         });
 
-      const ids = userServices.map((userService) => {return userService.getDataValue('service_id')});
+      const ids = userServices.map((userService) => {
+        return userService.getDataValue('service_id')
+      });
 
       const availableServices = await service.findAll(
         {
@@ -184,7 +183,15 @@ class ServicesStorage {
         }
       );
 
-      const services = availableServices.map((service) => { return {id:service.getDataValue('id'), name:service.getDataValue('name')} });
+      const services = availableServices.map((service) => {
+        return {
+          id: service.getDataValue('id'),
+          name: service.getDataValue('name'),
+          description: service.getDataValue('description')
+        }
+      });
+
+      await sequelize.close();
 
       return services.length !== 0 ? services : null;
 
