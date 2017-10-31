@@ -17,26 +17,24 @@ describe('When getting services available to a user', () => {
     res = httpMocks.createResponse();
     req = {
       params: {
-        uid: expectedUserId
-      }
+        uid: expectedUserId,
+      },
     };
 
-    getUnassociatedUserServicesStub = jest.fn().mockImplementation(() => {
-      return {
-        services: [
-          {
-            name: expectedServiceName,
-          }
-        ]
-      };
-    });
+    getUnassociatedUserServicesStub = jest.fn().mockImplementation(() => ({
+      services: [
+        {
+          name: expectedServiceName,
+        },
+      ],
+    }));
 
     logger = require('./../../src/infrastructure/logger');
-    logger.error = (() => ({  }));
+    logger.error = (() => ({ }));
 
     servicesStorage = require('./../../src/app/services/data/servicesStorage');
     servicesStorage.mockImplementation(() => ({
-      getUserUnassociatedServices: getUnassociatedUserServicesStub
+      getUserUnassociatedServices: getUnassociatedUserServicesStub,
     }));
   });
   it('then a bad request is returned if the userid is not supplied', async () => {
@@ -56,9 +54,7 @@ describe('When getting services available to a user', () => {
     expect(getUnassociatedUserServicesStub.mock.calls[0][0]).toBe(expectedUserId);
   });
   it('then if the request is valid and no data is returned a 404 is returned', async () => {
-    getUnassociatedUserServicesStub = jest.fn().mockImplementation(() => {
-      return null
-    });
+    getUnassociatedUserServicesStub = jest.fn().mockImplementation(() => null);
     req.params.uid = 'ABC123';
 
     await getUnassociatedUserAssociatedServices(req, res);
