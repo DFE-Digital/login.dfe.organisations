@@ -1,5 +1,7 @@
 'use strict';
+
 const Sequelize = require('sequelize');
+
 const Op = Sequelize.Op;
 const logger = require('./../../../infrastructure/logger');
 const config = require('./../../../infrastructure/config')();
@@ -11,24 +13,22 @@ let userServicesDataModel;
 let service;
 
 class ServicesStorage {
-
-
   async _defineOrganisationServiceModel() {
     organisation = sequelize.define('organisation', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
-        allowNull: false
+        allowNull: false,
       },
       name: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
 
     }, {
       timestamps: false,
       tableName: 'organisation',
-      schema: 'services'
+      schema: 'services',
     });
     await organisation.sync();
   }
@@ -38,20 +38,20 @@ class ServicesStorage {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
-        allowNull: false
+        allowNull: false,
       },
       name: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
       description: {
         type: Sequelize.STRING,
-        allowNull: true
+        allowNull: true,
       },
     }, {
       timestamps: false,
       tableName: 'service',
-      schema: 'services'
+      schema: 'services',
     });
     await service.sync();
   }
@@ -61,26 +61,26 @@ class ServicesStorage {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
-        allowNull: false
+        allowNull: false,
       },
       user_id: {
         type: Sequelize.UUID,
         primaryKey: true,
-        allowNull: false
+        allowNull: false,
       },
       status: {
         type: Sequelize.SMALLINT,
-        allowNull: false
+        allowNull: false,
       },
 
     }, {
       timestamps: false,
       tableName: 'user_services',
-      schema: 'services'
+      schema: 'services',
     });
 
-    userServicesDataModel.belongsTo(organisation, {as: 'Organisation', foreignKey: 'organisation_id'});
-    userServicesDataModel.belongsTo(service, {as: 'Service', foreignKey: 'service_id'});
+    userServicesDataModel.belongsTo(organisation, { as: 'Organisation', foreignKey: 'organisation_id' });
+    userServicesDataModel.belongsTo(service, { as: 'Service', foreignKey: 'service_id' });
 
     await userServicesDataModel.sync();
   }
@@ -88,20 +88,23 @@ class ServicesStorage {
   constructor(dataConnection) {
     if (dataConnection) {
       sequelize = dataConnection;
-    }
-    else {
-      assert(config.database.username, 'Database property username must be supplied');
-      assert(config.database.password, 'Database property password must be supplied');
-      assert(config.database.host, 'Database property host must be supplied');
-      sequelize = new Sequelize('postgres', config.database.username, config.database.password, {
-        host: config.database.host,
-        dialect: 'postgres'
-      });
+    } else {
+
+      if(config.database.postgresUrl) {
+        sequelize = new Sequelize(config.database.postgresUrl);
+      } else {
+        assert(config.database.username, 'Database property username must be supplied');
+        assert(config.database.password, 'Database property password must be supplied');
+        assert(config.database.host, 'Database property host must be supplied');
+        sequelize = new Sequelize('postgres', config.database.username, config.database.password, {
+          host: config.database.host,
+          dialect: 'postgres',
+        });
+      }
     }
   }
 
   async getUserAssociatedServices(id) {
-
     try {
       await sequelize.authenticate();
 
@@ -112,11 +115,11 @@ class ServicesStorage {
       const userServices = await userServicesDataModel.findAll(
         {
           where: {
-            user_id: id
-          }
+            user_id: id,
+          },
         });
 
-      let userServiceObject = await Promise.all(userServices.map(async (userService) => {
+      const userServiceObject = await Promise.all(userServices.map(async (userService) => {
         if (userService) {
           const org = await userService.getOrganisation();
           const service = await userService.getService();
@@ -125,28 +128,27 @@ class ServicesStorage {
             userService: {
               id: userService.getDataValue('id'),
               userId: userService.getDataValue('user_id'),
-              status: userService.getDataValue('status')
+              status: userService.getDataValue('status'),
             },
             organisation: {
               id: org.getDataValue('id'),
-              name: org.getDataValue('name')
+              name: org.getDataValue('name'),
             },
             service: {
               id: service.getDataValue('id'),
               name: service.getDataValue('name'),
-              description: service.getDataValue('description')
-            }
+              description: service.getDataValue('description'),
+            },
           };
           return objectToAdd;
         }
       }));
 
 
-      //todo check if this is necessary
+      // todo check if this is necessary
       await sequelize.close();
 
       return userServiceObject.length !== 0 ? userServiceObject : null;
-
     } catch (e) {
       logger.error(e);
       throw e;
@@ -164,37 +166,32 @@ class ServicesStorage {
       const userServices = await userServicesDataModel.findAll(
         {
           where: {
-            user_id: id
+            user_id: id,
           },
-          attributes: ['service_id']
+          attributes: ['service_id'],
         });
 
-      const ids = userServices.map((userService) => {
-        return userService.getDataValue('service_id')
-      });
+      const ids = userServices.map(userService => userService.getDataValue('service_id'));
 
       const availableServices = await service.findAll(
         {
           where: {
             id: {
-              [Op.notIn]: ids
-            }
-          }
-        }
+              [Op.notIn]: ids,
+            },
+          },
+        },
       );
 
-      const services = availableServices.map((service) => {
-        return {
-          id: service.getDataValue('id'),
-          name: service.getDataValue('name'),
-          description: service.getDataValue('description')
-        }
-      });
+      const services = availableServices.map(service => ({
+        id: service.getDataValue('id'),
+        name: service.getDataValue('name'),
+        description: service.getDataValue('description'),
+      }));
 
       await sequelize.close();
 
       return services.length !== 0 ? services : null;
-
     } catch (e) {
       logger.error(e);
       throw e;
