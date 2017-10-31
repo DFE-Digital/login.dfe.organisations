@@ -1,5 +1,6 @@
 'use strict';
 const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 const logger = require('./../../../infrastructure/logger');
 const config = require('./../../../infrastructure/config')();
 const assert = require('assert');
@@ -86,9 +87,9 @@ class ServicesStorage {
       sequelize = dataConnection;
     }
     else {
-      assert(config.database.username,'Database property username must be supplied');
-      assert(config.database.password,'Database property password must be supplied');
-      assert(config.database.host,'Database property host must be supplied');
+      assert(config.database.username, 'Database property username must be supplied');
+      assert(config.database.password, 'Database property password must be supplied');
+      assert(config.database.host, 'Database property host must be supplied');
       sequelize = new Sequelize('postgres', config.database.username, config.database.password, {
         host: config.database.host,
         dialect: 'postgres'
@@ -152,8 +153,42 @@ class ServicesStorage {
     }
   }
 
-  async getUserUnassociatedServices(id){
+  async getUserUnassociatedServices(id) {
+    try {
+      await sequelize.authenticate();
 
+      await this._defineOrganisationServiceModel();
+      await this._defineServiceModel();
+      await this._defineUserServiceModel();
+
+      const userService = await userServices.findAll(
+        {
+          where: {
+            user_id: id
+          },
+          attributes: [ 'service_id' ]
+        });
+
+      const ids = userService.map((userS) => {return userS.getDataValue('service_id')});
+
+      const availableServices = await service.findAll(
+        {
+          where: {
+            id: {
+              [Op.notIn]: ids
+            }
+          }
+        }
+      );
+
+      const services = availableServices.map((service) => { return {id:service.getDataValue('id'), name:service.getDataValue('name')} });
+
+      return services.length !== 0 ? services : null;
+
+    } catch (e) {
+      logger.error(e);
+      throw e;
+    }
   }
 }
 
