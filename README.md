@@ -73,5 +73,9 @@ This will return a response in the following format:
 ]
 ```
 
+You are also able to get services that are associated to a user
+```
+GET: /unassociated-with-user/[uid]
+```
 
 
