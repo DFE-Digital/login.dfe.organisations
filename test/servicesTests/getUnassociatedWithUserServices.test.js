@@ -2,7 +2,7 @@ jest.mock('./../../src/app/services/data/servicesStorage');
 jest.mock('./../../src/infrastructure/logger');
 
 const httpMocks = require('node-mocks-http');
-const getUnassociatedUserAssociatedServices = require('../../src/app/services/getUserUnassociatedServices');
+const getUnassociatedUserAssociatedServices = require('./../../src/app/services/getUserUnassociatedServices');
 
 describe('When getting services available to a user', () => {
   let req;
