@@ -7,6 +7,11 @@ const logger = require('./../../../infrastructure/logger');
 const config = require('./../../../infrastructure/config')();
 const assert = require('assert');
 
+const roles = [
+  { id: 0, name: 'End user' },
+  { id: 10000, name: 'Approver' },
+];
+
 let sequelize;
 let organisation;
 let userServicesDataModel;
@@ -68,11 +73,15 @@ class ServicesStorage {
         primaryKey: true,
         allowNull: false,
       },
+      role_id: {
+        type: Sequelize.SMALLINT,
+        allowNull: false,
+        defaultValue: 0,
+      },
       status: {
         type: Sequelize.SMALLINT,
         allowNull: false,
       },
-
     }, {
       timestamps: false,
       tableName: 'user_services',
@@ -119,7 +128,6 @@ class ServicesStorage {
 
       const userServiceObject = await Promise.all(userServices.map(async (userService) => {
         if (userService) {
-
           const objectToAdd = {
             userService: {
               id: userService.getDataValue('id'),
@@ -135,8 +143,11 @@ class ServicesStorage {
               name: userService.Service.getDataValue('name'),
               description: userService.Service.getDataValue('description'),
             },
+            role: roles.find(item => item.id === userService.getDataValue('role_id')),
           };
           return objectToAdd;
+        } else {
+          return null;
         }
       }));
 
