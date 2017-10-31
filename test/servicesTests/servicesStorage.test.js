@@ -81,19 +81,19 @@ describe('When using servicesStorage Data for a user', () => {
       expect(assertion).toBe(true);
     });
   });
-  describe('and getting data', () => {
-    let mockConnection;
-    let storage;
-
-    beforeEach(() => {
-      mockConnection = new SequelizeMock();
-      const Storage = require('./../../src/app/services/data/servicesStorage');
-      storage = new Storage(mockConnection);
-    });
-    it('returns null if the user service record is not found', async () => {
-      const result = await storage.getUserAssociatedServices('77d6b281-9f8d-4649-84b8-87fc42eee71d');
-
-      expect(result).toBeNull();
-    });
-  });
+  // describe('and getting data', () => {
+  //   let mockConnection;
+  //   let storage;
+  //
+  //   beforeEach(() => {
+  //     mockConnection = new SequelizeMock();
+  //     const Storage = require('./../../src/app/services/data/servicesStorage');
+  //     storage = new Storage(mockConnection);
+  //   });
+  //   it('returns null if the user service record is not found', async () => {
+  //     const result = await storage.getUserAssociatedServices('77d6b281-9f8d-4649-84b8-87fc42eee71d');
+  //
+  //     expect(result).toBeNull();
+  //   });
+  // });
 });
