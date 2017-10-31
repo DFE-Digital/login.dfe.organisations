@@ -1,12 +1,13 @@
 'use strict';
 const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 const logger = require('./../../../infrastructure/logger');
 const config = require('./../../../infrastructure/config')();
 const assert = require('assert');
 
 let sequelize;
 let organisation;
-let userServices;
+let userServicesDataModel;
 let service;
 
 class ServicesStorage {
@@ -43,7 +44,10 @@ class ServicesStorage {
         type: Sequelize.STRING,
         allowNull: false
       },
-
+      description: {
+      type: Sequelize.STRING,
+        allowNull: false
+      },
     }, {
       timestamps: false,
       tableName: 'service',
@@ -53,7 +57,7 @@ class ServicesStorage {
   }
 
   async _defineUserServiceModel() {
-    userServices = sequelize.define('user_services', {
+    userServicesDataModel = sequelize.define('user_services', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
@@ -75,10 +79,10 @@ class ServicesStorage {
       schema: 'services'
     });
 
-    userServices.belongsTo(organisation, {as: 'Organisation', foreignKey: 'organisation_id'});
-    userServices.belongsTo(service, {as: 'Service', foreignKey: 'service_id'});
+    userServicesDataModel.belongsTo(organisation, {as: 'Organisation', foreignKey: 'organisation_id'});
+    userServicesDataModel.belongsTo(service, {as: 'Service', foreignKey: 'service_id'});
 
-    await userServices.sync();
+    await userServicesDataModel.sync();
   }
 
   constructor(dataConnection) {
@@ -86,9 +90,9 @@ class ServicesStorage {
       sequelize = dataConnection;
     }
     else {
-      assert(config.database.username,'Database property username must be supplied');
-      assert(config.database.password,'Database property password must be supplied');
-      assert(config.database.host,'Database property host must be supplied');
+      assert(config.database.username, 'Database property username must be supplied');
+      assert(config.database.password, 'Database property password must be supplied');
+      assert(config.database.host, 'Database property host must be supplied');
       sequelize = new Sequelize('postgres', config.database.username, config.database.password, {
         host: config.database.host,
         dialect: 'postgres'
@@ -105,7 +109,7 @@ class ServicesStorage {
       await this._defineServiceModel();
       await this._defineUserServiceModel();
 
-      const userService = await userServices.findAll(
+      const userServices = await userServicesDataModel.findAll(
         {
           where: {
             user_id: id
@@ -115,16 +119,16 @@ class ServicesStorage {
 
       let userServiceObject = [];
 
-      await Promise.all(userService.map(async (uService) => {
-        if (!uService) {
-          const org = await uService.getOrganisation();
-          const service = await uService.getService();
+      await Promise.all(userServices.map(async (userService) => {
+        if (!userService) {
+          const org = await userService.getOrganisation();
+          const service = await userService.getService();
 
           const objectToAdd = {
             userService: {
-              id: uService.getDataValue('id'),
-              userId: uService.getDataValue('user_id'),
-              status: uService.getDataValue('status')
+              id: userService.getDataValue('id'),
+              userId: userService.getDataValue('user_id'),
+              status: userService.getDataValue('status')
             },
             organisation: {
               id: org.getDataValue('id'),
@@ -152,6 +156,43 @@ class ServicesStorage {
     }
   }
 
+  async getUserUnassociatedServices(id) {
+    try {
+      await sequelize.authenticate();
+
+      await this._defineOrganisationServiceModel();
+      await this._defineServiceModel();
+      await this._defineUserServiceModel();
+
+      const userServices = await userServicesDataModel.findAll(
+        {
+          where: {
+            user_id: id
+          },
+          attributes: [ 'service_id' ]
+        });
+
+      const ids = userServices.map((userService) => {return userService.getDataValue('service_id')});
+
+      const availableServices = await service.findAll(
+        {
+          where: {
+            id: {
+              [Op.notIn]: ids
+            }
+          }
+        }
+      );
+
+      const services = availableServices.map((service) => { return {id:service.getDataValue('id'), name:service.getDataValue('name')} });
+
+      return services.length !== 0 ? services : null;
+
+    } catch (e) {
+      logger.error(e);
+      throw e;
+    }
+  }
 }
 
 module.exports = ServicesStorage;
