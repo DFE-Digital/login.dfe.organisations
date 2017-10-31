@@ -14,6 +14,8 @@ class ServicesStorage {
   constructor(dataConnection) {
     if (dataConnection) {
       sequelize = dataConnection;
+    } else if (config.database && config.database.postgresUrl) {
+      sequelize = new Sequelize(config.database.postgresUrl);
     } else {
       assert(config.database.username, 'Database property username must be supplied');
       assert(config.database.password, 'Database property password must be supplied');
@@ -22,9 +24,8 @@ class ServicesStorage {
         host: config.database.host,
         dialect: 'postgres',
       });
-
-      this.schema = createSchema(sequelize);
     }
+    this.schema = createSchema(sequelize);
   }
 
   async getUserAssociatedServices(id) {
