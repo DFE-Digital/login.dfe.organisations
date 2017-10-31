@@ -4,13 +4,13 @@ jest.mock('assert');
 const SequelizeMock = require('sequelize-mock');
 
 describe('When using servicesStorage Data for a user', () => {
-  describe('and initialising the class', () =>{
+  describe('and initialising the class', () => {
     let assertion;
     let config;
     let configStub;
     let assert;
 
-    beforeEach(()=>{
+    beforeEach(() => {
       jest.resetModules();
 
       assertion = false;
@@ -22,19 +22,14 @@ describe('When using servicesStorage Data for a user', () => {
       });
     });
     it('then if the username in config is not supplied the assert is called', () => {
-
-
-
       config = require('./../../src/infrastructure/config');
-      configStub = jest.fn().mockImplementation(() => {
-        return {
-          database: {
-            username:'',
-            password:'123ABVF',
-            host:'hostname'
-          }
-        };
-      });
+      configStub = jest.fn().mockImplementation(() => ({
+        database: {
+          username: '',
+          password: '123ABVF',
+          host: 'hostname',
+        },
+      }));
       config.mockImplementation(configStub);
 
       const NewStorage = require('./../../src/app/services/data/servicesStorage');
@@ -43,17 +38,14 @@ describe('When using servicesStorage Data for a user', () => {
       expect(assertion).toBe(true);
     });
     it('then if the password in config is not supplied the assert is called', () => {
-
       config = require('./../../src/infrastructure/config');
-      configStub = jest.fn().mockImplementation(() => {
-        return {
-          database: {
-            username:'username',
-            password:'',
-            host:'hostname'
-          }
-        };
-      });
+      configStub = jest.fn().mockImplementation(() => ({
+        database: {
+          username: 'username',
+          password: '',
+          host: 'hostname',
+        },
+      }));
       config.mockImplementation(configStub);
 
       const NewStorage = require('./../../src/app/services/data/servicesStorage');
@@ -62,17 +54,14 @@ describe('When using servicesStorage Data for a user', () => {
       expect(assertion).toBe(true);
     });
     it('then if the host in config is not supplied the assert is called', () => {
-
       config = require('./../../src/infrastructure/config');
-      configStub = jest.fn().mockImplementation(() => {
-        return {
-          database: {
-            username:'username',
-            password:'123ABVF',
-            host:''
-          }
-        };
-      });
+      configStub = jest.fn().mockImplementation(() => ({
+        database: {
+          username: 'username',
+          password: '123ABVF',
+          host: '',
+        },
+      }));
       config.mockImplementation(configStub);
 
       const NewStorage = require('./../../src/app/services/data/servicesStorage');
