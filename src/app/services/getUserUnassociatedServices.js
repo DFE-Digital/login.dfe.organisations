@@ -2,9 +2,8 @@ const logger = require('./../../infrastructure/logger');
 const ServicesStorage = require('./data/servicesStorage');
 
 const action = async (req, res) => {
-
-  try{
-    if(!req.params.uid) {
+  try {
+    if (!req.params.uid) {
       res.status(400).send();
       return;
     }
@@ -12,16 +11,15 @@ const action = async (req, res) => {
     const storage = new ServicesStorage();
     const services = await storage.getUserUnassociatedServices(req.params.uid);
 
-    if(!services){
+    if (!services) {
       res.status(404);
       return;
     }
     res.status(200).send(services);
-  } catch(e) {
+  } catch (e) {
     logger.error(e);
     res.status(500).send(e);
   }
-
 };
 
 module.exports = action;
