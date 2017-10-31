@@ -7,7 +7,7 @@ const assert = require('assert');
 
 let sequelize;
 let organisation;
-let userServices;
+let userServicesDataModel;
 let service;
 
 class ServicesStorage {
@@ -57,7 +57,7 @@ class ServicesStorage {
   }
 
   async _defineUserServiceModel() {
-    userServices = sequelize.define('user_services', {
+    userServicesDataModel = sequelize.define('user_services', {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
@@ -79,10 +79,10 @@ class ServicesStorage {
       schema: 'services'
     });
 
-    userServices.belongsTo(organisation, {as: 'Organisation', foreignKey: 'organisation_id'});
-    userServices.belongsTo(service, {as: 'Service', foreignKey: 'service_id'});
+    userServicesDataModel.belongsTo(organisation, {as: 'Organisation', foreignKey: 'organisation_id'});
+    userServicesDataModel.belongsTo(service, {as: 'Service', foreignKey: 'service_id'});
 
-    await userServices.sync();
+    await userServicesDataModel.sync();
   }
 
   constructor(dataConnection) {
@@ -109,7 +109,7 @@ class ServicesStorage {
       await this._defineServiceModel();
       await this._defineUserServiceModel();
 
-      const userServices = await userServices.findAll(
+      const userServices = await userServicesDataModel.findAll(
         {
           where: {
             user_id: id
@@ -164,7 +164,7 @@ class ServicesStorage {
       await this._defineServiceModel();
       await this._defineUserServiceModel();
 
-      const userServices = await userServices.findAll(
+      const userServices = await userServicesDataModel.findAll(
         {
           where: {
             user_id: id
