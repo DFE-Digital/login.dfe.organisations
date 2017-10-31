@@ -44,7 +44,10 @@ class ServicesStorage {
         type: Sequelize.STRING,
         allowNull: false
       },
-
+      description: {
+      type: Sequelize.STRING,
+        allowNull: false
+      },
     }, {
       timestamps: false,
       tableName: 'service',
@@ -106,7 +109,7 @@ class ServicesStorage {
       await this._defineServiceModel();
       await this._defineUserServiceModel();
 
-      const userService = await userServices.findAll(
+      const userServices = await userServices.findAll(
         {
           where: {
             user_id: id
@@ -116,16 +119,16 @@ class ServicesStorage {
 
       let userServiceObject = [];
 
-      await Promise.all(userService.map(async (uService) => {
-        if (!uService) {
-          const org = await uService.getOrganisation();
-          const service = await uService.getService();
+      await Promise.all(userServices.map(async (userService) => {
+        if (!userService) {
+          const org = await userService.getOrganisation();
+          const service = await userService.getService();
 
           const objectToAdd = {
             userService: {
-              id: uService.getDataValue('id'),
-              userId: uService.getDataValue('user_id'),
-              status: uService.getDataValue('status')
+              id: userService.getDataValue('id'),
+              userId: userService.getDataValue('user_id'),
+              status: userService.getDataValue('status')
             },
             organisation: {
               id: org.getDataValue('id'),
@@ -161,7 +164,7 @@ class ServicesStorage {
       await this._defineServiceModel();
       await this._defineUserServiceModel();
 
-      const userService = await userServices.findAll(
+      const userServices = await userServices.findAll(
         {
           where: {
             user_id: id
@@ -169,7 +172,7 @@ class ServicesStorage {
           attributes: [ 'service_id' ]
         });
 
-      const ids = userService.map((userS) => {return userS.getDataValue('service_id')});
+      const ids = userServices.map((userService) => {return userService.getDataValue('service_id')});
 
       const availableServices = await service.findAll(
         {
