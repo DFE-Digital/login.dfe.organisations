@@ -28,6 +28,57 @@ class ServicesStorage {
     this.schema = createSchema(sequelize);
   }
 
+  async getById(id) {
+    try {
+      await sequelize.authenticate();
+
+      const serviceEntity = await this.schema.services.find({
+        where: {
+          id: {
+            [Op.eq]: id,
+          },
+        },
+      });
+      if (!serviceEntity) {
+        return null;
+      }
+      return {
+        id: serviceEntity.getDataValue('id'),
+        name: serviceEntity.getDataValue('name'),
+        description: serviceEntity.getDataValue('description'),
+      };
+    } catch (e) {
+      logger.error(`error getting service ${id} - ${e.message}`, e);
+      throw e;
+    }
+  }
+
+  async getUsersOfService(id) {
+    try {
+      await sequelize.authenticate();
+
+      const userServiceEntities = await this.schema.users.findAll(
+        {
+          where: {
+            service_id: {
+              [Op.eq]: id,
+            },
+          },
+        });
+
+      return await Promise.all(userServiceEntities.map(async (userServiceEntity) => {
+        return {
+          id: userServiceEntity.getDataValue('user_id'),
+          status: userServiceEntity.getDataValue('status'),
+          role: this.schema.roles.find(item => item.id === userServiceEntity.getDataValue('role_id')),
+        };
+      }));
+    } catch (e) {
+      logger.error(`error getting users of service ${id} - ${e.message}`, e);
+      throw e;
+    }
+  }
+
   async getUserAssociatedServices(id) {
     try {
       await sequelize.authenticate();
