@@ -1,8 +1,10 @@
+'use strict';
+
 jest.mock('./../../src/app/services/data/servicesStorage');
 jest.mock('./../../src/infrastructure/logger');
 jest.mock('./../../src/infrastructure/repository', () => {
-  const s = require('sequelize-mock');
-  return new s();
+  const SequalizeMock = require('sequelize-mock');
+  return new SequalizeMock();
 });
 
 const httpMocks = require('node-mocks-http');
