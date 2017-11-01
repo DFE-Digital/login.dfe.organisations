@@ -58,7 +58,7 @@ typings/
 .env
 
 # dev env
-.idea
+.idea/workspace.xml
 
 #config
 /config/
