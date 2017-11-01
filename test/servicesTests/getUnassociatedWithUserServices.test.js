@@ -1,5 +1,14 @@
+'use strict';
+
+
+/* eslint-disable global-require */
+
 jest.mock('./../../src/app/services/data/servicesStorage');
 jest.mock('./../../src/infrastructure/logger');
+jest.mock('./../../src/infrastructure/repository', () => {
+  const SequalizeMock = require('sequelize-mock');
+  return new SequalizeMock();
+});
 
 const httpMocks = require('node-mocks-http');
 const getUnassociatedUserAssociatedServices = require('./../../src/app/services/getUserUnassociatedServices');
