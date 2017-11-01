@@ -55,7 +55,6 @@ class ServicesStorage {
 
   async getUserAssociatedServices(id) {
     try {
-
       const userServices = await users.findAll(
         {
           where: {
