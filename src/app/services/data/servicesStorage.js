@@ -4,35 +4,13 @@ const Sequelize = require('sequelize');
 
 const Op = Sequelize.Op;
 const logger = require('./../../../infrastructure/logger');
-const config = require('./../../../infrastructure/config')();
-const assert = require('assert');
-const createSchema = require('./servicesSchema');
+const { users, services, roles } = require('./servicesSchema')();
 
-let sequelize;
 
 class ServicesStorage {
-  constructor(dataConnection) {
-    if (dataConnection) {
-      sequelize = dataConnection;
-    } else if (config.database && config.database.postgresUrl) {
-      sequelize = new Sequelize(config.database.postgresUrl);
-    } else {
-      assert(config.database.username, 'Database property username must be supplied');
-      assert(config.database.password, 'Database property password must be supplied');
-      assert(config.database.host, 'Database property host must be supplied');
-      sequelize = new Sequelize('postgres', config.database.username, config.database.password, {
-        host: config.database.host,
-        dialect: 'postgres',
-      });
-    }
-    this.schema = createSchema(sequelize);
-  }
-
   async getById(id) {
     try {
-      await sequelize.authenticate();
-
-      const serviceEntity = await this.schema.services.find({
+      const serviceEntity = await services.find({
         where: {
           id: {
             [Op.eq]: id,
@@ -55,9 +33,7 @@ class ServicesStorage {
 
   async getUsersOfService(id) {
     try {
-      await sequelize.authenticate();
-
-      const userServiceEntities = await this.schema.users.findAll(
+      const userServiceEntities = await users.findAll(
         {
           where: {
             service_id: {
@@ -66,13 +42,11 @@ class ServicesStorage {
           },
         });
 
-      return await Promise.all(userServiceEntities.map(async (userServiceEntity) => {
-        return {
-          id: userServiceEntity.getDataValue('user_id'),
-          status: userServiceEntity.getDataValue('status'),
-          role: this.schema.roles.find(item => item.id === userServiceEntity.getDataValue('role_id')),
-        };
-      }));
+      return await Promise.all(userServiceEntities.map(async userServiceEntity => ({
+        id: userServiceEntity.getDataValue('user_id'),
+        status: userServiceEntity.getDataValue('status'),
+        role: roles.find(item => item.id === userServiceEntity.getDataValue('role_id')),
+      })));
     } catch (e) {
       logger.error(`error getting users of service ${id} - ${e.message}`, e);
       throw e;
@@ -81,9 +55,8 @@ class ServicesStorage {
 
   async getUserAssociatedServices(id) {
     try {
-      await sequelize.authenticate();
 
-      const userServices = await this.schema.users.findAll(
+      const userServices = await users.findAll(
         {
           where: {
             user_id: {
@@ -110,7 +83,7 @@ class ServicesStorage {
               name: userService.Service.getDataValue('name'),
               description: userService.Service.getDataValue('description'),
             },
-            role: this.schema.roles.find(item => item.id === userService.getDataValue('role_id')),
+            role: roles.find(item => item.id === userService.getDataValue('role_id')),
           };
         }
         return [];
@@ -120,16 +93,13 @@ class ServicesStorage {
     } catch (e) {
       logger.error(e);
       throw e;
-    } finally {
-      await sequelize.close();
     }
   }
 
   async getUserUnassociatedServices(id) {
     try {
-      await sequelize.authenticate();
 
-      const userServices = await this.schema.users.findAll(
+      const userServices = await users.findAll(
         {
           where: {
             user_id: {
@@ -141,7 +111,7 @@ class ServicesStorage {
 
       const ids = userServices.map(userService => userService.getDataValue('service_id'));
 
-      const availableServices = await this.schema.services.findAll(
+      const availableServices = await services.findAll(
         {
           where: {
             id: {
@@ -151,17 +121,15 @@ class ServicesStorage {
         },
       );
 
-      const services = availableServices.map(service => ({
+      const returnValue = availableServices.map(service => ({
         id: service.getDataValue('id'),
         name: service.getDataValue('name'),
         description: service.getDataValue('description'),
       }));
-      return services.length !== 0 ? services : null;
+      return returnValue.length !== 0 ? returnValue : null;
     } catch (e) {
       logger.error(e);
       throw e;
-    } finally {
-      await sequelize.close();
     }
   }
 }

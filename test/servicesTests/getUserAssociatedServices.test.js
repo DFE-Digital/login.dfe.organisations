@@ -1,5 +1,13 @@
+'use strict';
+
 jest.mock('./../../src/app/services/data/servicesStorage');
 jest.mock('./../../src/infrastructure/logger');
+jest.mock('./../../src/infrastructure/config');
+
+jest.mock('./../../src/infrastructure/repository', () => {
+  const s = require('sequelize-mock');
+  return new s();
+});
 
 const httpMocks = require('node-mocks-http');
 const getUserAssociatedServices = require('./../../src/app/services/getUserAssociatedServices');
@@ -12,7 +20,6 @@ describe('When getting associated services to a user', () => {
   let logger;
   const expectedUserId = '7654321';
   const expectedServiceName = 'service 1';
-
   beforeEach(() => {
     res = httpMocks.createResponse();
     req = {
@@ -30,7 +37,7 @@ describe('When getting associated services to a user', () => {
     }));
 
     logger = require('./../../src/infrastructure/logger');
-    logger.error = (() => ({ }));
+    logger.error = (() => ({}));
 
     servicesStorage = require('./../../src/app/services/data/servicesStorage');
     servicesStorage.mockImplementation(() => ({
@@ -77,4 +84,5 @@ describe('When getting associated services to a user', () => {
 
     expect(res.statusCode).toBe(500);
   });
-});
+})
+;
