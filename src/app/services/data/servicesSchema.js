@@ -1,9 +1,10 @@
 'use strict';
 
 const Sequelize = require('sequelize');
+const db = require('./../../../infrastructure/repository');
 
-const createSchema = (sequalize) => {
-  const organisations = sequalize.define('organisation', {
+const createSchema = () => {
+  const organisations = db.define('organisation', {
     id: {
       type: Sequelize.UUID,
       primaryKey: true,
@@ -21,7 +22,7 @@ const createSchema = (sequalize) => {
   });
 
 
-  const services = sequalize.define('service', {
+  const services = db.define('service', {
     id: {
       type: Sequelize.UUID,
       primaryKey: true,
@@ -42,7 +43,7 @@ const createSchema = (sequalize) => {
   });
 
 
-  const users = sequalize.define('user_services', {
+  const users = db.define('user_services', {
     id: {
       type: Sequelize.UUID,
       primaryKey: true,
