@@ -1,5 +1,8 @@
 'use strict';
 
+
+/* eslint-disable global-require */
+
 jest.mock('./../../src/app/services/data/servicesStorage');
 jest.mock('./../../src/infrastructure/logger');
 jest.mock('./../../src/infrastructure/repository', () => {
