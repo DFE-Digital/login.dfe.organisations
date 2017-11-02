@@ -131,6 +131,10 @@ class ServicesStorage {
       throw e;
     }
   }
+
+  async getUserServiceById(id){
+
+  }
 }
 
 module.exports = ServicesStorage;
