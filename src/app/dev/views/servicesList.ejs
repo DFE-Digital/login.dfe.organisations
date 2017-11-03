@@ -1,0 +1,42 @@
+<div class="grid-row">
+    <div class="col-12">
+        <h1 class="heading-xlarge">
+            Manage services
+        </h1>
+    </div>
+</div>
+<div class="grid-row">
+    <div class="col-6">&nbsp;</div>
+    <div class="col-6" style="text-align: right; margin-bottom: 15px;">
+        <a class="button" href="/manage/services/new">Create Service</a>
+    </div>
+</div>
+<div class="grid-row">
+    <div class="col-12">
+        <table>
+            <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <%
+            for (let i = 0; i < locals.services.length; i++) {
+                const service = locals.services[i];
+            %>
+            <tr>
+                <td><%=service.id%></td>
+                <td><%=service.name%></td>
+                <td><%=(service.description && service.description.length > 20) ? `${service.description.substring(0, 17)}...` : service.description%></td>
+                <td>
+                    <span class="table-action"><a href="/manage/services/<%=service.id%>">Edit</a></span>
+                </td>
+            </tr>
+            <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
