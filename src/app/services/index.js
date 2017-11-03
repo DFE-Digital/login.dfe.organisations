@@ -7,6 +7,7 @@ const getUserAssociatedServices = require('./getUserAssociatedServices');
 const getUnassociatedWithUserServices = require('./getUserUnassociatedServices');
 const getServiceDetails = require('./getServiceDetails');
 const getServiceUsers = require('./getServiceUsers');
+const getUserRequestForApproval = require('./getUserRequestForApproval');
 
 const router = express.Router();
 
@@ -19,6 +20,7 @@ const routeExport = () => {
   router.get('/unassociated-with-user/:uid', getUnassociatedWithUserServices);
   router.get('/:sid/users', getServiceUsers);
   router.get('/:sid', getServiceDetails);
+  router.get('/:usid/request', getUserRequestForApproval);
 
   return router;
 };
