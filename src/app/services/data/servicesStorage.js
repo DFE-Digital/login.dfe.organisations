@@ -8,6 +8,26 @@ const { users, services, roles } = require('./servicesSchema')();
 
 
 class ServicesStorage {
+  _buildUserServiceModel(userService) {
+    return {
+      userService: {
+        id: userService.getDataValue('id'),
+        userId: userService.getDataValue('user_id'),
+        status: userService.getDataValue('status'),
+      },
+      organisation: {
+        id: userService.Organisation.getDataValue('id'),
+        name: userService.Organisation.getDataValue('name'),
+      },
+      service: {
+        id: userService.Service.getDataValue('id'),
+        name: userService.Service.getDataValue('name'),
+        description: userService.Service.getDataValue('description'),
+      },
+      role: roles.find(item => item.id === userService.getDataValue('role_id')),
+    };
+  }
+
   async getById(id) {
     try {
       const serviceEntity = await services.find({
@@ -67,23 +87,7 @@ class ServicesStorage {
 
       const userServiceObject = await Promise.all(userServices.map(async (userService) => {
         if (userService) {
-          return {
-            userService: {
-              id: userService.getDataValue('id'),
-              userId: userService.getDataValue('user_id'),
-              status: userService.getDataValue('status'),
-            },
-            organisation: {
-              id: userService.Organisation.getDataValue('id'),
-              name: userService.Organisation.getDataValue('name'),
-            },
-            service: {
-              id: userService.Service.getDataValue('id'),
-              name: userService.Service.getDataValue('name'),
-              description: userService.Service.getDataValue('description'),
-            },
-            role: roles.find(item => item.id === userService.getDataValue('role_id')),
-          };
+          return this._buildUserServiceModel(userService);
         }
         return [];
       }));
@@ -133,8 +137,29 @@ class ServicesStorage {
   }
 
   async getUserServiceById(id){
+    try {
+      const userService = await users.find(
+        {
+          where: {
+            id: {
+              [Op.eq]: id,
+            },
+          },
+          include: ['Organisation', 'Service'],
+        });
 
+      if(!userService) {
+        return null;
+      }
+
+      return  this._buildUserServiceModel(userService);
+    } catch (e) {
+      logger.error(e);
+      throw e;
+    }
   }
+
+
 }
 
 module.exports = ServicesStorage;
