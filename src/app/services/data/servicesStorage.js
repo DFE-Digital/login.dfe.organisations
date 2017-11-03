@@ -8,6 +8,26 @@ const { users, services, roles } = require('./servicesSchema')();
 
 
 class ServicesStorage {
+  async list() {
+    try {
+      const serviceEntities = await services.findAll();
+      if (!serviceEntities) {
+        return null;
+      }
+
+      return await Promise.all(serviceEntities.map(async (serviceEntity) => {
+        return {
+          id: serviceEntity.getDataValue('id'),
+          name: serviceEntity.getDataValue('name'),
+          description: serviceEntity.getDataValue('description'),
+        };
+      }));
+    } catch (e) {
+      logger.error(`error getting service ${id} - ${e.message}`, e);
+      throw e;
+    }
+  }
+
   async getById(id) {
     try {
       const serviceEntity = await services.find({
@@ -129,6 +149,30 @@ class ServicesStorage {
     } catch (e) {
       logger.error(e);
       throw e;
+    }
+  }
+
+  async create(id, name, description) {
+    await services.create({
+      id,
+      name,
+      description,
+    });
+  }
+
+  async update(id, name, description) {
+    const serviceEntity = await services.find({
+      where: {
+        id: {
+          [Op.eq]: id,
+        },
+      },
+    });
+    if (serviceEntity) {
+      serviceEntity.updateAttributes({
+        name,
+        description,
+      });
     }
   }
 }
