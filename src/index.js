@@ -7,7 +7,7 @@ const expressLayouts = require('express-ejs-layouts');
 const path = require('path');
 const config = require('./infrastructure/config')();
 const logger = require('./infrastructure/logger');
-const services = require('./app/services');
+const { organisations, services } = require('./app/services');
 const dev = require('./app/dev');
 
 const app = express();
@@ -16,7 +16,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use('/services', services);
-if(config.hostingEnvironment.useDevViews) {
+app.use('/organisations', organisations);
+if (config.hostingEnvironment.useDevViews) {
   app.use(expressLayouts);
   app.set('view engine', 'ejs');
   app.set('views', path.resolve(__dirname, 'app'));

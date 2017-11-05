@@ -10,17 +10,27 @@ const getServiceUsers = require('./getServiceUsers');
 
 const router = express.Router();
 
-const routeExport = () => {
+const servicesRouteExport = () => {
   // Add auth middleware.
   router.use(apiAuth(router, config));
 
   // Map routed to functions.
   router.get('/associated-with-user/:uid', getUserAssociatedServices);
   router.get('/unassociated-with-user/:uid', getUnassociatedWithUserServices);
-  router.get('/:sid/users', getServiceUsers);
-  router.get('/:sid', getServiceDetails);
+
 
   return router;
 };
 
-module.exports = routeExport();
+
+const organisationsRouteExport = () => {
+  router.use(apiAuth(router, config));
+  router.get('/:org_id/services/:sid', getServiceDetails);
+  router.get('/:org_id/services/:sid/users', getServiceUsers);
+  return router;
+};
+
+module.exports = {
+  services: servicesRouteExport(),
+  organisations: organisationsRouteExport(),
+};
