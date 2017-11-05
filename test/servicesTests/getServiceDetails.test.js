@@ -20,12 +20,18 @@ describe('when getting users of services', () => {
     req = {
       params: {
         sid: '9d672383-cf21-49b4-86d2-7cea955ad422',
+        org_id: '1d672383-cf21-49b4-86d2-7cea955ad422'
       },
     };
 
     servicesStorage = require('./../../src/app/services/data/servicesStorage');
     servicesStorage.mockImplementation(() => ({
       getById: () => ({
+        id: 'service1',
+        name: 'service one',
+        description: 'the first service',
+      }),
+      getServiceDetails: () => ({
         id: 'service1',
         name: 'service one',
         description: 'the first service',
@@ -37,6 +43,7 @@ describe('when getting users of services', () => {
     servicesStorage.mockImplementation(() => ({
       getById: () => (null),
       getUsersOfService: () => ([]),
+      getServiceDetails: () => (null),
     }));
 
     await getServiceDetails(req, res);
@@ -46,6 +53,7 @@ describe('when getting users of services', () => {
   });
 
   it('then it should send 200 if service found', async () => {
+
     await getServiceDetails(req, res);
 
     expect(res.statusCode).toBe(200);
