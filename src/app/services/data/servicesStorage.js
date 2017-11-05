@@ -8,7 +8,24 @@ const { users, services, roles, organisations } = require('./servicesSchema')();
 
 
 class ServicesStorage {
-  async list() {
+  async listOrganisations() {
+    try {
+      const orgEntities = await organisations.findAll();
+      if (!orgEntities) {
+        return null;
+      }
+
+      return await Promise.all(orgEntities.map(async serviceEntity => ({
+        id: serviceEntity.getDataValue('id'),
+        name: serviceEntity.getDataValue('name'),
+      })));
+    } catch (e) {
+      logger.error(`error getting organisations - ${e.message}`, e);
+      throw e;
+    }
+  }
+
+  async listServices() {
     try {
       const serviceEntities = await services.findAll();
       if (!serviceEntities) {
@@ -21,7 +38,7 @@ class ServicesStorage {
         description: serviceEntity.getDataValue('description'),
       })));
     } catch (e) {
-      logger.error(`error getting service ${id} - ${e.message}`, e);
+      logger.error(`error getting services - ${e.message}`, e);
       throw e;
     }
   }
@@ -194,6 +211,41 @@ class ServicesStorage {
         name,
         description,
       });
+    }
+  }
+
+  async upsertServiceUser(options) {
+    const { id, userId, organisationId, serviceId, roleId, status } = options;
+    try {
+      const userService = await users.findOne(
+        {
+          where: {
+            user_id: {
+              [Op.eq]: userId,
+            },
+            service_id: {
+              [Op.eq]: serviceId,
+            },
+            organisation_id: {
+              [Op.eq]: organisationId,
+            },
+          },
+        });
+
+      if (userService) {
+        await userService.destroy();
+      }
+      await users.create({
+        id,
+        user_id: userId,
+        organisation_id: organisationId,
+        service_id: serviceId,
+        role_id: roleId,
+        status,
+      });
+    } catch (e) {
+      logger.error(`Error in upsertServiceUser ${e.message}`);
+      throw e;
     }
   }
 }
