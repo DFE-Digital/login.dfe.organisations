@@ -1,9 +1,13 @@
+'use strict';
+
 const express = require('express');
+
 const router = express.Router({ mergeParams: true });
 const uuid = require('uuid/v4');
+
 const ServicesStorage = require('./../services/data/servicesStorage');
 
-const serviceCompare = (x, y) => {
+const compareNameAttr = (x, y) => {
   if (x.name.toUpperCase() < y.name.toUpperCase()) {
     return -1;
   }
@@ -12,6 +16,38 @@ const serviceCompare = (x, y) => {
   }
   return 0;
 };
+const seedUserServices = async (req, res) => {
+  const storage = new ServicesStorage();
+  const services = await storage.listServices();
+  const orgs = await storage.listOrganisations();
+
+  res.render('dev/views/seedUserServices', {
+    csrfToken: '',
+    services: services.sort(compareNameAttr),
+    organisations: orgs.sort(compareNameAttr),
+  });
+};
+
+const postSeedUserServices = async (req, res) => {
+  const userId = req.body.user_id;
+  const organisationId = req.body.organisation_id;
+  const serviceId = req.body.service_id;
+  const roleId = req.body.role_id;
+  const status = req.body.status;
+
+  const storage = new ServicesStorage();
+  await storage.upsertServiceUser({
+    id: uuid(),
+    userId,
+    organisationId,
+    serviceId,
+    roleId,
+    status,
+  });
+
+  res.redirect('/manage');
+};
+
 
 const routes = () => {
   router.get('/', (req, res) => {
@@ -20,9 +56,9 @@ const routes = () => {
 
   router.get('/services', async (req, res) => {
     const storage = new ServicesStorage();
-    const services = await storage.list();
+    const services = await storage.listServices();
     res.render('dev/views/servicesList', {
-      services: services.sort(serviceCompare),
+      services: services.sort(compareNameAttr),
     });
   });
 
@@ -73,6 +109,8 @@ const routes = () => {
     res.redirect('/manage/services');
   });
 
+  router.get('/seed-user-services', seedUserServices);
+  router.post('/seed-user-services', postSeedUserServices);
   return router;
 };
 
