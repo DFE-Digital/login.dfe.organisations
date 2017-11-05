@@ -20,6 +20,7 @@ describe('when getting users of services', () => {
     req = {
       params: {
         sid: '9d672383-cf21-49b4-86d2-7cea955ad422',
+        org_id: '1d672383-cf21-49b4-86d2-7cea955ad422',
       },
     };
 
@@ -43,12 +44,12 @@ describe('when getting users of services', () => {
     }));
   });
 
-  it('then it should send 400 if service id is not a uuid', async () => {
+  it('then it should send 404 if service id is not a uuid', async () => {
     req.params.sid = 'not-a-uuid';
 
     await getServiceUsers(req, res);
 
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toBe(404);
     expect(res._isEndCalled()).toBe(true);
   });
 
