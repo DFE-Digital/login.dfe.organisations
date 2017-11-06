@@ -4,28 +4,38 @@ const Sequelize = require('sequelize');
 
 const Op = Sequelize.Op;
 const logger = require('./../../../infrastructure/logger');
-const { users, services, roles } = require('./servicesSchema')();
+const { users, services, roles, organisations } = require('./servicesSchema')();
 
 
 class ServicesStorage {
-  _buildUserServiceModel(userService) {
-    return {
-      userService: {
-        id: userService.getDataValue('id'),
-        userId: userService.getDataValue('user_id'),
-        status: userService.getDataValue('status'),
-      },
-      organisation: {
-        id: userService.Organisation.getDataValue('id'),
-        name: userService.Organisation.getDataValue('name'),
-      },
-      service: {
-        id: userService.Service.getDataValue('id'),
-        name: userService.Service.getDataValue('name'),
-        description: userService.Service.getDataValue('description'),
-      },
-      role: roles.find(item => item.id === userService.getDataValue('role_id')),
-    };
+  async list() {
+    try {
+      const serviceEntities = await services.findAll();
+      if (!serviceEntities) {
+        return null;
+      }
+
+      return await Promise.all(serviceEntities.map(async serviceEntity => ({
+        id: serviceEntity.getDataValue('id'),
+        name: serviceEntity.getDataValue('name'),
+        description: serviceEntity.getDataValue('description'),
+      })));
+    } catch (e) {
+      logger.error(`error getting services - ${e.message}`, e);
+      throw e;
+    }
+  }
+
+  async getServiceDetails(organisationId, serviceId) {
+    try {
+      const service = await this.getById(serviceId);
+      const organisation = await organisations.findById(organisationId);
+
+      return { ...service, organisation: organisation.dataValues };
+    } catch (e) {
+      logger.error(`error getting service details org: ${organisationId}, service ${serviceId} - ${e.message}`, e);
+      throw e;
+    }
   }
 
   async getById(id) {
@@ -51,7 +61,7 @@ class ServicesStorage {
     }
   }
 
-  async getUsersOfService(id) {
+  async getUsersOfService(organisationId, id) {
     try {
       const userServiceEntities = await users.findAll(
         {
@@ -59,13 +69,21 @@ class ServicesStorage {
             service_id: {
               [Op.eq]: id,
             },
+            organisation_id: {
+              [Op.eq]: organisationId,
+            },
           },
+          include: ['Organisation'],
         });
 
       return await Promise.all(userServiceEntities.map(async userServiceEntity => ({
         id: userServiceEntity.getDataValue('user_id'),
         status: userServiceEntity.getDataValue('status'),
         role: roles.find(item => item.id === userServiceEntity.getDataValue('role_id')),
+        organisation: {
+          id: userServiceEntity.Organisation.getDataValue('id'),
+          name: userServiceEntity.Organisation.getDataValue('name'),
+        },
       })));
     } catch (e) {
       logger.error(`error getting users of service ${id} - ${e.message}`, e);
@@ -87,9 +105,22 @@ class ServicesStorage {
 
       const userServiceObject = await Promise.all(userServices.map(async (userService) => {
         if (userService) {
-          return this._buildUserServiceModel(userService);
+          return {
+            id: userService.getDataValue('id'),
+            name: userService.Service.getDataValue('name'),
+            userId: userService.getDataValue('user_id'),
+            // userService: {
+            //   id: userService.getDataValue('id'),
+            //   userId: userService.getDataValue('user_id'),
+            //   status: userService.getDataValue('status'),
+            // },
+            // service: {
+            //   id: userService.Service.getDataValue('id'),
+            //   name: userService.Service.getDataValue('name'),
+            description: userService.Service.getDataValue('description'),
+            // },
+          };
         }
-        return [];
       }));
 
       return userServiceObject.length !== 0 ? userServiceObject : null;
@@ -101,7 +132,6 @@ class ServicesStorage {
 
   async getUserUnassociatedServices(id) {
     try {
-
       const userServices = await users.findAll(
         {
           where: {
@@ -129,37 +159,108 @@ class ServicesStorage {
         name: service.getDataValue('name'),
         description: service.getDataValue('description'),
       }));
-      return returnValue.length !== 0 ? returnValue : null;
+      return returnValue;
     } catch (e) {
       logger.error(e);
       throw e;
     }
   }
 
-  async getUserServiceById(id){
+  async create(id, name, description) {
+    await services.create({
+      id,
+      name,
+      description,
+    });
+  }
+
+  async update(id, name, description) {
+    const serviceEntity = await services.find({
+      where: {
+        id: {
+          [Op.eq]: id,
+        },
+      },
+    });
+    if (serviceEntity) {
+      serviceEntity.updateAttributes({
+        name,
+        description,
+      });
+    }
+  }
+
+  async upsertServiceUser(options) {
+    const { id, userId, organisationId, serviceId, roleId, status } = options;
     try {
-      const userService = await users.find(
+      const userService = await users.findOne(
         {
           where: {
-            id: {
-              [Op.eq]: id,
+            user_id: {
+              [Op.eq]: userId,
+            },
+            service_id: {
+              [Op.eq]: serviceId,
+            },
+            organisation_id: {
+              [Op.eq]: organisationId,
+            },
+          },
+        });
+
+      if (userService) {
+        await userService.destroy();
+      }
+      await users.create({
+        id,
+        user_id: userId,
+        organisation_id: organisationId,
+        service_id: serviceId,
+        role_id: roleId,
+        status,
+      });
+    } catch (e) {
+      logger.error(`Error in upsertServiceUser ${e.message}`);
+      throw e;
+    }
+  }
+
+  async getUserService(serviceId, organisationId, userId) {
+    try {
+      const userServiceEntity = await users.findOne(
+        {
+          where: {
+            user_id: {
+              [Op.eq]: userId,
+            },
+            service_id: {
+              [Op.eq]: serviceId,
+            },
+            organisation_id: {
+              [Op.eq]: organisationId,
             },
           },
           include: ['Organisation', 'Service'],
         });
 
-      if(!userService) {
-        return null;
-      }
-
-      return  this._buildUserServiceModel(userService);
+      return {
+        userId: userServiceEntity.getDataValue('user_id'),
+        status: userServiceEntity.getDataValue('status'),
+        role: roles.find(item => item.id === userServiceEntity.getDataValue('role_id')),
+        service: {
+          id: userServiceEntity.Service.getDataValue('id'),
+          name: userServiceEntity.Service.getDataValue('name'),
+        },
+        organisation: {
+          id: userServiceEntity.Organisation.getDataValue('id'),
+          name: userServiceEntity.Organisation.getDataValue('name'),
+        },
+      };
     } catch (e) {
-      logger.error(e);
+      logger.error(`error getting user service information for org: ${organisationId}, service ${serviceId} and user:${userId} -  ${e.message}`, e);
       throw e;
     }
   }
-
-
 }
 
 module.exports = ServicesStorage;
