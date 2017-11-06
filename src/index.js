@@ -3,9 +3,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const https = require('https');
+const expressLayouts = require('express-ejs-layouts');
+const path = require('path');
 const config = require('./infrastructure/config')();
 const logger = require('./infrastructure/logger');
-const services = require('./app/services');
+const { organisations, services } = require('./app/services');
+const dev = require('./app/dev');
 
 const app = express();
 
@@ -13,6 +16,19 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use('/services', services);
+app.use('/organisations', organisations);
+if (config.hostingEnvironment.useDevViews) {
+  app.use(expressLayouts);
+  app.set('view engine', 'ejs');
+  app.set('views', path.resolve(__dirname, 'app'));
+  app.set('layout', 'layouts/layout');
+
+  app.use('/manage', dev());
+
+  app.get('/', (req, res) => {
+    res.redirect('/manage');
+  });
+}
 
 if (config.hostingEnvironment.env === 'dev') {
   app.proxy = true;

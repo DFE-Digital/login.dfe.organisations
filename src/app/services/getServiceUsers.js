@@ -1,14 +1,14 @@
 const logger = require('./../../infrastructure/logger');
 const ServicesStorage = require('./data/servicesStorage');
 
-const isUuid = (value) => {
-  return value.match(/^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$/);
-};
+const isUuid = value => value.match(/^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$/);
 
 const getServiceUsers = async (req, res) => {
   const serviceId = req.params.sid ? req.params.sid.toLowerCase() : '';
-  if (!isUuid(serviceId)) {
-    res.status(400).send();
+  const organisationId = req.params.org_id ? req.params.org_id.toLowerCase() : '';
+
+  if (!isUuid(serviceId) || !isUuid(organisationId)) {
+    res.status(404).send();
     return;
   }
 
@@ -21,7 +21,7 @@ const getServiceUsers = async (req, res) => {
       return;
     }
 
-    const usersOfService = await storage.getUsersOfService(serviceId);
+    const usersOfService = await storage.getUsersOfService(organisationId, serviceId);
 
     res.status(200).send(usersOfService);
   } catch (e) {

@@ -1,0 +1,38 @@
+<a href="/manage/services" class="link-back">Back</a>
+
+<div class="grid-row">
+    <div class="col-12">
+        <h1 class="heading-xlarge">
+            <%=editorTitle%>
+        </h1>
+    </div>
+</div>
+<div class="grid-row">
+    <div class="col-12">
+        <form method="post" id="form-edit-service">
+            <input type="hidden" name="_csrf" value="<%=csrfToken%>" />
+            <fieldset>
+                <legend class="vh"><%=editorTitle%> form</legend>
+                <div class="form-group">
+                    <span style="display: block; font-weight: bold;">Id</span>
+                    <span><%=editorItem.id%></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label-bold" for="name">Name</label>
+                    <div>
+                        <input class="form-control" id="name" name="name" type="text" required aria-required="true" maxlength="255" value="<%=editorItem.name%>" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label-bold" for="description">Description</label>
+                    <div>
+                        <input class="form-control" id="description" name="description" type="text" maxlength="255" value="<%=editorItem.description%>" />
+                    </div>
+                </div>
+                <div class="form-submit">
+                    <button type="submit" class="button"><%=editorAction%></button>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,43 @@
+<a href="/" class="link-back">Back</a>
+
+<div class="grid-row">
+    <div class="col-12">
+        <h1 class="heading-xlarge">
+            Manage organisations
+        </h1>
+    </div>
+</div>
+<div class="grid-row">
+    <div class="col-6">&nbsp;</div>
+    <div class="col-6" style="text-align: right; margin-bottom: 15px;">
+        <a class="button" href="/manage/organisations/new">Create Organisation</a>
+    </div>
+</div>
+<div class="grid-row">
+    <div class="col-12">
+        <table>
+            <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <%
+            for (let i = 0; i < locals.organisations.length; i++) {
+                const organisation = locals.organisations[i];
+            %>
+            <tr>
+                <td><%=organisation.id%></td>
+                <td><%=organisation.name%></td>
+                <td>
+                    <span class="table-action"><a href="/manage/organisations/<%=organisation.id%>">Edit</a></span>
+                </td>
+            </tr>
+            <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>

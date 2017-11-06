@@ -62,13 +62,13 @@ describe('When getting associated services to a user', () => {
     expect(res.statusCode).toBe(200);
     expect(getUserServicesStub.mock.calls[0][0]).toBe(expectedUserId);
   });
-  it('then if the request is valid and no data is returned a 404 is returned', async () => {
+  it('then if the request is valid and no data is returned a 200 is returned', async () => {
     getUserServicesStub = jest.fn().mockImplementation(() => null);
     req.params.uid = 'ABC123';
 
     await getUserAssociatedServices(req, res);
 
-    expect(res.statusCode).toBe(404);
+    expect(res.statusCode).toBe(200);
     expect(getUserServicesStub.mock.calls[0][0]).toBe('ABC123');
   });
   it('then if the request is valid the data is returned in the response', async () => {

@@ -17,20 +17,24 @@ describe('When getting an approval request', () => {
   let req;
   let res;
   let servicesStorage;
-  let getUserServiceByIdStub;
+  let getUserServiceStub;
   let logger;
-  const expectedUserServiceId = '7654321';
+  const expectedServiceId = '7654321';
+  const expectedOrgId = '21FDE45';
+  const expectedUserId = 'FRV434321';
   const expectedServiceName = 'service 1';
 
   beforeEach(() => {
     res = httpMocks.createResponse();
     req = {
       params: {
-        usid: expectedUserServiceId,
+        sid: expectedServiceId,
+        org_id: expectedOrgId,
+        uid: expectedUserId,
       },
     };
 
-    getUserServiceByIdStub = jest.fn().mockImplementation(() => ({
+    getUserServiceStub = jest.fn().mockImplementation(() => ({
       userServiceRequest:
         {
           name: expectedServiceName,
@@ -42,17 +46,39 @@ describe('When getting an approval request', () => {
 
     servicesStorage = require('./../../src/app/services/data/servicesStorage');
     servicesStorage.mockImplementation(() => ({
-      getUserServiceById: getUserServiceByIdStub,
+      getUserService: getUserServiceStub,
     }));
   });
   afterEach(() => {
     expect(res._isEndCalled()).toBe(true);
   });
-  it('then if the uid is not passed a bad request is returned', async () => {
-    const usidValues = ['', undefined, null];
+  it('then if the serviceId is not passed a bad request is returned', async () => {
+    const serviceIdValues = ['', undefined, null];
 
-    await Promise.all(usidValues.map(async (valueToUse) => {
-      req.params.usid = valueToUse;
+    await Promise.all(serviceIdValues.map(async (valueToUse) => {
+      req.params.sid = valueToUse;
+
+      await getUserRequestForApproval(req, res);
+      expect(res.statusCode).toBe(400);
+    }));
+
+  });
+  it('then if the orgid is not passed a bad request is returned', async () => {
+    const orgIdValues = ['', undefined, null];
+
+    await Promise.all(orgIdValues.map(async (valueToUse) => {
+      req.params.org_id = valueToUse;
+
+      await getUserRequestForApproval(req, res);
+      expect(res.statusCode).toBe(400);
+    }));
+
+  });
+  it('then if the userid is not passed a bad request is returned', async () => {
+    const userIdValues = ['', undefined, null];
+
+    await Promise.all(userIdValues.map(async (valueToUse) => {
+      req.params.uid = valueToUse;
 
       await getUserRequestForApproval(req, res);
       expect(res.statusCode).toBe(400);
@@ -63,11 +89,13 @@ describe('When getting an approval request', () => {
     await getUserRequestForApproval(req, res);
 
     expect(res.statusCode).toBe(200);
-    expect(getUserServiceByIdStub.mock.calls[0][0]).toBe(expectedUserServiceId);
+    expect(getUserServiceStub.mock.calls[0][0]).toBe(expectedServiceId);
+    expect(getUserServiceStub.mock.calls[0][1]).toBe(expectedOrgId);
+    expect(getUserServiceStub.mock.calls[0][2]).toBe(expectedUserId);
   });
   it('then if the request is valid and no data is returned a 404 is returned', async () => {
-    getUserServiceByIdStub = jest.fn().mockImplementation(() => null);
-    req.params.usid = 'ABC123';
+    getUserServiceStub = jest.fn().mockImplementation(() => null);
+    req.params.sid = 'ABC123';
 
     await getUserRequestForApproval(req, res);
 
@@ -75,12 +103,12 @@ describe('When getting an approval request', () => {
 
   });
   it('then a 500 response is returned when an error is thrown', async () => {
-    getUserServiceByIdStub = jest.fn().mockImplementation(() => {
+    getUserServiceStub = jest.fn().mockImplementation(() => {
       throw new Error();
     });
 
     await getUserRequestForApproval(req, res);
 
     expect(res.statusCode).toBe(500);
-  })
+  });
 });
