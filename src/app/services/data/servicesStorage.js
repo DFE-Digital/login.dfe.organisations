@@ -8,24 +8,9 @@ const { users, services, roles, organisations } = require('./servicesSchema')();
 
 
 class ServicesStorage {
-  async listOrganisations() {
-    try {
-      const orgEntities = await organisations.findAll();
-      if (!orgEntities) {
-        return null;
-      }
 
-      return await Promise.all(orgEntities.map(async serviceEntity => ({
-        id: serviceEntity.getDataValue('id'),
-        name: serviceEntity.getDataValue('name'),
-      })));
-    } catch (e) {
-      logger.error(`error getting organisations - ${e.message}`, e);
-      throw e;
-    }
-  }
 
-  async listServices() {
+  async list() {
     try {
       const serviceEntities = await services.findAll();
       if (!serviceEntities) {
@@ -248,6 +233,8 @@ class ServicesStorage {
       throw e;
     }
   }
+
+
 }
 
 module.exports = ServicesStorage;
