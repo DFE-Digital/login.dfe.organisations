@@ -8,8 +8,6 @@ const { users, services, roles, organisations } = require('./servicesSchema')();
 
 
 class ServicesStorage {
-
-
   async list() {
     try {
       const serviceEntities = await services.findAll();
@@ -108,28 +106,21 @@ class ServicesStorage {
       const userServiceObject = await Promise.all(userServices.map(async (userService) => {
         if (userService) {
           return {
-            id: userService.Service.getDataValue('id'),
+            id: userService.getDataValue('id'),
             name: userService.Service.getDataValue('name'),
-            description: userService.Service.getDataValue('description'),
-            status: userService.getDataValue('status'),
+            userId: userService.getDataValue('user_id'),
             // userService: {
             //   id: userService.getDataValue('id'),
             //   userId: userService.getDataValue('user_id'),
             //   status: userService.getDataValue('status'),
             // },
-            organisation: {
-              id: userService.Organisation.getDataValue('id'),
-              name: userService.Organisation.getDataValue('name'),
-            },
             // service: {
             //   id: userService.Service.getDataValue('id'),
             //   name: userService.Service.getDataValue('name'),
-            //   description: userService.Service.getDataValue('description'),
+            description: userService.Service.getDataValue('description'),
             // },
-            role: roles.find(item => item.id === userService.getDataValue('role_id')),
           };
         }
-        return [];
       }));
 
       return userServiceObject.length !== 0 ? userServiceObject : null;
@@ -141,7 +132,7 @@ class ServicesStorage {
 
   async getUserUnassociatedServices(id) {
     try {
-      const userServices =  await users.findAll(
+      const userServices = await users.findAll(
         {
           where: {
             user_id: {
@@ -234,7 +225,42 @@ class ServicesStorage {
     }
   }
 
+  async getUserService(serviceId, organisationId, userId) {
+    try {
+      const userServiceEntity = await users.findOne(
+        {
+          where: {
+            user_id: {
+              [Op.eq]: userId,
+            },
+            service_id: {
+              [Op.eq]: serviceId,
+            },
+            organisation_id: {
+              [Op.eq]: organisationId,
+            },
+          },
+          include: ['Organisation', 'Service'],
+        });
 
+      return {
+        userId: userServiceEntity.getDataValue('user_id'),
+        status: userServiceEntity.getDataValue('status'),
+        role: roles.find(item => item.id === userServiceEntity.getDataValue('role_id')),
+        service: {
+          id: userServiceEntity.Service.getDataValue('id'),
+          name: userServiceEntity.Service.getDataValue('name'),
+        },
+        organisation: {
+          id: userServiceEntity.Organisation.getDataValue('id'),
+          name: userServiceEntity.Organisation.getDataValue('name'),
+        },
+      };
+    } catch (e) {
+      logger.error(`error getting user service information for org: ${organisationId}, service ${serviceId} and user:${userId} -  ${e.message}`, e);
+      throw e;
+    }
+  }
 }
 
 module.exports = ServicesStorage;

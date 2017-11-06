@@ -7,6 +7,7 @@ const getUserAssociatedServices = require('./getUserAssociatedServices');
 const getUnassociatedWithUserServices = require('./getUserUnassociatedServices');
 const getServiceDetails = require('./getServiceDetails');
 const getServiceUsers = require('./getServiceUsers');
+const getUserRequestForApproval = require('./getUserRequestForApproval');
 
 const router = express.Router();
 
@@ -17,8 +18,6 @@ const servicesRouteExport = () => {
   // Map routed to functions.
   router.get('/associated-with-user/:uid', getUserAssociatedServices);
   router.get('/unassociated-with-user/:uid', getUnassociatedWithUserServices);
-
-
   return router;
 };
 
@@ -26,6 +25,7 @@ const servicesRouteExport = () => {
 const organisationsRouteExport = () => {
   router.use(apiAuth(router, config));
   router.get('/:org_id/services/:sid', getServiceDetails);
+  router.get('/:org_id/services/:sid/request/:uid', getUserRequestForApproval);
   router.get('/:org_id/services/:sid/users', getServiceUsers);
   return router;
 };
