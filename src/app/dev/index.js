@@ -6,6 +6,7 @@ const router = express.Router({ mergeParams: true });
 const uuid = require('uuid/v4');
 
 const ServicesStorage = require('./../services/data/servicesStorage');
+const OrganisationsStorage = require('./../services/data/organisationsStorage');
 
 const compareNameAttr = (x, y) => {
   if (x.name.toUpperCase() < y.name.toUpperCase()) {
@@ -18,8 +19,9 @@ const compareNameAttr = (x, y) => {
 };
 const seedUserServices = async (req, res) => {
   const storage = new ServicesStorage();
-  const services = await storage.listServices();
-  const orgs = await storage.listOrganisations();
+  const orgStorage = new OrganisationsStorage();
+  const services = await storage.list();
+  const orgs = await orgStorage.list();
 
   res.render('dev/views/seedUserServices', {
     csrfToken: '',
@@ -56,7 +58,7 @@ const routes = () => {
 
   router.get('/services', async (req, res) => {
     const storage = new ServicesStorage();
-    const services = await storage.listServices();
+    const services = await storage.list();
     res.render('dev/views/servicesList', {
       services: services.sort(compareNameAttr),
     });
@@ -107,6 +109,60 @@ const routes = () => {
     await storage.update(id, name, description);
 
     res.redirect('/manage/services');
+  });
+
+  router.get('/organisations', async (req, res) => {
+    const storage = new OrganisationsStorage();
+    const organisations = await storage.list();
+    res.render('dev/views/organisationsList', {
+      organisations: organisations.sort(compareNameAttr),
+    });
+  });
+
+  router.get('/organisations/new', (req, res) => {
+    res.render('dev/views/organisationEdit', {
+      csrfToken: '',
+      editorTitle: 'Create organisation',
+      editorAction: 'Create',
+      editorItem: {
+        id: '[New]',
+        name: '',
+        description: '',
+      },
+    });
+  });
+
+  router.post('/organisations/new', async (req, res) => {
+    const id = uuid();
+    const name = req.body.name;
+
+    const storage = new OrganisationsStorage();
+    await storage.createOrg(id, name);
+
+    res.redirect('/manage/organisations');
+  });
+  router.get('/organisations/:id', async (req, res) => {
+    const storage = new OrganisationsStorage();
+    const organisation = await storage.getOrgById(req.params.id);
+    if (!organisation) {
+      res.status(404).send();
+    }
+
+    res.render('dev/views/organisationEdit', {
+      csrfToken: '',
+      editorTitle: 'Edit organisation',
+      editorAction: 'Update',
+      editorItem: organisation,
+    });
+  });
+  router.post('/organisations/:id', async (req, res) => {
+    const id = req.params.id;
+    const name = req.body.name;
+
+    const storage = new OrganisationsStorage();
+    await storage.updateOrg(id, name);
+
+    res.redirect('/manage/organisations');
   });
 
   router.get('/seed-user-services', seedUserServices);
