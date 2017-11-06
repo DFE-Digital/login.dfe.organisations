@@ -141,7 +141,7 @@ class ServicesStorage {
 
   async getUserUnassociatedServices(id) {
     try {
-      const userServices = await users.findAll(
+      const userServices =  await users.findAll(
         {
           where: {
             user_id: {
@@ -168,7 +168,7 @@ class ServicesStorage {
         name: service.getDataValue('name'),
         description: service.getDataValue('description'),
       }));
-      return returnValue.length !== 0 ? returnValue : null;
+      return returnValue;
     } catch (e) {
       logger.error(e);
       throw e;
