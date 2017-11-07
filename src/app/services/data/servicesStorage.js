@@ -106,24 +106,21 @@ class ServicesStorage {
       const userServiceObject = await Promise.all(userServices.map(async (userService) => {
         if (userService) {
           return {
-            id: userService.getDataValue('id'),
+            id: userService.Service.getDataValue('id'),
             name: userService.Service.getDataValue('name'),
-            userId: userService.getDataValue('user_id'),
-            // userService: {
-            //   id: userService.getDataValue('id'),
-            //   userId: userService.getDataValue('user_id'),
-            //   status: userService.getDataValue('status'),
-            // },
-            // service: {
-            //   id: userService.Service.getDataValue('id'),
-            //   name: userService.Service.getDataValue('name'),
             description: userService.Service.getDataValue('description'),
-            // },
+            status: userService.getDataValue('status'),
+            userId: userService.getDataValue('user_id'),
+            organisation: {
+              id: userService.Organisation.getDataValue('id'),
+              name: userService.Organisation.getDataValue('name'),
+            },
+            role: roles.find(item => item.id === userService.getDataValue('role_id')),
           };
         }
       }));
 
-      return userServiceObject.length !== 0 ? userServiceObject : null;
+      return userServiceObject;
     } catch (e) {
       logger.error(e);
       throw e;
