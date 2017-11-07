@@ -4,6 +4,7 @@ const express = require('express');
 
 const router = express.Router({ mergeParams: true });
 const uuid = require('uuid/v4');
+const _ = require('lodash');
 
 const ServicesStorage = require('./../services/data/servicesStorage');
 const OrganisationsStorage = require('./../services/data/organisationsStorage');
@@ -167,6 +168,44 @@ const routes = () => {
 
   router.get('/seed-user-services', seedUserServices);
   router.post('/seed-user-services', postSeedUserServices);
+
+  router.get('/user-access', async (req, res) => {
+    const storage = new ServicesStorage();
+    const services = await storage.list();
+    const orgStorage = new OrganisationsStorage();
+    const organisations = await orgStorage.list();
+
+    const allUserAccess = _.flatten(await Promise.all(services.map(async (service) => {
+      const usersOfService = await Promise.all(organisations.map(async (organisation) => {
+        const usersOfServiceByOrg =  await storage.getUsersOfService(organisation.id, service.id);
+        return usersOfServiceByOrg.map((user) => {
+          return {
+            userId: user.id,
+            service,
+            organisation,
+            role: user.role,
+          };
+        });
+      }));
+      return _.flatten(usersOfService);
+    })));
+
+    const users = _.partition(allUserAccess, (item) => {
+      return item.userid;
+    }).filter((item) => {
+      return item.length > 0;
+    }).map((item) => {
+      return {
+        id: item[0].userId,
+        access: item,
+      };
+    });
+
+    res.render('dev/views/userAccessList', {
+      users,
+    });
+  });
+
   return router;
 };
 
