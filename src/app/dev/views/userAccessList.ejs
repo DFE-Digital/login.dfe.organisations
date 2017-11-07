@@ -1,0 +1,54 @@
+<a href="/" class="link-back">Back</a>
+
+<div class="grid-row">
+    <div class="col-12">
+        <h1 class="heading-xlarge">
+            Manage user access
+        </h1>
+    </div>
+</div>
+<!--<div class="grid-row">-->
+    <!--<div class="col-6">&nbsp;</div>-->
+    <!--<div class="col-6" style="text-align: right; margin-bottom: 15px;">-->
+        <!--<a class="button" href="/manage/organisations/new">Create Organisation</a>-->
+    <!--</div>-->
+<!--</div>-->
+<div class="users-container">
+    <% for (let i = 0; i < locals.users.length; i++) { %>
+    <% const user = locals.users[i]; %>
+    <div class="grid-row">
+        <div class="col-12">
+            <h3 class="heading-small">User: <%=user.id%></h3>
+            <table>
+                <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Organisation</th>
+                    <th>Role</th>
+                </tr>
+                </thead>
+                <tbody>
+                <% for (let j = 0; j < user.access.length; j++) { %>
+                <% const access = user.access[j]; %>
+                <tr>
+                    <td><%=access.service.name%></td>
+                    <td><%=access.organisation.name%></td>
+                    <td><%=access.role.name%></td>
+                </tr>
+                <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <% } %>
+</div>
+
+<style>
+    .users-container .grid-row {
+        margin-top: 20px;
+    }
+
+    .users-container .grid-row:first-child {
+        margin-top: 0;
+    }
+</style>
