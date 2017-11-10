@@ -25,7 +25,7 @@ const action = async (req, res) => {
   } catch (e) {
     const id = uuid();
     logger.error(`error putting invitation (eid: ${id}) - ${e.message}`);
-    res.status(500).send();
+    res.status(500).send(`An error occured (id: ${id})`);
   }
 };
 
