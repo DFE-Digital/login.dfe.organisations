@@ -13,14 +13,11 @@ const organisationRoutes = () => {
   router.use(apiAuth(router, config));
 
   // Map routes to functions.
-  // router.get('/associated-with-user/:uid', getUserAssociatedServices);
-  // router.get('/unassociated-with-user/:uid', getUnassociatedWithUserServices);
-
   router.put('/:org_id/services/:svc_id/invitations/:inv_id', putInvitation);
 
   return router;
 };
 
 module.exports = {
-  organisationInvitations: organisationRoutes,
+  organisationInvitations: organisationRoutes(),
 };
