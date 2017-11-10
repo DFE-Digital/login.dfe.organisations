@@ -33,6 +33,39 @@ class InvitationsStorage {
       throw e;
     }
   }
+
+  async upsert(details) {
+    const { invitationId, organisationId, serviceId, roleId } = details;
+    try {
+      const invitation = await invitations.findOne(
+        {
+          where: {
+            invitation_id: {
+              [Op.eq]: invitationId,
+            },
+            service_id: {
+              [Op.eq]: serviceId,
+            },
+            organisation_id: {
+              [Op.eq]: organisationId,
+            },
+          },
+        });
+
+      if (invitation) {
+        await invitation.destroy();
+      }
+      await invitations.create({
+        invitation_id: invitationId,
+        organisation_id: organisationId,
+        service_id: serviceId,
+        role_id: roleId,
+      });
+    } catch (e) {
+      logger.error(`Error in InvitationsStorage.upsert ${e.message}`);
+      throw e;
+    }
+  }
 }
 
 module.exports = InvitationsStorage;
