@@ -230,7 +230,34 @@ const listInvitationServices = async (req, res) => {
     invitations: groupedInvitations,
   });
 };
+const getLinkInvitation = async (req, res) => {
+  const storage = new ServicesStorage();
+  const orgStorage = new OrganisationsStorage();
+  const services = await storage.list();
+  const orgs = await orgStorage.list();
 
+  res.render('dev/views/invitationsLink', {
+    csrfToken: '',
+    services: services.sort(compareNameAttr),
+    organisations: orgs.sort(compareNameAttr),
+  });
+};
+const postLinkInvitation = async (req, res) => {
+  const invitationId = req.body.invitation_id;
+  const organisationId = req.body.organisation_id;
+  const serviceId = req.body.service_id;
+  const roleId = req.body.role_id;
+
+  const storage = new InvitationsStorage();
+  await storage.upsert({
+    invitationId,
+    organisationId,
+    serviceId,
+    roleId,
+  });
+
+  res.redirect('/manage');
+};
 
 const routes = () => {
   router.get('/', (req, res) => {
@@ -255,6 +282,8 @@ const routes = () => {
   router.get('/user-access', listUserServices);
 
   router.get('/invitation-access', listInvitationServices);
+  router.get('/invitation-access/link', getLinkInvitation);
+  router.post('/invitation-access/link', postLinkInvitation);
 
   return router;
 };
