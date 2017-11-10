@@ -4,7 +4,7 @@ const Sequelize = require('sequelize');
 
 const Op = Sequelize.Op;
 const logger = require('./../../../infrastructure/logger');
-const { invitations, services, roles, organisations } = require('./../../../infrastructure/repository');
+const { invitations, roles } = require('./../../../infrastructure/repository');
 
 class InvitationsStorage {
   async list() {
