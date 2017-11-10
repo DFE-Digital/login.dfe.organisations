@@ -5,9 +5,12 @@ const bodyParser = require('body-parser');
 const https = require('https');
 const expressLayouts = require('express-ejs-layouts');
 const path = require('path');
+const fs = require('fs');
 const config = require('./infrastructure/config')();
 const logger = require('./infrastructure/logger');
+const morgan = require('morgan');
 const { organisations, services } = require('./app/services');
+const { organisationInvitations } = require('./app/invitations');
 const dev = require('./app/dev');
 
 const app = express();
@@ -15,8 +18,12 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+app.use(morgan('combined', { stream: fs.createWriteStream('./access.log', { flags: 'a' }) }));
+app.use(morgan('dev'));
+
 app.use('/services', services);
-app.use('/organisations', organisations);
+// app.use('/organisations', organisations);
+app.use('/organisations', organisationInvitations);
 if (config.hostingEnvironment.useDevViews) {
   app.use(expressLayouts);
   app.set('view engine', 'ejs');
