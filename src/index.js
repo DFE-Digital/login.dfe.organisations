@@ -22,7 +22,7 @@ app.use(morgan('combined', { stream: fs.createWriteStream('./access.log', { flag
 app.use(morgan('dev'));
 
 app.use('/services', services);
-// app.use('/organisations', organisations);
+app.use('/organisations', organisations);
 app.use('/organisations', organisationInvitations);
 if (config.hostingEnvironment.useDevViews) {
   app.use(expressLayouts);
