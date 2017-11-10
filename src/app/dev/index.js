@@ -4,10 +4,11 @@ const express = require('express');
 
 const router = express.Router({ mergeParams: true });
 const uuid = require('uuid/v4');
-const _ = require('lodash');
+const { partition, flatten } = require('lodash');
 
 const ServicesStorage = require('./../services/data/servicesStorage');
 const OrganisationsStorage = require('./../services/data/organisationsStorage');
+const InvitationsStorage = require('./../invitations/data/invitationsStorage');
 
 const compareNameAttr = (x, y) => {
   if (x.name.toUpperCase() < y.name.toUpperCase()) {
@@ -18,6 +19,129 @@ const compareNameAttr = (x, y) => {
   }
   return 0;
 };
+const innerPartition = (items, keySelector) => {
+  const partitioned = [];
+  items.forEach((item) => {
+    const itemKey = keySelector(item);
+    let batch = partitioned.find((x) => x.key === itemKey);
+    if (!batch) {
+      batch = {
+        key: itemKey,
+        items: [],
+      };
+      partitioned.push(batch);
+    }
+    batch.items.push(item);
+  });
+  return partitioned.map((x) => x.items);
+};
+
+const listServices = async (req, res) => {
+  const storage = new ServicesStorage();
+  const services = await storage.list();
+  res.render('dev/views/servicesList', {
+    services: services.sort(compareNameAttr),
+  });
+};
+const getCreateServices = (req, res) => {
+  res.render('dev/views/serviceEdit', {
+    csrfToken: '',
+    editorTitle: 'Create service',
+    editorAction: 'Create',
+    editorItem: {
+      id: '[New]',
+      name: '',
+      description: '',
+    },
+  });
+};
+const postCreateServices = async (req, res) => {
+  const id = uuid();
+  const name = req.body.name;
+  const description = req.body.description || '';
+
+  const storage = new ServicesStorage();
+  await storage.create(id, name, description);
+
+  res.redirect('/manage/services');
+};
+const getEditServices = async (req, res) => {
+  const storage = new ServicesStorage();
+  const service = await storage.getById(req.params.id);
+  if (!service) {
+    res.status(404).send();
+  }
+
+  res.render('dev/views/serviceEdit', {
+    csrfToken: '',
+    editorTitle: 'Edit service',
+    editorAction: 'Update',
+    editorItem: service,
+  });
+};
+const postEditServices = async (req, res) => {
+  const id = req.params.id;
+  const name = req.body.name;
+  const description = req.body.description || '';
+
+  const storage = new ServicesStorage();
+  await storage.update(id, name, description);
+
+  res.redirect('/manage/services');
+};
+
+const listOrganisations = async (req, res) => {
+  const storage = new OrganisationsStorage();
+  const organisations = await storage.list();
+  res.render('dev/views/organisationsList', {
+    organisations: organisations.sort(compareNameAttr),
+  });
+};
+const getCreateOrganisation = (req, res) => {
+  res.render('dev/views/organisationEdit', {
+    csrfToken: '',
+    editorTitle: 'Create organisation',
+    editorAction: 'Create',
+    editorItem: {
+      id: '[New]',
+      name: '',
+      description: '',
+    },
+  });
+};
+const postCreateOrganisation = async (req, res) => {
+  const id = uuid();
+  const name = req.body.name;
+
+  const storage = new OrganisationsStorage();
+  await storage.createOrg(id, name);
+
+  res.redirect('/manage/organisations');
+};
+const getEditOrganisation = async (req, res) => {
+  const storage = new OrganisationsStorage();
+  const organisation = await storage.getOrgById(req.params.id);
+  if (!organisation) {
+    res.status(404).send();
+  }
+
+  res.render('dev/views/organisationEdit', {
+    csrfToken: '',
+    editorTitle: 'Edit organisation',
+    editorAction: 'Update',
+    editorItem: organisation,
+  });
+};
+const postEditOrganisation = async (req, res) => {
+  const id = req.params.id;
+  const name = req.body.name;
+
+  const storage = new OrganisationsStorage();
+  await storage.updateOrg(id, name);
+
+  res.redirect('/manage/organisations');
+};
+
 const seedUserServices = async (req, res) => {
   const storage = new ServicesStorage();
   const orgStorage = new OrganisationsStorage();
@@ -30,7 +154,6 @@ const seedUserServices = async (req, res) => {
     organisations: orgs.sort(compareNameAttr),
   });
 };
-
 const postSeedUserServices = async (req, res) => {
   const userId = req.body.user_id;
   const organisationId = req.body.organisation_id;
@@ -50,6 +173,63 @@ const postSeedUserServices = async (req, res) => {
 
   res.redirect('/manage');
 };
+const listUserServices = async (req, res) => {
+  const storage = new ServicesStorage();
+  const services = await storage.list();
+  const orgStorage = new OrganisationsStorage();
+  const organisations = await orgStorage.list();
+
+  const allUserAccess = flatten(await Promise.all(services.map(async (service) => {
+    const usersOfService = await Promise.all(organisations.map(async (organisation) => {
+      const usersOfServiceByOrg = await storage.getUsersOfService(organisation.id, service.id);
+      return usersOfServiceByOrg.map((user) => {
+        return {
+          userId: user.id,
+          service,
+          organisation,
+          role: user.role,
+        };
+      });
+    }));
+    return flatten(usersOfService);
+  })));
+
+  const users = partition(allUserAccess, (item) => {
+    return item.userid;
+  }).filter((item) => {
+    return item.length > 0;
+  }).map((item) => {
+    return {
+      id: item[0].userId,
+      access: item,
+    };
+  });
+
+  res.render('dev/views/userAccessList', {
+    users,
+  });
+};
+
+const listInvitationServices = async (req, res) => {
+  const storage = new InvitationsStorage();
+  const invitations = await storage.list();
+
+  let groupedInvitations = innerPartition(invitations, (item) => {
+    return item.invitationId;
+  });
+  groupedInvitations = groupedInvitations.filter((item) => {
+    return item.length > 0;
+  }).map((item) => {
+    return {
+      id: item[0].invitationId,
+      access: item,
+    };
+  });
+
+  res.render('dev/views/invitationsList', {
+    invitations: groupedInvitations,
+  });
+};
 
 
 const routes = () => {
@@ -57,154 +237,24 @@ const routes = () => {
     res.render('dev/views/launch');
   });
 
-  router.get('/services', async (req, res) => {
-    const storage = new ServicesStorage();
-    const services = await storage.list();
-    res.render('dev/views/servicesList', {
-      services: services.sort(compareNameAttr),
-    });
-  });
+  router.get('/services', listServices);
+  router.get('/services/new', getCreateServices);
+  router.post('/services/new', postCreateServices);
+  router.get('/services/:id', getEditServices);
+  router.post('/services/:id', postEditServices);
 
-  router.get('/services/new', (req, res) => {
-    res.render('dev/views/serviceEdit', {
-      csrfToken: '',
-      editorTitle: 'Create service',
-      editorAction: 'Create',
-      editorItem: {
-        id: '[New]',
-        name: '',
-        description: '',
-      },
-    });
-  });
-  router.post('/services/new', async (req, res) => {
-    const id = uuid();
-    const name = req.body.name;
-    const description = req.body.description || '';
+  router.get('/organisations', listOrganisations);
 
-    const storage = new ServicesStorage();
-    await storage.create(id, name, description);
-
-    res.redirect('/manage/services');
-  });
-  router.get('/services/:id', async (req, res) => {
-    const storage = new ServicesStorage();
-    const service = await storage.getById(req.params.id);
-    if (!service) {
-      res.status(404).send();
-    }
-
-    res.render('dev/views/serviceEdit', {
-      csrfToken: '',
-      editorTitle: 'Edit service',
-      editorAction: 'Update',
-      editorItem: service,
-    });
-  });
-  router.post('/services/:id', async (req, res) => {
-    const id = req.params.id;
-    const name = req.body.name;
-    const description = req.body.description || '';
-
-    const storage = new ServicesStorage();
-    await storage.update(id, name, description);
-
-    res.redirect('/manage/services');
-  });
-
-  router.get('/organisations', async (req, res) => {
-    const storage = new OrganisationsStorage();
-    const organisations = await storage.list();
-    res.render('dev/views/organisationsList', {
-      organisations: organisations.sort(compareNameAttr),
-    });
-  });
-
-  router.get('/organisations/new', (req, res) => {
-    res.render('dev/views/organisationEdit', {
-      csrfToken: '',
-      editorTitle: 'Create organisation',
-      editorAction: 'Create',
-      editorItem: {
-        id: '[New]',
-        name: '',
-        description: '',
-      },
-    });
-  });
-
-  router.post('/organisations/new', async (req, res) => {
-    const id = uuid();
-    const name = req.body.name;
-
-    const storage = new OrganisationsStorage();
-    await storage.createOrg(id, name);
-
-    res.redirect('/manage/organisations');
-  });
-  router.get('/organisations/:id', async (req, res) => {
-    const storage = new OrganisationsStorage();
-    const organisation = await storage.getOrgById(req.params.id);
-    if (!organisation) {
-      res.status(404).send();
-    }
-
-    res.render('dev/views/organisationEdit', {
-      csrfToken: '',
-      editorTitle: 'Edit organisation',
-      editorAction: 'Update',
-      editorItem: organisation,
-    });
-  });
-  router.post('/organisations/:id', async (req, res) => {
-    const id = req.params.id;
-    const name = req.body.name;
-
-    const storage = new OrganisationsStorage();
-    await storage.updateOrg(id, name);
-
-    res.redirect('/manage/organisations');
-  });
+  router.get('/organisations/new', getCreateOrganisation);
+  router.post('/organisations/new', postCreateOrganisation);
+  router.get('/organisations/:id', getEditOrganisation);
+  router.post('/organisations/:id', postEditOrganisation);
 
   router.get('/seed-user-services', seedUserServices);
   router.post('/seed-user-services', postSeedUserServices);
+  router.get('/user-access', listUserServices);
 
-  router.get('/user-access', async (req, res) => {
-    const storage = new ServicesStorage();
-    const services = await storage.list();
-    const orgStorage = new OrganisationsStorage();
-    const organisations = await orgStorage.list();
-
-    const allUserAccess = _.flatten(await Promise.all(services.map(async (service) => {
-      const usersOfService = await Promise.all(organisations.map(async (organisation) => {
-        const usersOfServiceByOrg =  await storage.getUsersOfService(organisation.id, service.id);
-        return usersOfServiceByOrg.map((user) => {
-          return {
-            userId: user.id,
-            service,
-            organisation,
-            role: user.role,
-          };
-        });
-      }));
-      return _.flatten(usersOfService);
-    })));
-
-    const users = _.partition(allUserAccess, (item) => {
-      return item.userid;
-    }).filter((item) => {
-      return item.length > 0;
-    }).map((item) => {
-      return {
-        id: item[0].userId,
-        access: item,
-      };
-    });
-
-    res.render('dev/views/userAccessList', {
-      users,
-    });
-  });
+  router.get('/invitation-access', listInvitationServices);
 
   return router;
 };

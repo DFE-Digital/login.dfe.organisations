@@ -83,9 +83,28 @@ const users = db.define('user_services', {
   tableName: 'user_services',
   schema: 'services',
 });
-
 users.belongsTo(organisations, { as: 'Organisation', foreignKey: 'organisation_id' });
 users.belongsTo(services, { as: 'Service', foreignKey: 'service_id' });
+
+
+const invitations = db.define('invitation_services', {
+  invitation_id: {
+    type: Sequelize.UUID,
+    primaryKey: true,
+    allowNull: false,
+  },
+  role_id: {
+    type: Sequelize.SMALLINT,
+    allowNull: false,
+    defaultValue: 0,
+  },
+}, {
+  timestamps: false,
+  tableName: 'invitation_services',
+  schema: 'services',
+});
+invitations.belongsTo(organisations, { as: 'Organisation', foreignKey: 'organisation_id' });
+invitations.belongsTo(services, { as: 'Service', foreignKey: 'service_id' });
 
 const roles = [
   { id: 0, name: 'End user' },
@@ -97,4 +116,5 @@ module.exports = {
   services,
   organisations,
   roles,
+  invitations,
 };
