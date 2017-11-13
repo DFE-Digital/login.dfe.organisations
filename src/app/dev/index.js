@@ -1,6 +1,7 @@
 'use strict';
 
 const express = require('express');
+const listEndpoints = require('express-list-endpoints');
 
 const router = express.Router({ mergeParams: true });
 const uuid = require('uuid/v4');
@@ -23,7 +24,7 @@ const innerPartition = (items, keySelector) => {
   const partitioned = [];
   items.forEach((item) => {
     const itemKey = keySelector(item);
-    let batch = partitioned.find((x) => x.key === itemKey);
+    let batch = partitioned.find(x => x.key === itemKey);
     if (!batch) {
       batch = {
         key: itemKey,
@@ -33,7 +34,7 @@ const innerPartition = (items, keySelector) => {
     }
     batch.items.push(item);
   });
-  return partitioned.map((x) => x.items);
+  return partitioned.map(x => x.items);
 };
 
 const listServices = async (req, res) => {
@@ -182,28 +183,20 @@ const listUserServices = async (req, res) => {
   const allUserAccess = flatten(await Promise.all(services.map(async (service) => {
     const usersOfService = await Promise.all(organisations.map(async (organisation) => {
       const usersOfServiceByOrg = await storage.getUsersOfService(organisation.id, service.id);
-      return usersOfServiceByOrg.map((user) => {
-        return {
-          userId: user.id,
-          service,
-          organisation,
-          role: user.role,
-        };
-      });
+      return usersOfServiceByOrg.map(user => ({
+        userId: user.id,
+        service,
+        organisation,
+        role: user.role,
+      }));
     }));
     return flatten(usersOfService);
   })));
 
-  const users = partition(allUserAccess, (item) => {
-    return item.userid;
-  }).filter((item) => {
-    return item.length > 0;
-  }).map((item) => {
-    return {
-      id: item[0].userId,
-      access: item,
-    };
-  });
+  const users = partition(allUserAccess, item => item.userid).filter(item => item.length > 0).map(item => ({
+    id: item[0].userId,
+    access: item,
+  }));
 
   res.render('dev/views/userAccessList', {
     users,
@@ -214,17 +207,11 @@ const listInvitationServices = async (req, res) => {
   const storage = new InvitationsStorage();
   const invitations = await storage.list();
 
-  let groupedInvitations = innerPartition(invitations, (item) => {
-    return item.invitationId;
-  });
-  groupedInvitations = groupedInvitations.filter((item) => {
-    return item.length > 0;
-  }).map((item) => {
-    return {
-      id: item[0].invitationId,
-      access: item,
-    };
-  });
+  let groupedInvitations = innerPartition(invitations, item => item.invitationId);
+  groupedInvitations = groupedInvitations.filter(item => item.length > 0).map(item => ({
+    id: item[0].invitationId,
+    access: item,
+  }));
 
   res.render('dev/views/invitationsList', {
     invitations: groupedInvitations,
@@ -261,7 +248,8 @@ const postLinkInvitation = async (req, res) => {
 
 const routes = () => {
   router.get('/', (req, res) => {
-    res.render('dev/views/launch');
+    const routeList = listEndpoints(req.app);
+    res.render('dev/views/launch', { routes: routeList });
   });
 
   router.get('/services', listServices);
