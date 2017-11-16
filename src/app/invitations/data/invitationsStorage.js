@@ -34,6 +34,39 @@ class InvitationsStorage {
     }
   }
 
+  async getForInvitationId(id) {
+    try {
+      const invitationEntities = await invitations.findAll(
+        {
+          where: {
+            invitation_id: {
+              [Op.eq]: id,
+            },
+          },
+          include: ['Organisation', 'Service'],
+        });
+      if (!invitationEntities) {
+        return null;
+      }
+
+      return await Promise.all(invitationEntities.map(async invitationEntity => ({
+        invitationId: invitationEntity.getDataValue('invitation_id'),
+        role: roles.find(item => item.id === invitationEntity.getDataValue('role_id')),
+        service: {
+          id: invitationEntity.Service.getDataValue('id'),
+          name: invitationEntity.Service.getDataValue('name'),
+        },
+        organisation: {
+          id: invitationEntity.Organisation.getDataValue('id'),
+          name: invitationEntity.Organisation.getDataValue('name'),
+        },
+      })));
+    } catch (e) {
+      logger.error(`error getting services for invitation - ${e.message}`, e);
+      throw e;
+    }
+  }
+
   async upsert(details) {
     const { invitationId, organisationId, serviceId, roleId } = details;
     try {
