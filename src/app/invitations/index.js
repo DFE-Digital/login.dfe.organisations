@@ -4,11 +4,25 @@ const express = require('express');
 const apiAuth = require('login.dfe.api.auth');
 const config = require('./../../infrastructure/config')();
 
+const getInvitation = require('./getInvitation');
 const putInvitation = require('./putInvitation');
 
-const router = express.Router();
+
+const invitationRoutes = () => {
+  const router = express.Router();
+
+  // Add auth middleware.
+  router.use(apiAuth(router, config));
+
+  // Map routes to functions.
+  router.get('/:inv_id', getInvitation);
+
+  return router;
+};
 
 const organisationRoutes = () => {
+  const router = express.Router();
+
   // Add auth middleware.
   router.use(apiAuth(router, config));
 
@@ -19,5 +33,6 @@ const organisationRoutes = () => {
 };
 
 module.exports = {
+  invitations: invitationRoutes(),
   organisationInvitations: organisationRoutes(),
 };
