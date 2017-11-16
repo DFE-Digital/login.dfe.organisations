@@ -10,7 +10,7 @@ const config = require('./infrastructure/config')();
 const logger = require('./infrastructure/logger');
 const morgan = require('morgan');
 const { organisations, services } = require('./app/services');
-const { organisationInvitations } = require('./app/invitations');
+const { organisationInvitations, invitations } = require('./app/invitations');
 const dev = require('./app/dev');
 
 const app = express();
@@ -24,6 +24,8 @@ app.use(morgan('dev'));
 app.use('/services', services);
 app.use('/organisations', organisations);
 app.use('/organisations', organisationInvitations);
+app.use('/invitations', invitations);
+
 if (config.hostingEnvironment.useDevViews) {
   app.use(expressLayouts);
   app.set('view engine', 'ejs');
