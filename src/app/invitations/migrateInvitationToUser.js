@@ -1,9 +1,9 @@
 'use strict';
 
 const uuid = require('uuid/v4');
-const InvitationStorage = require('./data/invitationsStorage');
+const ServiceStorage = require('./../services/data/servicesStorage');
 
-const storage = new InvitationStorage();
+const storage = new ServiceStorage();
 
 const APPROVED_STATUS = 1;
 
