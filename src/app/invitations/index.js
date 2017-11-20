@@ -6,7 +6,7 @@ const config = require('./../../infrastructure/config')();
 
 const getInvitation = require('./getInvitation');
 const putInvitation = require('./putInvitation');
-
+const postMigrateInvitationToUser = require('./migrateInvitationToUser')
 
 const invitationRoutes = () => {
   const router = express.Router();
@@ -16,7 +16,7 @@ const invitationRoutes = () => {
 
   // Map routes to functions.
   router.get('/:inv_id', getInvitation);
-
+  router.post('/:inv_id/migrate-to-user', postMigrateInvitationToUser);
   return router;
 };
 
