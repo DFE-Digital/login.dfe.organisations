@@ -15,7 +15,7 @@ const handler = async (req, res) => {
 
   const services = await storage.getForInvitationId(invitationId);
   if (services) {
-    const promises = services.forEach((s) => {
+    const promises = services.map((s) => {
       return serviceStorage.upsertServiceUser({
         id: uuid(),
         userId,
