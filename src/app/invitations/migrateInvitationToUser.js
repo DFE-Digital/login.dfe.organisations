@@ -17,7 +17,7 @@ const handler = async (req, res) => {
   if (services) {
     await Promise.all(
       services.forEach(async (s) => {
-        await serviceStorage.upsertServiceUser({
+        return serviceStorage.upsertServiceUser({
           id: uuid(),
           userId,
           organisationId: s.organisation.id,
@@ -25,7 +25,6 @@ const handler = async (req, res) => {
           roleId: s.role.id,
           status: APPROVED_STATUS,
         });
-        return true;
       }),
     );
 
