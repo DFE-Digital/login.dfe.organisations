@@ -15,17 +15,19 @@ const handler = async (req, res) => {
 
   const services = await storage.getForInvitationId(invitationId);
   if (services) {
+    const promises = services.forEach((s) => {
+      return serviceStorage.upsertServiceUser({
+        id: uuid(),
+        userId,
+        organisationId: s.organisation.id,
+        serviceId: s.service.id,
+        roleId: s.role.id,
+        status: APPROVED_STATUS
+      });
+    });
+
     await Promise.all(
-      services.forEach(async (s) => {
-        return serviceStorage.upsertServiceUser({
-          id: uuid(),
-          userId,
-          organisationId: s.organisation.id,
-          serviceId: s.service.id,
-          roleId: s.role.id,
-          status: APPROVED_STATUS,
-        });
-      }),
+      promises,
     );
 
     res.status(202).send();
