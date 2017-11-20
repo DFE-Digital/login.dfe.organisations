@@ -25,6 +25,7 @@ const handler = async (req, res) => {
           roleId: s.role.id,
           status: APPROVED_STATUS,
         });
+        return true;
       }),
     );
 
