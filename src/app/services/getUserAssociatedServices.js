@@ -1,5 +1,5 @@
 const logger = require('./../../infrastructure/logger');
-const ServicesStorage = require('./data/servicesStorage');
+const servicesStorage = require('./data/servicesStorage');
 
 const getUserAssociatedServices = async (req, res) => {
   try {
@@ -8,8 +8,7 @@ const getUserAssociatedServices = async (req, res) => {
       return;
     }
 
-    const storage = new ServicesStorage();
-    const services = await storage.getUserAssociatedServices(req.params.uid);
+    const services = await servicesStorage.getUserAssociatedServices(req.params.uid);
 
     if (!services) {
       res.status(200).send([]);

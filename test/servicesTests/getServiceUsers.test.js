@@ -3,18 +3,28 @@
 /* eslint-disable global-require */
 
 jest.mock('./../../src/app/services/data/servicesStorage');
+
+jest.mock('./../../src/app/services/data/servicesStorage', () => {
+  const getById = jest.fn();
+  const getUsersOfService = jest.fn();
+  return {
+    getById: jest.fn().mockImplementation(getById),
+    getUsersOfService: jest.fn().mockImplementation(getUsersOfService),
+  };
+});
+
 jest.mock('./../../src/infrastructure/repository', () => {
   const SequalizeMock = require('sequelize-mock');
   return new SequalizeMock();
 });
 
+const servicesStorage = require('./../../src/app/services/data/servicesStorage');
 const getServiceUsers = require('./../../src/app/services/getServiceUsers');
 const httpMocks = require('node-mocks-http');
 
 describe('when getting users of services', () => {
   let req;
   const res = httpMocks.createResponse();
-  let servicesStorage;
 
   beforeEach(() => {
     req = {
@@ -24,14 +34,11 @@ describe('when getting users of services', () => {
       },
     };
 
-    servicesStorage = require('./../../src/app/services/data/servicesStorage');
-    servicesStorage.mockImplementation(() => ({
-      getById: () => ({
-        id: '',
-        name: '',
-        description: '',
-      }),
-      getUsersOfService: () => ([
+    servicesStorage.getById.mockReset();
+    servicesStorage.getUsersOfService.mockReset();
+
+    servicesStorage.getUsersOfService.mockReturnValue(
+      [
         {
           id: 'user1',
           status: 54,
@@ -40,8 +47,15 @@ describe('when getting users of services', () => {
             name: 'user',
           },
         },
-      ]),
-    }));
+      ],
+    );
+    servicesStorage.getById.mockReturnValue(
+      {
+        id: '',
+        name: '',
+        description: '',
+      },
+    );
   });
 
   it('then it should send 404 if service id is not a uuid', async () => {
@@ -54,10 +68,12 @@ describe('when getting users of services', () => {
   });
 
   it('then it should send 404 if service not found', async () => {
-    servicesStorage.mockImplementation(() => ({
-      getById: () => (null),
-      getUsersOfService: () => ([]),
-    }));
+    servicesStorage.getById.mockReset();
+    servicesStorage.getUsersOfService.mockReset();
+
+    servicesStorage.getUsersOfService.mockReturnValue([]);
+    servicesStorage.getById.mockReturnValue(null);
+
 
     await getServiceUsers(req, res);
 
@@ -82,5 +98,5 @@ describe('when getting users of services', () => {
     expect(response[0].status).toBe(54);
     expect(response[0].role.id).toBe(12);
     expect(response[0].role.name).toBe('user');
-  })
+  });
 });
