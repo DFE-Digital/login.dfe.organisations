@@ -6,21 +6,19 @@ jest.mock('./../../../src/infrastructure/logger', () => {
 });
 jest.mock('./../../../src/app/invitations/data/invitationsStorage', () => {
   const upsert = jest.fn();
-  return jest.fn().mockImplementation(() => {
-    return {
-      upsert,
-    };
-  });
+  return {
+    upsert: jest.fn().mockImplementation(upsert),
+  };
 });
 
-const InvitationsStorage = require('./../../../src/app/invitations/data/invitationsStorage');
+
+const invitationsStorage = require('./../../../src/app/invitations/data/invitationsStorage');
 const httpMocks = require('node-mocks-http');
 const putInvitation = require('./../../../src/app/invitations/putInvitation');
 
 describe('when putting an invitation', () => {
   let req;
   let res;
-  let storage;
 
   beforeEach(() => {
     req = {
@@ -36,15 +34,15 @@ describe('when putting an invitation', () => {
 
     res = httpMocks.createResponse();
 
-    storage = new InvitationsStorage();
-    storage.upsert.mockReset();
+    invitationsStorage.upsert.mockReset();
+
   });
 
   it('then it should upsert record with put data', async () => {
     await putInvitation(req, res);
 
-    expect(storage.upsert.mock.calls.length).toBe(1);
-    expect(storage.upsert.mock.calls[0][0]).toMatchObject({
+    expect(invitationsStorage.upsert.mock.calls.length).toBe(1);
+    expect(invitationsStorage.upsert.mock.calls[0][0]).toMatchObject({
       invitationId: 'inv1',
       organisationId: 'org1',
       serviceId: 'svc1',
