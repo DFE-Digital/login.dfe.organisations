@@ -1,9 +1,7 @@
 'use strict';
 
 const uuid = require('uuid/v4');
-const InvitationStorage = require('./data/invitationsStorage');
-
-const storage = new InvitationStorage();
+const invitationStorage = require('./data/invitationsStorage');
 
 const APPROVED_STATUS = 1;
 
@@ -11,11 +9,11 @@ const handler = async (req, res) => {
   const invitationId = req.params.inv_id;
   const userId = req.body.user_id;
 
-  const services = await storage.getForInvitationId(invitationId);
+  const services = await invitationStorage.getForInvitationId(invitationId);
   if (services) {
     await Promise.all(
       services.forEach(async (s) => {
-        await storage.upsertServiceUser({
+        await invitationStorage.upsertServiceUser({
           id: uuid(),
           userId,
           organisationId: s.organisation.id,

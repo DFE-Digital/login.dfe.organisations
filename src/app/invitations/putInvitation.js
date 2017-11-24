@@ -2,8 +2,8 @@
 
 const logger = require('./../../infrastructure/logger');
 const uuid = require('uuid/v4');
-const InvitationStorage = require('./data/invitationsStorage');
-const storage = new InvitationStorage();
+const invitationStorage = require('./data/invitationsStorage');
+
 
 const action = async (req, res) => {
   try {
@@ -14,7 +14,7 @@ const action = async (req, res) => {
     const serviceId = req.params.svc_id;
     const roleId = req.body.roleId;
 
-    await storage.upsert({
+    await invitationStorage.upsert({
       invitationId,
       organisationId,
       serviceId,

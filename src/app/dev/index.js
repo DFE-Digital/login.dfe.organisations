@@ -9,7 +9,7 @@ const { partition, flatten } = require('lodash');
 
 const ServicesStorage = require('./../services/data/servicesStorage');
 const OrganisationsStorage = require('./../services/data/organisationsStorage');
-const InvitationsStorage = require('./../invitations/data/invitationsStorage');
+const invitationsStorage = require('./../invitations/data/invitationsStorage');
 
 const compareNameAttr = (x, y) => {
   if (x.name.toUpperCase() < y.name.toUpperCase()) {
@@ -204,8 +204,7 @@ const listUserServices = async (req, res) => {
 };
 
 const listInvitationServices = async (req, res) => {
-  const storage = new InvitationsStorage();
-  const invitations = await storage.list();
+  const invitations = await invitationsStorage.list();
 
   let groupedInvitations = innerPartition(invitations, item => item.invitationId);
   groupedInvitations = groupedInvitations.filter(item => item.length > 0).map(item => ({
@@ -235,8 +234,7 @@ const postLinkInvitation = async (req, res) => {
   const serviceId = req.body.service_id;
   const roleId = req.body.role_id;
 
-  const storage = new InvitationsStorage();
-  await storage.upsert({
+  await invitationsStorage.upsert({
     invitationId,
     organisationId,
     serviceId,
