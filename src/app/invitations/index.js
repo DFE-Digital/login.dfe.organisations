@@ -6,7 +6,7 @@ const config = require('./../../infrastructure/config')();
 
 const getInvitation = require('./getInvitation');
 const putInvitation = require('./putInvitation');
-const postMigrateInvitationToUser = require('./migrateInvitationToUser')
+const postMigrateInvitationToUser = require('./migrateInvitationToUser');
 
 const invitationRoutes = () => {
   const router = express.Router();

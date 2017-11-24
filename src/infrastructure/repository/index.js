@@ -15,7 +15,7 @@ if (config.database && config.database.postgresUrl) {
   assert(config.database.host, 'Database property host must be supplied');
   db = new Sequelize('postgres', config.database.username, config.database.password, {
     host: config.database.host,
-    dialect: 'postgres'
+    dialect: 'postgres',
   });
 }
 
