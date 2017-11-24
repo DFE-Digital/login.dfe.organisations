@@ -8,7 +8,7 @@ const uuid = require('uuid/v4');
 const { partition, flatten } = require('lodash');
 
 const ServicesStorage = require('./../services/data/servicesStorage');
-const OrganisationsStorage = require('./../services/data/organisationsStorage');
+const organisationsStorage = require('./../services/data/organisationsStorage');
 const invitationsStorage = require('./../invitations/data/invitationsStorage');
 
 const compareNameAttr = (x, y) => {
@@ -92,8 +92,7 @@ const postEditServices = async (req, res) => {
 };
 
 const listOrganisations = async (req, res) => {
-  const storage = new OrganisationsStorage();
-  const organisations = await storage.list();
+  const organisations = await organisationsStorage.list();
   res.render('dev/views/organisationsList', {
     organisations: organisations.sort(compareNameAttr),
   });
@@ -114,14 +113,12 @@ const postCreateOrganisation = async (req, res) => {
   const id = uuid();
   const name = req.body.name;
 
-  const storage = new OrganisationsStorage();
-  await storage.createOrg(id, name);
+  await organisationsStorage.createOrg(id, name);
 
   res.redirect('/manage/organisations');
 };
 const getEditOrganisation = async (req, res) => {
-  const storage = new OrganisationsStorage();
-  const organisation = await storage.getOrgById(req.params.id);
+  const organisation = await organisationsStorage.getOrgById(req.params.id);
   if (!organisation) {
     res.status(404).send();
   }
@@ -137,17 +134,14 @@ const postEditOrganisation = async (req, res) => {
   const id = req.params.id;
   const name = req.body.name;
 
-  const storage = new OrganisationsStorage();
-  await storage.updateOrg(id, name);
+  await organisationsStorage.updateOrg(id, name);
 
   res.redirect('/manage/organisations');
 };
 
 const seedUserServices = async (req, res) => {
-  const storage = new ServicesStorage();
-  const orgStorage = new OrganisationsStorage();
-  const services = await storage.list();
-  const orgs = await orgStorage.list();
+  const services = await servicesStorage.list();
+  const orgs = await organisationsStorage.list();
 
   res.render('dev/views/seedUserServices', {
     csrfToken: '',
@@ -177,8 +171,7 @@ const postSeedUserServices = async (req, res) => {
 const listUserServices = async (req, res) => {
   const storage = new ServicesStorage();
   const services = await storage.list();
-  const orgStorage = new OrganisationsStorage();
-  const organisations = await orgStorage.list();
+  const organisations = await organisationsStorage.list();
 
   const allUserAccess = flatten(await Promise.all(services.map(async (service) => {
     const usersOfService = await Promise.all(organisations.map(async (organisation) => {
@@ -218,9 +211,8 @@ const listInvitationServices = async (req, res) => {
 };
 const getLinkInvitation = async (req, res) => {
   const storage = new ServicesStorage();
-  const orgStorage = new OrganisationsStorage();
   const services = await storage.list();
-  const orgs = await orgStorage.list();
+  const orgs = await organisationsStorage.list();
 
   res.render('dev/views/invitationsLink', {
     csrfToken: '',
