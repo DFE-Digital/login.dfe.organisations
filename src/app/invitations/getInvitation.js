@@ -1,8 +1,7 @@
-const InvitationStorage = require('./data/invitationsStorage');
-const storage = new InvitationStorage();
+const invitationStorage = require('./data/invitationsStorage');
 
 const action = async (req, res) => {
-  const services = await storage.getForInvitationId(req.params.inv_id);
+  const services = await invitationStorage.getForInvitationId(req.params.inv_id);
   if (!services) {
     res.status(404).send();
     return;
