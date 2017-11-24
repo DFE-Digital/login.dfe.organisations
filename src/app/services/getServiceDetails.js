@@ -1,16 +1,14 @@
 'use strict';
 
 const logger = require('./../../infrastructure/logger');
-const ServicesStorage = require('./data/servicesStorage');
+const servicesStorage = require('./data/servicesStorage');
 
 const getServiceDetails = async (req, res) => {
   const serviceId = req.params.sid ? req.params.sid.toLowerCase() : '';
   const organisationId = req.params.org_id ? req.params.org_id.toLowerCase() : '';
 
   try {
-    const storage = new ServicesStorage();
-
-    const service = await storage.getServiceDetails(organisationId, serviceId);
+    const service = await servicesStorage.getServiceDetails(organisationId, serviceId);
     if (!service) {
       res.status(404).send();
       return;
