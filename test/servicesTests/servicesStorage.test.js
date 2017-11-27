@@ -1,8 +1,6 @@
 jest.mock('./../../src/infrastructure/config');
 jest.mock('assert');
 
-const SequelizeMock = require('sequelize-mock');
-
 describe('When using servicesStorage Data for a user', () => {
   describe('and initialising the class', () => {
     let assertion;
@@ -32,8 +30,8 @@ describe('When using servicesStorage Data for a user', () => {
       }));
       config.mockImplementation(configStub);
 
-      const NewStorage = require('./../../src/app/services/data/servicesStorage');
-      new NewStorage();
+      require('./../../src/app/services/data/servicesStorage');
+
 
       expect(assertion).toBe(true);
     });
@@ -48,8 +46,8 @@ describe('When using servicesStorage Data for a user', () => {
       }));
       config.mockImplementation(configStub);
 
-      const NewStorage = require('./../../src/app/services/data/servicesStorage');
-      new NewStorage();
+      require('./../../src/app/services/data/servicesStorage');
+
 
       expect(assertion).toBe(true);
     });
@@ -64,8 +62,8 @@ describe('When using servicesStorage Data for a user', () => {
       }));
       config.mockImplementation(configStub);
 
-      const NewStorage = require('./../../src/app/services/data/servicesStorage');
-      new NewStorage();
+      require('./../../src/app/services/data/servicesStorage');
+
 
       expect(assertion).toBe(true);
     });

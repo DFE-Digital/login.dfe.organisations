@@ -30,8 +30,8 @@ jest.mock('./../../../../src/infrastructure/logger', () => {
 const { createJestMockForSequelizeEntity } = require('./../../../utils/mocks');
 const db = require('./../../../../src/infrastructure/repository');
 const { Op } = require('sequelize');
-const InvitationsStorage = require('./../../../../src/app/invitations/data/invitationsStorage');
-const storage = new InvitationsStorage();
+const invitationStorage = require('./../../../../src/app/invitations/data/invitationsStorage');
+
 const details = {
   invitationId: 'inv1',
   organisationId: '',
@@ -46,7 +46,7 @@ describe('when upserting and invitation mapping', () => {
   });
 
   it('then it should check for exiting record by invitation_id, service_id and organisation_id', async () => {
-    await storage.upsert(details);
+    await invitationStorage.upsert(details);
 
     expect(db.invitations.findOne.mock.calls.length).toBe(1);
 
@@ -71,13 +71,13 @@ describe('when upserting and invitation mapping', () => {
     invitation.destroy = jest.fn();
     db.invitations.findOne.mockReturnValue(invitation);
 
-    await storage.upsert(details);
+    await invitationStorage.upsert(details);
 
     expect(invitation.destroy.mock.calls.length).toBe(1);
   });
 
   it('then it should create new record when existing record found', async () => {
-    await storage.upsert(details);
+    await invitationStorage.upsert(details);
 
     expect(db.invitations.create.mock.calls.length).toBe(1);
     expect(db.invitations.create.mock.calls[0][0]).toMatchObject({
@@ -91,7 +91,7 @@ describe('when upserting and invitation mapping', () => {
   it('then it should create new record when no existing record found', async () => {
     db.invitations.findOne.mockReturnValue(null);
 
-    await storage.upsert(details);
+    await invitationStorage.upsert(details);
 
     expect(db.invitations.create.mock.calls.length).toBe(1);
     expect(db.invitations.create.mock.calls[0][0]).toMatchObject({
