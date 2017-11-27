@@ -1,7 +1,13 @@
-"use strict";
+'use strict';
+
 /* eslint-disable global-require */
 
-jest.mock('./../../src/app/services/data/servicesStorage');
+jest.mock('./../../src/app/services/data/servicesStorage', () => {
+  const getUserService = jest.fn();
+  return {
+    getUserService: jest.fn().mockImplementation(getUserService),
+  };
+});
 jest.mock('./../../src/infrastructure/logger');
 jest.mock('./../../src/infrastructure/config');
 
@@ -9,15 +15,13 @@ jest.mock('./../../src/infrastructure/repository', () => {
   const SequelizeMock = require('sequelize-mock');
   return new SequelizeMock();
 });
-
+const servicesStorage = require('./../../src/app/services/data/servicesStorage');
 const httpMocks = require('node-mocks-http');
 const getUserRequestForApproval = require('./../../src/app/services/getUserRequestForApproval');
 
 describe('When getting an approval request', () => {
   let req;
   let res;
-  let servicesStorage;
-  let getUserServiceStub;
   let logger;
   const expectedServiceId = '7654321';
   const expectedOrgId = '21FDE45';
@@ -34,20 +38,18 @@ describe('When getting an approval request', () => {
       },
     };
 
-    getUserServiceStub = jest.fn().mockImplementation(() => ({
-      userServiceRequest:
-        {
-          name: expectedServiceName,
-        },
-    }));
-
     logger = require('./../../src/infrastructure/logger');
     logger.error = (() => ({}));
 
-    servicesStorage = require('./../../src/app/services/data/servicesStorage');
-    servicesStorage.mockImplementation(() => ({
-      getUserService: getUserServiceStub,
-    }));
+    servicesStorage.getUserService.mockReset();
+
+    servicesStorage.getUserService.mockReturnValue(
+      { userServiceRequest:
+        {
+          name: expectedServiceName,
+        },
+      },
+    );
   });
   afterEach(() => {
     expect(res._isEndCalled()).toBe(true);
@@ -61,7 +63,6 @@ describe('When getting an approval request', () => {
       await getUserRequestForApproval(req, res);
       expect(res.statusCode).toBe(400);
     }));
-
   });
   it('then if the orgid is not passed a bad request is returned', async () => {
     const orgIdValues = ['', undefined, null];
@@ -72,7 +73,6 @@ describe('When getting an approval request', () => {
       await getUserRequestForApproval(req, res);
       expect(res.statusCode).toBe(400);
     }));
-
   });
   it('then if the userid is not passed a bad request is returned', async () => {
     const userIdValues = ['', undefined, null];
@@ -83,29 +83,28 @@ describe('When getting an approval request', () => {
       await getUserRequestForApproval(req, res);
       expect(res.statusCode).toBe(400);
     }));
-
   });
   it('then the data is retrieved from the services storage', async () => {
     await getUserRequestForApproval(req, res);
 
     expect(res.statusCode).toBe(200);
-    expect(getUserServiceStub.mock.calls[0][0]).toBe(expectedServiceId);
-    expect(getUserServiceStub.mock.calls[0][1]).toBe(expectedOrgId);
-    expect(getUserServiceStub.mock.calls[0][2]).toBe(expectedUserId);
+    expect(servicesStorage.getUserService.mock.calls[0][0]).toBe(expectedServiceId);
+    expect(servicesStorage.getUserService.mock.calls[0][1]).toBe(expectedOrgId);
+    expect(servicesStorage.getUserService.mock.calls[0][2]).toBe(expectedUserId);
   });
   it('then if the request is valid and no data is returned a 404 is returned', async () => {
-    getUserServiceStub = jest.fn().mockImplementation(() => null);
+    servicesStorage.getUserService.mockReset();
+    servicesStorage.getUserService.mockReturnValue(null);
+
     req.params.sid = 'ABC123';
 
     await getUserRequestForApproval(req, res);
 
     expect(res.statusCode).toBe(404);
-
   });
   it('then a 500 response is returned when an error is thrown', async () => {
-    getUserServiceStub = jest.fn().mockImplementation(() => {
-      throw new Error();
-    });
+    servicesStorage.getUserService.mockReset();
+    servicesStorage.getUserService = () => { throw new Error(); };
 
     await getUserRequestForApproval(req, res);
 

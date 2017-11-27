@@ -6,11 +6,9 @@ jest.mock('./../../../src/infrastructure/logger', () => {
 });
 jest.mock('./../../../src/app/invitations/data/invitationsStorage', () => {
   const getForInvitationId = jest.fn();
-  return jest.fn().mockImplementation(() => {
-    return {
-      getForInvitationId,
-    };
-  });
+  return {
+    getForInvitationId: jest.fn().mockImplementation(getForInvitationId),
+  };
 });
 
 const serviceMapping1 = {
@@ -29,14 +27,13 @@ const serviceMapping1 = {
   },
 };
 
-const InvitationsStorage = require('./../../../src/app/invitations/data/invitationsStorage');
+const invitationsStorage = require('./../../../src/app/invitations/data/invitationsStorage');
 const httpMocks = require('node-mocks-http');
 const getInvitation = require('./../../../src/app/invitations/getInvitation');
 
 describe('when getting an invitation', () => {
   let req;
   let res;
-  let storage;
 
   beforeEach(() => {
     req = {
@@ -47,9 +44,8 @@ describe('when getting an invitation', () => {
 
     res = httpMocks.createResponse();
 
-    storage = new InvitationsStorage();
-    storage.getForInvitationId.mockReset();
-    storage.getForInvitationId.mockReturnValue([
+    invitationsStorage.getForInvitationId.mockReset();
+    invitationsStorage.getForInvitationId.mockReturnValue([
       serviceMapping1,
     ]);
   });
@@ -67,11 +63,11 @@ describe('when getting an invitation', () => {
   });
 
   it('then it should return 404 response if invitation service not found', async () => {
-    storage.getForInvitationId.mockReturnValue(null);
+    invitationsStorage.getForInvitationId.mockReturnValue(null);
 
     await getInvitation(req, res);
 
     expect(res._isEndCalled()).toBe(true);
     expect(res.statusCode).toBe(404);
-  })
+  });
 });
