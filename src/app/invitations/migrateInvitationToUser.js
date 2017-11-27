@@ -2,6 +2,7 @@
 
 const uuid = require('uuid/v4');
 const invitationStorage = require('./data/invitationsStorage');
+const serviceStorage = require('./../services/data/servicesStorage');
 
 const APPROVED_STATUS = 1;
 
@@ -11,17 +12,19 @@ const handler = async (req, res) => {
 
   const services = await invitationStorage.getForInvitationId(invitationId);
   if (services) {
+    const promises = services.map((s) => {
+      return serviceStorage.upsertServiceUser({
+        id: uuid(),
+        userId,
+        organisationId: s.organisation.id,
+        serviceId: s.service.id,
+        roleId: s.role.id,
+        status: APPROVED_STATUS
+      });
+    });
+
     await Promise.all(
-      services.forEach(async (s) => {
-        await invitationStorage.upsertServiceUser({
-          id: uuid(),
-          userId,
-          organisationId: s.organisation.id,
-          serviceId: s.service.id,
-          roleId: s.role.id,
-          status: APPROVED_STATUS,
-        });
-      }),
+      promises,
     );
 
     res.status(202).send();
