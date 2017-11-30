@@ -90,4 +90,16 @@ You are also able to get services that are associated to a user
 GET: /unassociated-with-user/[uid]
 ```
 
+### Creating database
+
+You can run the following to create the database
+
+```
+settings=./config/login.dfe.organisations.dev.local.json node tools/createDatabase.js 
+
+```
+
+which against a blank database will create the necessary tables. If you already have a database then use the scripts in the 
+**database_scripts** folder.
+
 
