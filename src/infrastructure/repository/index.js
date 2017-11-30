@@ -1,9 +1,13 @@
 'use strict';
 
+
+
 const Sequelize = require('sequelize');
 const assert = require('assert');
 // const logger = require('./../logger');
 const config = require('./../config')();
+
+const dbSchema = config.database.schema || 'services';
 
 let db;
 
@@ -13,6 +17,7 @@ if (config.database && config.database.postgresUrl) {
   assert(config.database.username, 'Database property username must be supplied');
   assert(config.database.password, 'Database property password must be supplied');
   assert(config.database.host, 'Database property host must be supplied');
+
   db = new Sequelize('postgres', config.database.username, config.database.password, {
     host: config.database.host,
     dialect: 'postgres',
@@ -33,7 +38,7 @@ const organisations = db.define('organisation', {
 }, {
   timestamps: false,
   tableName: 'organisation',
-  schema: 'services',
+  schema: dbSchema,
 });
 
 
@@ -54,7 +59,7 @@ const services = db.define('service', {
 }, {
   timestamps: false,
   tableName: 'service',
-  schema: 'services',
+  schema: dbSchema,
 });
 
 
@@ -79,9 +84,9 @@ const users = db.define('user_services', {
     defaultValue: 0,
   },
 }, {
-  timestamps: false,
+  timestamps: true,
   tableName: 'user_services',
-  schema: 'services',
+  schema: dbSchema,
 });
 users.belongsTo(organisations, { as: 'Organisation', foreignKey: 'organisation_id' });
 users.belongsTo(services, { as: 'Service', foreignKey: 'service_id' });
@@ -101,7 +106,7 @@ const invitations = db.define('invitation_services', {
 }, {
   timestamps: false,
   tableName: 'invitation_services',
-  schema: 'services',
+  schema: config.database.schema,
 });
 invitations.belongsTo(organisations, { as: 'Organisation', foreignKey: 'organisation_id' });
 invitations.belongsTo(services, { as: 'Service', foreignKey: 'service_id' });
