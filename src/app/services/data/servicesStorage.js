@@ -110,6 +110,7 @@ const getUserAssociatedServices = async (id) => {
           description: userService.Service.getDataValue('description'),
           status: userService.getDataValue('status'),
           userId: userService.getDataValue('user_id'),
+          requestDate: userService.getDataValue('createdAt'),
           organisation: {
             id: userService.Organisation.getDataValue('id'),
             name: userService.Organisation.getDataValue('name'),
