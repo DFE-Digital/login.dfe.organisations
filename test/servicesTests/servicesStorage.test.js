@@ -26,6 +26,7 @@ describe('When using servicesStorage Data for a user', () => {
           username: '',
           password: '123ABVF',
           host: 'hostname',
+          dialect: 'postgres',
         },
       }));
       config.mockImplementation(configStub);
@@ -42,6 +43,7 @@ describe('When using servicesStorage Data for a user', () => {
           username: 'username',
           password: '',
           host: 'hostname',
+          dialect: 'postgres',
         },
       }));
       config.mockImplementation(configStub);
@@ -58,6 +60,7 @@ describe('When using servicesStorage Data for a user', () => {
           username: 'username',
           password: '123ABVF',
           host: '',
+          dialect: 'postgres',
         },
       }));
       config.mockImplementation(configStub);

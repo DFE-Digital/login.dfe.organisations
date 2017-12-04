@@ -1,12 +1,13 @@
 'use strict';
 
 
-
 const Sequelize = require('sequelize');
 const assert = require('assert');
 // const logger = require('./../logger');
 const config = require('./../config')();
 
+const databaseName = config.database.name || 'postgres';
+const encryptDb = config.database.encrypt || false;
 const dbSchema = config.database.schema || 'services';
 
 let db;
@@ -17,10 +18,13 @@ if (config.database && config.database.postgresUrl) {
   assert(config.database.username, 'Database property username must be supplied');
   assert(config.database.password, 'Database property password must be supplied');
   assert(config.database.host, 'Database property host must be supplied');
-
-  db = new Sequelize('postgres', config.database.username, config.database.password, {
+  assert(config.database.dialect, 'Database property dialect must be supplied, this must be postgres or mssql');
+  db = new Sequelize(databaseName, config.database.username, config.database.password, {
     host: config.database.host,
-    dialect: 'postgres',
+    dialect: config.database.dialect,
+    dialectOptions: {
+      encrypt: encryptDb,
+    },
   });
 }
 
@@ -106,7 +110,7 @@ const invitations = db.define('invitation_services', {
 }, {
   timestamps: false,
   tableName: 'invitation_services',
-  schema: config.database.schema,
+  schema: dbSchema,
 });
 invitations.belongsTo(organisations, { as: 'Organisation', foreignKey: 'organisation_id' });
 invitations.belongsTo(services, { as: 'Service', foreignKey: 'service_id' });
