@@ -12,16 +12,14 @@ const handler = async (req, res) => {
 
   const services = await invitationStorage.getForInvitationId(invitationId);
   if (services) {
-    const promises = services.map((s) => {
-      return serviceStorage.upsertServiceUser({
-        id: uuid(),
-        userId,
-        organisationId: s.organisation.id,
-        serviceId: s.service.id,
-        roleId: s.role.id,
-        status: APPROVED_STATUS
-      });
-    });
+    const promises = services.map(s => serviceStorage.upsertServiceUser({
+      id: uuid(),
+      userId,
+      organisationId: s.organisation.id,
+      serviceId: s.service.id,
+      roleId: s.role.id,
+      status: APPROVED_STATUS,
+    }));
 
     await Promise.all(
       promises,
