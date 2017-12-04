@@ -1,7 +1,6 @@
 'use strict';
 
 
-
 const Sequelize = require('sequelize');
 const assert = require('assert');
 // const logger = require('./../logger');
@@ -25,7 +24,7 @@ if (config.database && config.database.postgresUrl) {
     dialect: config.database.dialect,
     dialectOptions: {
       encrypt: encryptDb,
-    }
+    },
   });
 }
 
