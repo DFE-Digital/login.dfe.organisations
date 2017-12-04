@@ -14,6 +14,7 @@ const { organisationInvitations, invitations } = require('./app/invitations');
 const dev = require('./app/dev');
 
 const { organisationsSchema, validateConfigAndQuitOnError } = require('login.dfe.config.schema');
+
 validateConfigAndQuitOnError(organisationsSchema, config, logger);
 
 const app = express();
