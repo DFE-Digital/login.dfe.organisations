@@ -14,7 +14,7 @@ const router = express.Router();
 
 const servicesRouteExport = () => {
   // Add auth middleware.
-  // router.use(apiAuth(router, config));
+  router.use(apiAuth(router, config));
 
   // Map routed to functions.
   router.get('/associated-with-user/:uid', getUserAssociatedServices);
@@ -24,7 +24,7 @@ const servicesRouteExport = () => {
 
 
 const organisationsRouteExport = () => {
-  // router.use(apiAuth(router, config));
+  router.use(apiAuth(router, config));
   router.get('/:org_id/services/:sid', getServiceDetails);
   router.get('/:org_id/services/:sid/request/:uid', getUserRequestForApproval);
   router.get('/:org_id/services/:sid/users', getServiceUsers);
