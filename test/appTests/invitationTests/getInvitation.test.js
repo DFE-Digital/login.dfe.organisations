@@ -56,7 +56,6 @@ describe('when getting an invitation', () => {
     expect(res._isEndCalled()).toBe(true);
     expect(res.statusCode).toBe(200);
     const data = res._getData();
-    console.log(JSON.stringify(data));
     expect(data).not.toBeNull();
     expect(data.length).toBe(1);
     expect(data[0]).toMatchObject(serviceMapping1);

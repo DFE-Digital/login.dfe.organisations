@@ -90,6 +90,34 @@ const getUsersOfService = async (organisationId, id) => {
   }
 };
 
+const getApproversOfServiceUserIds = async (organisationId, id) => {
+  try {
+    const approversServiceEntities = await users.findAll(
+      {
+        where: {
+          service_id: {
+            [Op.eq]: id,
+          },
+          organisation_id: {
+            [Op.eq]: organisationId,
+          },
+          role_id: {
+            [Op.eq]: 10000,
+          },
+          status: {
+            [Op.eq]: 1,
+          },
+        },
+      });
+    return await Promise.all(approversServiceEntities.map(async approverServiceEntity => ({
+      id: approverServiceEntity.getDataValue('user_id'),
+    })));
+  } catch (e) {
+    logger.error(`error getting approver's of service ${id} - ${e.message}`, e);
+    throw e;
+  }
+};
+
 const getUserAssociatedServices = async (id) => {
   try {
     const userServices = await users.findAll(
@@ -269,5 +297,6 @@ module.exports = {
   update,
   upsertServiceUser,
   getUserService,
+  getApproversOfServiceUserIds,
 };
 
