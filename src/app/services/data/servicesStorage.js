@@ -139,9 +139,7 @@ const getUserAssociatedServices = async (id) => {
           status: userService.getDataValue('status'),
           userId: userService.getDataValue('user_id'),
           requestDate: userService.getDataValue('createdAt'),
-          approvers: await userService.getApprovers().map((user) => {
-            return user.user_id;
-          }),
+          approvers: await userService.getApprovers().map(user => user.user_id),
           organisation: {
             id: userService.Organisation.getDataValue('id'),
             name: userService.Organisation.getDataValue('name'),
