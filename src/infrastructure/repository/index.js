@@ -2,6 +2,7 @@
 
 
 const Sequelize = require('sequelize');
+
 const Op = Sequelize.Op;
 const assert = require('assert');
 // const logger = require('./../logger');
@@ -94,8 +95,8 @@ const users = db.define('user_services', {
   schema: dbSchema,
 
 });
-users.belongsTo(organisations, {as: 'Organisation', foreignKey: 'organisation_id'});
-users.belongsTo(services, {as: 'Service', foreignKey: 'service_id'});
+users.belongsTo(organisations, { as: 'Organisation', foreignKey: 'organisation_id' });
+users.belongsTo(services, { as: 'Service', foreignKey: 'service_id' });
 users.prototype.getApprovers = function () {
   return users.findAll({
     where:
@@ -134,12 +135,12 @@ const invitations = db.define('invitation_services', {
   tableName: 'invitation_services',
   schema: dbSchema,
 });
-invitations.belongsTo(organisations, {as: 'Organisation', foreignKey: 'organisation_id'});
-invitations.belongsTo(services, {as: 'Service', foreignKey: 'service_id'});
+invitations.belongsTo(organisations, { as: 'Organisation', foreignKey: 'organisation_id' });
+invitations.belongsTo(services, { as: 'Service', foreignKey: 'service_id' });
 
 const roles = [
-  {id: 0, name: 'End user'},
-  {id: 10000, name: 'Approver'},
+  { id: 0, name: 'End user' },
+  { id: 10000, name: 'Approver' },
 ];
 
 module.exports = {
