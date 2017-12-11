@@ -51,31 +51,6 @@
         </div>
     </header>
 
-    <div class="header-user">
-        <div class="header-inner">
-            <div class="service-info">
-                <div class="phase-banner-beta">
-                    <p>
-                        <strong class="phase-tag">BETA</strong>
-                        <span>This is a new service – your <a href="#" target="_blank">feedback</a> will help us to improve it. </span>
-                    </p>
-                </div>
-            </div>
-            <% if (locals.user !== undefined) { %>
-            <div class="account-information" role="navigation">
-                <p class="signed-in-as"><span class="vh">You are signed in as</span> <%= locals.displayName %></p>
-                <nav id="user-nav">
-                    <ul role="menubar">
-                        <li><a href="/profile" role="menuitem">Profile</a></li>
-                        <li><a href="/signout" role="menuitem">Sign out</a></li>
-                    </ul>
-                </nav>
-            </div>
-            <% } %>
-        </div>
-    </div>
-
-
     <main id="content" tabindex="-1">
         <%- body %>
     </main>
@@ -86,18 +61,14 @@
     <div class="footer-wrapper">
         <nav>
             <ul>
-                <li><a href="/help">Help</a></li>
-                <li><a href="cookies.html">Cookies</a></li>
-                <li><a href="privacy.html">Privacy policy</a></li>
-                <li><a href="/terms">Terms and conditions</a></li>
-                <li><a href="/help">Need help using this service?</a></li>
+                <li></li>
             </ul>
         </nav>
     </div>
 </footer>
 
 <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-<script src="https://rawgit.com/DFE-Digital/dfe.ui.toolkit/master/dist/javascript/app.js"></script>
+<script src="https://rawgit.com/DFE-Digital/dfe.ui.toolkit/master/dist/javascript/app.min.js"></script>
 
 </body>
 </html>
