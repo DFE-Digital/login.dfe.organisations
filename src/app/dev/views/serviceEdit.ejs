@@ -14,7 +14,7 @@
             <fieldset>
                 <legend class="vh"><%=editorTitle%> form</legend>
                 <div class="form-group">
-                    <span style="display: block; font-weight: bold;">Id</span>
+                    <span class="form-label-bold">Id</span>
                     <span><%=editorItem.id%></span>
                 </div>
                 <div class="form-group">
@@ -25,9 +25,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label-bold" for="description">Description</label>
-                    <div>
-                        <input class="form-control" id="description" name="description" type="text" maxlength="255" value="<%=editorItem.description%>" />
-                    </div>
+                    <textarea class="form-control form-control-3-4" name="description" id="description" rows="5"><%=editorItem.description%></textarea>
                 </div>
                 <div class="form-submit">
                     <button type="submit" class="button"><%=editorAction%></button>

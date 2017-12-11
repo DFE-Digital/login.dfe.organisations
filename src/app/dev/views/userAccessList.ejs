@@ -7,12 +7,7 @@
         </h1>
     </div>
 </div>
-<!--<div class="grid-row">-->
-    <!--<div class="col-6">&nbsp;</div>-->
-    <!--<div class="col-6" style="text-align: right; margin-bottom: 15px;">-->
-        <!--<a class="button" href="/manage/organisations/new">Create Organisation</a>-->
-    <!--</div>-->
-<!--</div>-->
+
 <div class="users-container">
     <% for (let i = 0; i < locals.users.length; i++) { %>
     <% const user = locals.users[i]; %>
@@ -40,15 +35,6 @@
             </table>
         </div>
     </div>
+    <hr>
     <% } %>
 </div>
-
-<style>
-    .users-container .grid-row {
-        margin-top: 20px;
-    }
-
-    .users-container .grid-row:first-child {
-        margin-top: 0;
-    }
-</style>
