@@ -12,10 +12,15 @@ const morgan = require('morgan');
 const { organisations, services } = require('./app/services');
 const { organisationInvitations, invitations } = require('./app/invitations');
 const dev = require('./app/dev');
+const appInsights = require('applicationinsights');
 
 const { organisationsSchema, validateConfigAndQuitOnError } = require('login.dfe.config.schema');
 
 validateConfigAndQuitOnError(organisationsSchema, config, logger);
+
+if (config.hostingEnvironment.applicationInsights) {
+  appInsights.setup(config.hostingEnvironment.applicationInsights).start();
+}
 
 const app = express();
 
