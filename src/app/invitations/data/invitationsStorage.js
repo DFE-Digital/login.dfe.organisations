@@ -6,8 +6,9 @@ const Op = Sequelize.Op;
 const logger = require('./../../../infrastructure/logger');
 const { invitations, roles } = require('./../../../infrastructure/repository');
 
-const list = async () => {
+const list = async (correlationId) => {
   try {
+    logger.info(`List invitation for request ${correlationId}`);
     const invitationEntities = await invitations.findAll({
       include: ['Organisation', 'Service'],
     });
@@ -28,13 +29,14 @@ const list = async () => {
       },
     })));
   } catch (e) {
-    logger.error(`error getting invitations - ${e.message}`, e);
+    logger.error(`error getting invitations - ${e.message} for request ${correlationId} error: ${e}`);
     throw e;
   }
 };
 
-const getForInvitationId = async (id) => {
+const getForInvitationId = async (id, correlationId) => {
   try {
+    logger.info(`Get invitation for request ${correlationId}`);
     const invitationEntities = await invitations.findAll(
       {
         where: {
@@ -61,12 +63,13 @@ const getForInvitationId = async (id) => {
       },
     })));
   } catch (e) {
-    logger.error(`error getting services for invitation - ${e.message}`, e);
+    logger.error(`error getting services for invitation - ${e.message} for request ${correlationId} error: ${e}`);
     throw e;
   }
 };
 
-const upsert = async (details) => {
+const upsert = async (details, correlationId) => {
+  logger.info(`Upsert invitation for request ${correlationId}`);
   const { invitationId, organisationId, serviceId, roleId } = details;
   try {
     const invitation = await invitations.findOne(
@@ -94,7 +97,7 @@ const upsert = async (details) => {
       role_id: roleId,
     });
   } catch (e) {
-    logger.error(`Error in InvitationsStorage.upsert ${e.message}`);
+    logger.error(`Error in InvitationsStorage.upsert ${e.message} for request ${correlationId} error: ${e}`);
     throw e;
   }
 };

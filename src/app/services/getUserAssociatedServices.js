@@ -8,7 +8,7 @@ const getUserAssociatedServices = async (req, res) => {
       return;
     }
 
-    const services = await servicesStorage.getUserAssociatedServices(req.params.uid);
+    const services = await servicesStorage.getUserAssociatedServices(req.params.uid, req.header('x-correlation-id'));
 
     if (!services) {
       res.status(200).send([]);

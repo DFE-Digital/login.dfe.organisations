@@ -10,7 +10,7 @@ const handler = async (req, res) => {
   const invitationId = req.params.inv_id;
   const userId = req.body.user_id;
 
-  const services = await invitationStorage.getForInvitationId(invitationId);
+  const services = await invitationStorage.getForInvitationId(invitationId, req.header('x-correlation-id'));
   if (services) {
     const promises = services.map(s => serviceStorage.upsertServiceUser({
       id: uuid(),
@@ -19,7 +19,7 @@ const handler = async (req, res) => {
       serviceId: s.service.id,
       roleId: s.role.id,
       status: APPROVED_STATUS,
-    }));
+    }, req.header('x-correlation-id')));
 
     await Promise.all(
       promises,

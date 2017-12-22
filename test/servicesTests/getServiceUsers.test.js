@@ -25,12 +25,19 @@ const httpMocks = require('node-mocks-http');
 describe('when getting users of services', () => {
   let req;
   const res = httpMocks.createResponse();
+  const expectedRequestCorrelationId = '392f0e46-787b-41bc-9e77-4c3cb94824bb';
 
   beforeEach(() => {
     req = {
       params: {
         sid: '9d672383-cf21-49b4-86d2-7cea955ad422',
         org_id: '1d672383-cf21-49b4-86d2-7cea955ad422',
+      },
+      headers: {
+        'x-correlation-id': expectedRequestCorrelationId,
+      },
+      header(header) {
+        return this.headers[header];
       },
     };
 
@@ -98,5 +105,15 @@ describe('when getting users of services', () => {
     expect(response[0].status).toBe(54);
     expect(response[0].role.id).toBe(12);
     expect(response[0].role.name).toBe('user');
+  });
+  it('then the correct params are passed to the storage provider', async () => {
+    await getServiceUsers(req, res);
+
+    expect(servicesStorage.getById.mock.calls[0][0]).toBe('9d672383-cf21-49b4-86d2-7cea955ad422');
+    expect(servicesStorage.getById.mock.calls[0][1]).toBe(expectedRequestCorrelationId);
+
+    expect(servicesStorage.getUsersOfService.mock.calls[0][0]).toBe('1d672383-cf21-49b4-86d2-7cea955ad422');
+    expect(servicesStorage.getUsersOfService.mock.calls[0][1]).toBe('9d672383-cf21-49b4-86d2-7cea955ad422');
+    expect(servicesStorage.getUsersOfService.mock.calls[0][2]).toBe(expectedRequestCorrelationId);
   });
 });

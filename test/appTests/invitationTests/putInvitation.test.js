@@ -19,6 +19,7 @@ const putInvitation = require('./../../../src/app/invitations/putInvitation');
 describe('when putting an invitation', () => {
   let req;
   let res;
+  const expectedRequestCorrelationId = '60fa3608-f1a0-41d9-a0b5-32a2e04b6c59';
 
   beforeEach(() => {
     req = {
@@ -29,6 +30,12 @@ describe('when putting an invitation', () => {
       },
       body: {
         roleId: 99,
+      },
+      headers: {
+        'x-correlation-id': expectedRequestCorrelationId,
+      },
+      header(header) {
+        return this.headers[header];
       },
     };
 
@@ -48,6 +55,7 @@ describe('when putting an invitation', () => {
       serviceId: 'svc1',
       roleId: 99,
     });
+    expect(invitationsStorage.upsert.mock.calls[0][1]).toBe(expectedRequestCorrelationId);
   });
 
   it('then it should return a 202 response', async () => {
