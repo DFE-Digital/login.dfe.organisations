@@ -27,6 +27,7 @@ describe('When getting an approval request', () => {
   const expectedOrgId = '21FDE45';
   const expectedUserId = 'FRV434321';
   const expectedServiceName = 'service 1';
+  const expectedRequestCorrelationId = '392f0e46-787b-41bc-9e77-4c3cb94824bb';
 
   beforeEach(() => {
     res = httpMocks.createResponse();
@@ -35,6 +36,12 @@ describe('When getting an approval request', () => {
         sid: expectedServiceId,
         org_id: expectedOrgId,
         uid: expectedUserId,
+      },
+      headers: {
+        'x-correlation-id': expectedRequestCorrelationId,
+      },
+      header(header) {
+        return this.headers[header];
       },
     };
 
@@ -91,6 +98,7 @@ describe('When getting an approval request', () => {
     expect(servicesStorage.getUserService.mock.calls[0][0]).toBe(expectedServiceId);
     expect(servicesStorage.getUserService.mock.calls[0][1]).toBe(expectedOrgId);
     expect(servicesStorage.getUserService.mock.calls[0][2]).toBe(expectedUserId);
+    expect(servicesStorage.getUserService.mock.calls[0][3]).toBe(expectedRequestCorrelationId);
   });
   it('then if the request is valid and no data is returned a 404 is returned', async () => {
     servicesStorage.getUserService.mockReset();
