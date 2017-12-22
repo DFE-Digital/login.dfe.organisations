@@ -1,5 +1,6 @@
 'use strict';
 
+const appInsights = require('applicationinsights');
 const express = require('express');
 const bodyParser = require('body-parser');
 const https = require('https');
@@ -16,6 +17,10 @@ const dev = require('./app/dev');
 const { organisationsSchema, validateConfigAndQuitOnError } = require('login.dfe.config.schema');
 
 validateConfigAndQuitOnError(organisationsSchema, config, logger);
+
+if (config.hostingEnvironment.applicationInsights) {
+  appInsights.setup(config.hostingEnvironment.applicationInsights).start();
+}
 
 const app = express();
 
