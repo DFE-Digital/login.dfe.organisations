@@ -13,13 +13,13 @@ const getServiceUsers = async (req, res) => {
   }
 
   try {
-    const service = await servicesStorage.getById(serviceId);
+    const service = await servicesStorage.getById(serviceId, req.header('x-correlation-id'));
     if (!service) {
       res.status(404).send();
       return;
     }
 
-    const usersOfService = await servicesStorage.getUsersOfService(organisationId, serviceId);
+    const usersOfService = await servicesStorage.getUsersOfService(organisationId, serviceId, req.header('x-correlation-id'));
 
     res.status(200).send(usersOfService);
   } catch (e) {

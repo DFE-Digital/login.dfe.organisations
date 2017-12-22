@@ -24,6 +24,7 @@ jest.mock('./../../../../src/infrastructure/repository', () => {
 jest.mock('./../../../../src/infrastructure/logger', () => {
   return {
     error: jest.fn(),
+    info: jest.fn(),
   };
 });
 
