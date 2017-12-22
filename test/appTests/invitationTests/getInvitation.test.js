@@ -34,11 +34,18 @@ const getInvitation = require('./../../../src/app/invitations/getInvitation');
 describe('when getting an invitation', () => {
   let req;
   let res;
+  const expectedRequestCorrelationId = '3bd43d3b-7ead-40f0-b6b5-b31a64e9547d';
 
   beforeEach(() => {
     req = {
       params: {
         inv_id: 'inv1',
+      },
+      headers: {
+        'x-correlation-id': expectedRequestCorrelationId,
+      },
+      header(header) {
+        return this.headers[header];
       },
     };
 
@@ -68,5 +75,11 @@ describe('when getting an invitation', () => {
 
     expect(res._isEndCalled()).toBe(true);
     expect(res.statusCode).toBe(404);
+  });
+  it('then the params are passed to the storage provider', async () => {
+    await getInvitation(req, res);
+
+    expect(invitationsStorage.getForInvitationId.mock.calls[0][0]).toBe('inv1');
+    expect(invitationsStorage.getForInvitationId.mock.calls[0][1]).toBe(expectedRequestCorrelationId);
   });
 });

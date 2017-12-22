@@ -8,7 +8,7 @@ const getServiceDetails = async (req, res) => {
   const organisationId = req.params.org_id ? req.params.org_id.toLowerCase() : '';
 
   try {
-    const service = await servicesStorage.getServiceDetails(organisationId, serviceId);
+    const service = await servicesStorage.getServiceDetails(organisationId, serviceId, req.header('x-correlation-id'));
     if (!service) {
       res.status(404).send();
       return;
