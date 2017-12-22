@@ -26,12 +26,19 @@ describe('When getting services available to a user', () => {
   let logger;
   const expectedUserId = '7654321';
   const expectedServiceName = 'service 1';
+  const expectedRequestCorrelationId = '392f0e46-787b-41bc-9e77-4c3cb94824bb';
 
   beforeEach(() => {
     res = httpMocks.createResponse();
     req = {
       params: {
         uid: expectedUserId,
+      },
+      headers: {
+        'x-correlation-id': expectedRequestCorrelationId,
+      },
+      header(header) {
+        return this.headers[header];
       },
     };
 
@@ -74,6 +81,7 @@ describe('When getting services available to a user', () => {
 
     expect(res.statusCode).toBe(404);
     expect(servicesStorage.getUserUnassociatedServices.mock.calls[0][0]).toBe('ABC123');
+    expect(servicesStorage.getUserUnassociatedServices.mock.calls[0][1]).toBe(expectedRequestCorrelationId);
   });
   it('then if the request is valid the data is returned in the response', async () => {
     await getUnassociatedUserAssociatedServices(req, res);
