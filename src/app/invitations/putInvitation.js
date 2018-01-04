@@ -7,7 +7,7 @@ const invitationStorage = require('./data/invitationsStorage');
 
 const action = async (req, res) => {
   try {
-    logger.info(`putting invitation. Params = ${JSON.stringify(req.params)}. Body = ${JSON.stringify(req.body)}. CorrelationId = ${req.header('x-correlation-id')}`);
+    logger.info(`putting invitation. Params = ${JSON.stringify(req.params)}. Body = ${JSON.stringify(req.body)}. CorrelationId = ${req.header('x-correlation-id')}`, {correlationId: req.header('x-correlation-id')});
 
     const invitationId = req.params.inv_id;
     const organisationId = req.params.org_id;
