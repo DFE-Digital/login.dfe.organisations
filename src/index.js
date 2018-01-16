@@ -1,5 +1,6 @@
 'use strict';
 
+const config = require('./infrastructure/config')();
 const appInsights = require('applicationinsights');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -7,7 +8,6 @@ const https = require('https');
 const expressLayouts = require('express-ejs-layouts');
 const path = require('path');
 const fs = require('fs');
-const config = require('./infrastructure/config')();
 const logger = require('./infrastructure/logger');
 const morgan = require('morgan');
 const { organisations, services } = require('./app/services');
