@@ -9,6 +9,7 @@ const getServiceDetails = require('./getServiceDetails');
 const getServiceUsers = require('./getServiceUsers');
 const getUserRequestForApproval = require('./getUserRequestForApproval');
 const getApproversOfService = require('./getApproversOfService');
+const getServiceById = require('./getServiceById');
 
 const router = express.Router();
 
@@ -17,6 +18,7 @@ const servicesRouteExport = () => {
   router.use(apiAuth(router, config));
 
   // Map routed to functions.
+  router.get('/:sid', getServiceById);
   router.get('/associated-with-user/:uid', getUserAssociatedServices);
   router.get('/unassociated-with-user/:uid', getUnassociatedWithUserServices);
   return router;
