@@ -13,6 +13,7 @@ const morgan = require('morgan');
 const { organisations, services } = require('./app/services');
 const { organisationInvitations, invitations } = require('./app/invitations');
 const dev = require('./app/dev');
+const healthCheck = require('login.dfe.healthcheck');
 
 const { organisationsSchema, validateConfigAndQuitOnError } = require('login.dfe.config.schema');
 
@@ -30,6 +31,7 @@ app.use(bodyParser.json());
 app.use(morgan('combined', { stream: fs.createWriteStream('./access.log', { flags: 'a' }) }));
 app.use(morgan('dev'));
 
+app.use('/healthcheck', healthCheck({ config }));
 app.use('/services', services);
 app.use('/organisations', organisations);
 app.use('/organisations', organisationInvitations);
