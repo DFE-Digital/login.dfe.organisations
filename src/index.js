@@ -10,7 +10,8 @@ const expressLayouts = require('express-ejs-layouts');
 const path = require('path');
 const fs = require('fs');
 const morgan = require('morgan');
-const { organisations, services } = require('./app/services');
+const services = require('./app/services');
+const organisations = require('./app/organisations');
 const { organisationInvitations, invitations } = require('./app/invitations');
 const dev = require('./app/dev');
 const healthCheck = require('login.dfe.healthcheck');
@@ -32,8 +33,9 @@ app.use(morgan('combined', { stream: fs.createWriteStream('./access.log', { flag
 app.use(morgan('dev'));
 
 app.use('/healthcheck', healthCheck({ config }));
-app.use('/services', services);
+app.use('/services', services.services);
 app.use('/organisations', organisations);
+app.use('/organisations', services.organisations);
 app.use('/organisations', organisationInvitations);
 app.use('/invitations', invitations);
 
