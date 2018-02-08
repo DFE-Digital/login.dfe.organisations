@@ -1,7 +1,6 @@
-const { list } = require('./data/organisationsStorage');
-const { chunk } = require('lodash');
+const { pagedList } = require('./data/organisationsStorage');
 
-const pageSize = 2;
+const pageSize = 25;
 
 const getPageNumber = (req) => {
   if (!req.query.page) {
@@ -17,14 +16,12 @@ const getPageNumber = (req) => {
 };
 
 const listOrganisations = async (req, res) => {
-  const page = getPageNumber(req);
-  const all = await list();
-  const pages = chunk(all, pageSize);
-
+  const pageNumber = getPageNumber(req);
+  const page = await pagedList(pageNumber, pageSize);
   return res.contentType('json').send({
-    organisations: pages[page - 1],
-    page,
-    totalNumberOfPages: pages.length,
+    organisations: page.organisations,
+    page: pageNumber,
+    totalNumberOfPages: page.totalNumberOfPages,
   });
 };
 
