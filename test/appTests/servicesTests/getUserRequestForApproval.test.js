@@ -2,22 +2,22 @@
 
 /* eslint-disable global-require */
 
-jest.mock('./../../src/app/services/data/servicesStorage', () => {
+jest.mock('./../../../src/app/services/data/servicesStorage', () => {
   const getUserService = jest.fn();
   return {
     getUserService: jest.fn().mockImplementation(getUserService),
   };
 });
-jest.mock('./../../src/infrastructure/logger');
-jest.mock('./../../src/infrastructure/config');
+jest.mock('./../../../src/infrastructure/logger');
+jest.mock('./../../../src/infrastructure/config');
 
-jest.mock('./../../src/infrastructure/repository', () => {
+jest.mock('./../../../src/infrastructure/repository', () => {
   const SequelizeMock = require('sequelize-mock');
   return new SequelizeMock();
 });
-const servicesStorage = require('./../../src/app/services/data/servicesStorage');
+const servicesStorage = require('./../../../src/app/services/data/servicesStorage');
 const httpMocks = require('node-mocks-http');
-const getUserRequestForApproval = require('./../../src/app/services/getUserRequestForApproval');
+const getUserRequestForApproval = require('./../../../src/app/services/getUserRequestForApproval');
 
 describe('When getting an approval request', () => {
   let req;
@@ -45,7 +45,7 @@ describe('When getting an approval request', () => {
       },
     };
 
-    logger = require('./../../src/infrastructure/logger');
+    logger = require('./../../../src/infrastructure/logger/index');
     logger.error = (() => ({}));
 
     servicesStorage.getUserService.mockReset();
