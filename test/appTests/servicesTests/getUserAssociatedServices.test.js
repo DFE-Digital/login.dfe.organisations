@@ -2,23 +2,23 @@
 
 /* eslint-disable global-require */
 
-jest.mock('./../../src/app/services/data/servicesStorage', () => {
+jest.mock('./../../../src/app/services/data/servicesStorage', () => {
   const getUserAssociatedServices = jest.fn();
   return {
     getUserAssociatedServices: jest.fn().mockImplementation(getUserAssociatedServices),
   };
 });
-jest.mock('./../../src/infrastructure/logger');
-jest.mock('./../../src/infrastructure/config');
+jest.mock('./../../../src/infrastructure/logger');
+jest.mock('./../../../src/infrastructure/config');
 
-jest.mock('./../../src/infrastructure/repository', () => {
+jest.mock('./../../../src/infrastructure/repository', () => {
   const SequalizeMock = require('sequelize-mock');
   return new SequalizeMock();
 });
 
-const servicesStorage = require('./../../src/app/services/data/servicesStorage');
+const servicesStorage = require('./../../../src/app/services/data/servicesStorage');
 const httpMocks = require('node-mocks-http');
-const getUserAssociatedServices = require('./../../src/app/services/getUserAssociatedServices');
+const getUserAssociatedServices = require('./../../../src/app/services/getUserAssociatedServices');
 
 describe('When getting associated services to a user', () => {
   let req;
@@ -42,7 +42,7 @@ describe('When getting associated services to a user', () => {
       },
     };
 
-    logger = require('./../../src/infrastructure/logger');
+    logger = require('./../../../src/infrastructure/logger/index');
     logger.error = (() => ({}));
 
     servicesStorage.getUserAssociatedServices.mockReset();

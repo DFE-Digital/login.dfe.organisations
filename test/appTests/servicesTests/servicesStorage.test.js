@@ -1,4 +1,4 @@
-jest.mock('./../../src/infrastructure/config');
+jest.mock('./../../../src/infrastructure/config');
 jest.mock('assert');
 
 describe('When using servicesStorage Data for a user', () => {
@@ -20,7 +20,7 @@ describe('When using servicesStorage Data for a user', () => {
       });
     });
     it('then if the username in config is not supplied the assert is called', () => {
-      config = require('./../../src/infrastructure/config');
+      config = require('./../../../src/infrastructure/config/index');
       configStub = jest.fn().mockImplementation(() => ({
         database: {
           username: '',
@@ -31,13 +31,13 @@ describe('When using servicesStorage Data for a user', () => {
       }));
       config.mockImplementation(configStub);
 
-      require('./../../src/app/services/data/servicesStorage');
+      require('./../../../src/app/services/data/servicesStorage');
 
 
       expect(assertion).toBe(true);
     });
     it('then if the password in config is not supplied the assert is called', () => {
-      config = require('./../../src/infrastructure/config');
+      config = require('./../../../src/infrastructure/config/index');
       configStub = jest.fn().mockImplementation(() => ({
         database: {
           username: 'username',
@@ -48,13 +48,13 @@ describe('When using servicesStorage Data for a user', () => {
       }));
       config.mockImplementation(configStub);
 
-      require('./../../src/app/services/data/servicesStorage');
+      require('./../../../src/app/services/data/servicesStorage');
 
 
       expect(assertion).toBe(true);
     });
     it('then if the host in config is not supplied the assert is called', () => {
-      config = require('./../../src/infrastructure/config');
+      config = require('./../../../src/infrastructure/config/index');
       configStub = jest.fn().mockImplementation(() => ({
         database: {
           username: 'username',
@@ -65,7 +65,7 @@ describe('When using servicesStorage Data for a user', () => {
       }));
       config.mockImplementation(configStub);
 
-      require('./../../src/app/services/data/servicesStorage');
+      require('./../../../src/app/services/data/servicesStorage');
 
 
       expect(assertion).toBe(true);
