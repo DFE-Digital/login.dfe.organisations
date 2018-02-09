@@ -2,9 +2,9 @@
 
 /* eslint-disable global-require */
 
-jest.mock('./../../src/app/services/data/servicesStorage');
+jest.mock('./../../../src/app/services/data/servicesStorage');
 
-jest.mock('./../../src/app/services/data/servicesStorage', () => {
+jest.mock('./../../../src/app/services/data/servicesStorage', () => {
   const getById = jest.fn();
   const getApproversOfServiceUserIds = jest.fn();
   return {
@@ -13,13 +13,13 @@ jest.mock('./../../src/app/services/data/servicesStorage', () => {
   };
 });
 
-jest.mock('./../../src/infrastructure/repository', () => {
+jest.mock('./../../../src/infrastructure/repository', () => {
   const SequalizeMock = require('sequelize-mock');
   return new SequalizeMock();
 });
 
-const servicesStorage = require('./../../src/app/services/data/servicesStorage');
-const getApproversOfService = require('./../../src/app/services/getApproversOfService');
+const servicesStorage = require('./../../../src/app/services/data/servicesStorage');
+const getApproversOfService = require('./../../../src/app/services/getApproversOfService');
 const httpMocks = require('node-mocks-http');
 
 describe('when getting users of services', () => {

@@ -2,19 +2,19 @@
 
 /* eslint-disable global-require */
 
-jest.mock('./../../src/app/services/data/servicesStorage', () => {
+jest.mock('./../../../src/app/services/data/servicesStorage', () => {
   const getServiceDetails = jest.fn();
   return {
     getServiceDetails: jest.fn().mockImplementation(getServiceDetails),
   };
 });
-jest.mock('./../../src/infrastructure/repository', () => {
+jest.mock('./../../../src/infrastructure/repository', () => {
   const SequalizeMock = require('sequelize-mock');
   return new SequalizeMock();
 });
 
-const servicesStorage = require('./../../src/app/services/data/servicesStorage');
-const getServiceDetails = require('./../../src/app/services/getServiceDetails');
+const servicesStorage = require('./../../../src/app/services/data/servicesStorage');
+const getServiceDetails = require('./../../../src/app/services/getServiceDetails');
 const httpMocks = require('node-mocks-http');
 
 
