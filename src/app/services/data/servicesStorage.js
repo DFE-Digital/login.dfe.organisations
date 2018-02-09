@@ -9,7 +9,7 @@ const { users, services, roles, organisations } = require('./../../../infrastruc
 
 const list = async (correlationId) => {
   try {
-    logger.info(`Calling list for services storage for request ${correlationId}`, {correlationId});
+    logger.info(`Calling list for services storage for request ${correlationId}`, { correlationId });
     const serviceEntities = await services.findAll();
     if (!serviceEntities) {
       return null;
@@ -21,27 +21,27 @@ const list = async (correlationId) => {
       description: serviceEntity.getDataValue('description'),
     })));
   } catch (e) {
-    logger.error(`error getting services - ${e.message} for request ${correlationId} error: ${e}`, {correlationId});
+    logger.error(`error getting services - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
   }
 };
 
 const getServiceDetails = async (organisationId, serviceId, correlationId) => {
   try {
-    logger.info(`Calling getServiceDetails for services storage for request ${correlationId}`, {correlationId});
+    logger.info(`Calling getServiceDetails for services storage for request ${correlationId}`, { correlationId });
     const service = await this.getById(serviceId);
     const organisation = await organisations.findById(organisationId);
 
     return { ...service, organisation: organisation.dataValues };
   } catch (e) {
-    logger.error(`error getting service details org: ${organisationId}, service ${serviceId} - ${e.message} for request ${correlationId} error: ${e}`, {correlationId});
+    logger.error(`error getting service details org: ${organisationId}, service ${serviceId} - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
   }
 };
 
 const getById = async (id, correlationId) => {
   try {
-    logger.info(`Calling getById for services storage for request ${correlationId}`, {correlationId});
+    logger.info(`Calling getById for services storage for request ${correlationId}`, { correlationId });
     const serviceEntity = await services.find({
       where: {
         id: {
@@ -58,14 +58,14 @@ const getById = async (id, correlationId) => {
       description: serviceEntity.getDataValue('description'),
     };
   } catch (e) {
-    logger.error(`error getting service ${id} - ${e.message} for request ${correlationId} error: ${e}`, {correlationId});
+    logger.error(`error getting service ${id} - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
   }
 };
 
 const getUsersOfService = async (organisationId, id, correlationId) => {
   try {
-    logger.info(`Calling getUsersOfService for services storage for request ${correlationId}`, {correlationId});
+    logger.info(`Calling getUsersOfService for services storage for request ${correlationId}`, { correlationId });
     const userServiceEntities = await users.findAll(
       {
         where: {
@@ -89,14 +89,14 @@ const getUsersOfService = async (organisationId, id, correlationId) => {
       },
     })));
   } catch (e) {
-    logger.error(`error getting users of service ${id} - ${e.message} for request ${correlationId} error: ${e}`, {correlationId});
+    logger.error(`error getting users of service ${id} - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
   }
 };
 
 const getApproversOfServiceUserIds = async (organisationId, id, correlationId) => {
   try {
-    logger.info(`Calling getApproversOfServiceUserIds for services storage for request ${correlationId}`, {correlationId});
+    logger.info(`Calling getApproversOfServiceUserIds for services storage for request ${correlationId}`, { correlationId });
     const approversServiceEntities = await users.findAll(
       {
         where: {
@@ -118,14 +118,14 @@ const getApproversOfServiceUserIds = async (organisationId, id, correlationId) =
       id: approverServiceEntity.getDataValue('user_id'),
     })));
   } catch (e) {
-    logger.error(`error getting approver's of service ${id} - ${e.message} for request ${correlationId} error: ${e}`, {correlationId});
+    logger.error(`error getting approver's of service ${id} - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
   }
 };
 
 const getUserAssociatedServices = async (id, correlationId) => {
   try {
-    logger.info(`Calling getUserAssociatedServices for services storage for request ${correlationId}`, {correlationId});
+    logger.info(`Calling getUserAssociatedServices for services storage for request ${correlationId}`, { correlationId });
     const userServices = await users.findAll(
       {
         where: {
@@ -138,6 +138,10 @@ const getUserAssociatedServices = async (id, correlationId) => {
 
     return await Promise.all(userServices.map(async (userService) => {
       if (userService) {
+        const approvers = await userService.getApprovers().map(user => user.user_id);
+        const externalIdentifiers = await userService.getExternalIdentifiers().map((id) => {
+          return { key: id.identifier_key, value: id.identifier_value };
+        });
         return {
           id: userService.Service.getDataValue('id'),
           name: userService.Service.getDataValue('name'),
@@ -145,25 +149,26 @@ const getUserAssociatedServices = async (id, correlationId) => {
           status: userService.getDataValue('status'),
           userId: userService.getDataValue('user_id'),
           requestDate: userService.getDataValue('createdAt'),
-          approvers: await userService.getApprovers().map(user => user.user_id),
+          approvers,
           organisation: {
             id: userService.Organisation.getDataValue('id'),
             name: userService.Organisation.getDataValue('name'),
           },
           role: roles.find(item => item.id === userService.getDataValue('role_id')),
+          externalIdentifiers,
         };
       }
       return {};
     }));
   } catch (e) {
-    logger.error(`error getting user associated services of user ${id} - ${e.message} for request ${correlationId} error: ${e}`, {correlationId});
+    logger.error(`error getting user associated services of user ${id} - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
   }
 };
 
 const getUserUnassociatedServices = async (id, correlationId) => {
   try {
-    logger.info(`Calling getUserUnassociatedServices for services storage for request ${correlationId}`, {correlationId});
+    logger.info(`Calling getUserUnassociatedServices for services storage for request ${correlationId}`, { correlationId });
     const userServices = await users.findAll(
       {
         where: {
@@ -193,27 +198,27 @@ const getUserUnassociatedServices = async (id, correlationId) => {
     }));
     return returnValue;
   } catch (e) {
-    logger.error(`error getting user unassociated services of user ${id} - ${e.message} for request ${correlationId} error: ${e}`, {correlationId});
+    logger.error(`error getting user unassociated services of user ${id} - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
   }
 };
 
 const create = async (id, name, description, correlationId) => {
   try {
-    logger.info(`Calling create for services storage for request ${correlationId}`, {correlationId});
+    logger.info(`Calling create for services storage for request ${correlationId}`, { correlationId });
     await services.create({
       id,
       name,
       description,
     });
   } catch (e) {
-    logger.error(`error creating service ${e.message} for request ${correlationId} error: ${e}`, {correlationId});
+    logger.error(`error creating service ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
   }
 };
 
 const update = async (id, name, description, correlationId) => {
   try {
-    logger.info(`Calling update for services storage for request ${correlationId}`, {correlationId});
+    logger.info(`Calling update for services storage for request ${correlationId}`, { correlationId });
     const serviceEntity = await services.find({
       where: {
         id: {
@@ -228,12 +233,12 @@ const update = async (id, name, description, correlationId) => {
       });
     }
   } catch (e) {
-    logger.error(`error updating service ${e.message} for request ${correlationId} error: ${e}`, {correlationId});
+    logger.error(`error updating service ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
   }
 };
 
 const upsertServiceUser = async (options, correlationId) => {
-  logger.info(`Calling upsertServiceUser for services storage for request ${correlationId}`, {correlationId});
+  logger.info(`Calling upsertServiceUser for services storage for request ${correlationId}`, { correlationId });
   const { id, userId, organisationId, serviceId, roleId, status } = options;
   try {
     const userService = await users.findOne(
@@ -263,14 +268,14 @@ const upsertServiceUser = async (options, correlationId) => {
       status,
     });
   } catch (e) {
-    logger.error(`Error in upsertServiceUser ${e.message} for request ${correlationId} error: ${e}`, {correlationId});
+    logger.error(`Error in upsertServiceUser ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
   }
 };
 
 const getUserService = async (serviceId, organisationId, userId, correlationId) => {
   try {
-    logger.info(`Calling getUserService for services storage for request ${correlationId}`, {correlationId});
+    logger.info(`Calling getUserService for services storage for request ${correlationId}`, { correlationId });
     const userServiceEntity = await users.findOne(
       {
         where: {
@@ -301,7 +306,7 @@ const getUserService = async (serviceId, organisationId, userId, correlationId) 
       },
     };
   } catch (e) {
-    logger.error(`error getting user service information for org: ${organisationId}, service ${serviceId} and user:${userId} -  ${e.message} for request ${correlationId} error: ${e}`, {correlationId});
+    logger.error(`error getting user service information for org: ${organisationId}, service ${serviceId} and user:${userId} -  ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
   }
 };

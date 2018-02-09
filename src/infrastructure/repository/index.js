@@ -68,6 +68,35 @@ const services = db.define('service', {
   schema: dbSchema,
 });
 
+const userExternalIdentifiers = db.define('user_service_identifiers', {
+  user_id: {
+    type: Sequelize.UUID,
+    primaryKey: true,
+    allowNull: false,
+  },
+  service_id: {
+    type: Sequelize.UUID,
+    primaryKey: true,
+    allowNull: false,
+  },
+  organisation_id: {
+    type: Sequelize.UUID,
+    primaryKey: true,
+    allowNull: false,
+  },
+  identifier_key: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+  identifier_value: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+}, {
+  timestamps: false,
+  tableName: 'user_service_identifiers',
+  schema: dbSchema,
+});
 
 const users = db.define('user_services', {
   id: {
@@ -116,6 +145,24 @@ users.prototype.getApprovers = function () {
         },
       },
 
+  });
+};
+users.prototype.getExternalIdentifiers = function () {
+  return userExternalIdentifiers.findAll({
+    where:
+      {
+        user_id:
+          {
+            [Op.eq]: this.user_id,
+          },
+        service_id:
+          {
+            [Op.eq]: this.service_id,
+          },
+        organisation_id: {
+          [Op.eq]: this.organisation_id,
+        },
+      },
   });
 };
 
