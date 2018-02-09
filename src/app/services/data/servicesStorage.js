@@ -311,6 +311,38 @@ const getUserService = async (serviceId, organisationId, userId, correlationId) 
   }
 };
 
+const getExternalIdentifier = async (serviceId, identifierKey, identifierValue, correlationId) => {
+  try {
+    logger.info(`Calling getExternalIdentifier for services storage for request ${correlationId}`, { correlationId });
+    const serviceEntity = await services.find({
+      where: {
+        id: {
+          [Op.eq]: serviceId,
+        },
+      },
+    });
+    if (!serviceEntity) {
+      return null;
+    }
+
+    const externalIdentifier = await serviceEntity.getExternalIdentifier(identifierKey, identifierValue);
+    if (!externalIdentifier) {
+      return null;
+    }
+
+    return {
+      userId: externalIdentifier.getDataValue('user_id'),
+      serviceId: externalIdentifier.getDataValue('service_id'),
+      organisationId: externalIdentifier.getDataValue('organisation_id'),
+      key: externalIdentifier.getDataValue('identifier_key'),
+      value: externalIdentifier.getDataValue('identifier_value'),
+    };
+  } catch (e) {
+    logger.error(`error getting service ${id} - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
+    throw e;
+  }
+};
+
 module.exports = {
   list,
   getServiceDetails,
@@ -323,5 +355,6 @@ module.exports = {
   upsertServiceUser,
   getUserService,
   getApproversOfServiceUserIds,
+  getExternalIdentifier,
 };
 
