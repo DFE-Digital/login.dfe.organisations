@@ -203,6 +203,27 @@ const invitations = db.define('invitation_services', {
 });
 invitations.belongsTo(organisations, { as: 'Organisation', foreignKey: 'organisation_id' });
 invitations.belongsTo(services, { as: 'Service', foreignKey: 'service_id' });
+invitations.prototype.getApprovers = function () {
+  return users.findAll({
+    where:
+      {
+        service_id:
+          {
+            [Op.eq]: this.service_id,
+          },
+        organisation_id: {
+          [Op.eq]: this.organisation_id,
+        },
+        role_id: {
+          [Op.eq]: 10000,
+        },
+        status: {
+          [Op.eq]: 1,
+        },
+      },
+
+  });
+};
 
 const roles = [
   { id: 0, name: 'End user' },
