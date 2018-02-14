@@ -8,7 +8,7 @@ const { invitations, roles } = require('./../../../infrastructure/repository');
 
 const list = async (correlationId) => {
   try {
-    logger.info(`List invitation for request ${correlationId}`, {correlationId});
+    logger.info(`List invitation for request ${correlationId}`, { correlationId });
     const invitationEntities = await invitations.findAll({
       include: ['Organisation', 'Service'],
     });
@@ -29,14 +29,14 @@ const list = async (correlationId) => {
       },
     })));
   } catch (e) {
-    logger.error(`error getting invitations - ${e.message} for request ${correlationId} error: ${e}`, {correlationId});
+    logger.error(`error getting invitations - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
   }
 };
 
 const getForInvitationId = async (id, correlationId) => {
   try {
-    logger.info(`Get invitation for request ${correlationId}`, {correlationId});
+    logger.info(`Get invitation for request ${correlationId}`, { correlationId });
     const invitationEntities = await invitations.findAll(
       {
         where: {
@@ -61,15 +61,16 @@ const getForInvitationId = async (id, correlationId) => {
         id: invitationEntity.Organisation.getDataValue('id'),
         name: invitationEntity.Organisation.getDataValue('name'),
       },
+      approvers: await invitationEntity.getApprovers().map(user => user.user_id),
     })));
   } catch (e) {
-    logger.error(`error getting services for invitation - ${e.message} for request ${correlationId} error: ${e}`, {correlationId});
+    logger.error(`error getting services for invitation - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
   }
 };
 
 const upsert = async (details, correlationId) => {
-  logger.info(`Upsert invitation for request ${correlationId}`, {correlationId});
+  logger.info(`Upsert invitation for request ${correlationId}`, { correlationId });
   const { invitationId, organisationId, serviceId, roleId } = details;
   try {
     const invitation = await invitations.findOne(
@@ -97,7 +98,7 @@ const upsert = async (details, correlationId) => {
       role_id: roleId,
     });
   } catch (e) {
-    logger.error(`Error in InvitationsStorage.upsert ${e.message} for request ${correlationId} error: ${e}`, {correlationId});
+    logger.error(`Error in InvitationsStorage.upsert ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
   }
 };
