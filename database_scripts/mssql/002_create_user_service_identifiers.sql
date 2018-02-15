@@ -2,9 +2,9 @@ IF NOT EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.TABLES where TABLE_NAME = 'user_s
 BEGIN
     create table dbo.user_service_identifiers
     (
-        user_id uuid not null,
-        service_id uuid not null,
-        organisation_id uuid not null,
+        user_id uniqueidentifier not null,
+        service_id uniqueidentifier not null,
+        organisation_id uniqueidentifier not null,
         identifier_key varchar(25) not null,
         identifier_value varchar(255) not null,
         constraint user_service_identifiers_pkey
