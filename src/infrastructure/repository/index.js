@@ -184,6 +184,35 @@ users.prototype.getExternalIdentifiers = function () {
       },
   });
 };
+users.prototype.setExternalIdentifier = async function (key, value) {
+  const existing = await externalIdentifiers.find({
+    where:
+      {
+        user_id: {
+          [Op.eq]: this.user_id,
+        },
+        service_id: {
+          [Op.eq]: this.service_id,
+        },
+        organisation_id: {
+          [Op.eq]: this.organisation_id,
+        },
+        identifier_key: {
+          [Op.eq]: key,
+        },
+      },
+  });
+  if (existing) {
+    existing.destroy();
+  }
+  await externalIdentifiers.create({
+    user_id: this.user_id,
+    organisation_id: this.organisation_id,
+    service_id: this.service_id,
+    identifier_key: key,
+    identifier_value: value,
+  });
+};
 
 
 const invitationExternalIdentifiers = db.define('invitation_service_identifiers', {
