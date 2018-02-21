@@ -73,7 +73,7 @@ const upsert = async (details, correlationId) => {
   logger.info(`Upsert invitation for request ${correlationId}`, { correlationId });
   const { invitationId, organisationId, serviceId, roleId } = details;
   try {
-    const invitation = await invitations.findOne(
+    let invitation = await invitations.findOne(
       {
         where: {
           invitation_id: {
@@ -91,12 +91,19 @@ const upsert = async (details, correlationId) => {
     if (invitation) {
       await invitation.destroy();
     }
-    await invitations.create({
+    invitation = await invitations.create({
       invitation_id: invitationId,
       organisation_id: organisationId,
       service_id: serviceId,
       role_id: roleId,
     });
+
+    if (details.externalIdentifiers) {
+      for (let i = 0; i < details.externalIdentifiers.length; i += 1) {
+        const extId = details.externalIdentifiers[i];
+        invitation.setExternalIdentifier(extId.key, extId.value);
+      }
+    }
   } catch (e) {
     logger.error(`Error in InvitationsStorage.upsert ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
