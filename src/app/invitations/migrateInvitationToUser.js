@@ -12,21 +12,18 @@ const handler = async (req, res) => {
 
   const services = await invitationStorage.getForInvitationId(invitationId, req.header('x-correlation-id'));
   if (services) {
-    const promises = services.map(s => serviceStorage.upsertServiceUser({
+    await Promise.all(services.map(s => serviceStorage.upsertServiceUser({
       id: uuid(),
       userId,
       organisationId: s.organisation.id,
       serviceId: s.service.id,
       roleId: s.role.id,
       status: APPROVED_STATUS,
-    }, req.header('x-correlation-id')));
-
-    await Promise.all(
-      promises,
-    );
-
-    res.status(202).send();
+      externalIdentifiers: s.externalIdentifiers,
+    }, req.header('x-correlation-id'))));
   }
+
+  res.status(202).send();
 };
 
 
