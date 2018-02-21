@@ -239,9 +239,9 @@ const update = async (id, name, description, correlationId) => {
 
 const upsertServiceUser = async (options, correlationId) => {
   logger.info(`Calling upsertServiceUser for services storage for request ${correlationId}`, { correlationId });
-  const { id, userId, organisationId, serviceId, roleId, status } = options;
+  const { id, userId, organisationId, serviceId, roleId, status, externalIdentifiers } = options;
   try {
-    const userService = await users.findOne(
+    let userService = await users.findOne(
       {
         where: {
           user_id: {
@@ -259,7 +259,7 @@ const upsertServiceUser = async (options, correlationId) => {
     if (userService) {
       await userService.destroy();
     }
-    await users.create({
+    userService = await users.create({
       id,
       user_id: userId,
       organisation_id: organisationId,
@@ -267,6 +267,13 @@ const upsertServiceUser = async (options, correlationId) => {
       role_id: roleId,
       status,
     });
+
+    if (externalIdentifiers) {
+      for (let i = 0; i < externalIdentifiers.length; i += 1) {
+        const extId = externalIdentifiers[i];
+        userService.setExternalIdentifier(extId.key, extId.value);
+      }
+    }
   } catch (e) {
     logger.error(`Error in upsertServiceUser ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
