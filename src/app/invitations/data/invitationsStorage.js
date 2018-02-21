@@ -50,19 +50,26 @@ const getForInvitationId = async (id, correlationId) => {
       return null;
     }
 
-    return await Promise.all(invitationEntities.map(async invitationEntity => ({
-      invitationId: invitationEntity.getDataValue('invitation_id'),
-      role: roles.find(item => item.id === invitationEntity.getDataValue('role_id')),
-      service: {
-        id: invitationEntity.Service.getDataValue('id'),
-        name: invitationEntity.Service.getDataValue('name'),
-      },
-      organisation: {
-        id: invitationEntity.Organisation.getDataValue('id'),
-        name: invitationEntity.Organisation.getDataValue('name'),
-      },
-      approvers: await invitationEntity.getApprovers().map(user => user.user_id),
-    })));
+    return await Promise.all(invitationEntities.map(async (invitationEntity) => {
+      const approvers = await invitationEntity.getApprovers().map(user => user.user_id);
+      const externalIdentifiers = await invitationEntity.getExternalIdentifiers().map((id) => {
+        return { key: id.identifier_key, value: id.identifier_value };
+      });
+      return {
+        invitationId: invitationEntity.getDataValue('invitation_id'),
+        role: roles.find(item => item.id === invitationEntity.getDataValue('role_id')),
+        service: {
+          id: invitationEntity.Service.getDataValue('id'),
+          name: invitationEntity.Service.getDataValue('name'),
+        },
+        organisation: {
+          id: invitationEntity.Organisation.getDataValue('id'),
+          name: invitationEntity.Organisation.getDataValue('name'),
+        },
+        approvers,
+        externalIdentifiers,
+      };
+    }));
   } catch (e) {
     logger.error(`error getting services for invitation - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
