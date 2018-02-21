@@ -13,12 +13,14 @@ const action = async (req, res) => {
     const organisationId = req.params.org_id;
     const serviceId = req.params.svc_id;
     const roleId = req.body.roleId;
+    const externalIdentifiers = req.body.externalIdentifiers;
 
     await invitationStorage.upsert({
       invitationId,
       organisationId,
       serviceId,
       roleId,
+      externalIdentifiers,
     }, req.header('x-correlation-id'));
 
     res.status(202).send();

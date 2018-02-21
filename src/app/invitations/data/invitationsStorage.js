@@ -50,19 +50,26 @@ const getForInvitationId = async (id, correlationId) => {
       return null;
     }
 
-    return await Promise.all(invitationEntities.map(async invitationEntity => ({
-      invitationId: invitationEntity.getDataValue('invitation_id'),
-      role: roles.find(item => item.id === invitationEntity.getDataValue('role_id')),
-      service: {
-        id: invitationEntity.Service.getDataValue('id'),
-        name: invitationEntity.Service.getDataValue('name'),
-      },
-      organisation: {
-        id: invitationEntity.Organisation.getDataValue('id'),
-        name: invitationEntity.Organisation.getDataValue('name'),
-      },
-      approvers: await invitationEntity.getApprovers().map(user => user.user_id),
-    })));
+    return await Promise.all(invitationEntities.map(async (invitationEntity) => {
+      const approvers = await invitationEntity.getApprovers().map(user => user.user_id);
+      const externalIdentifiers = await invitationEntity.getExternalIdentifiers().map((id) => {
+        return { key: id.identifier_key, value: id.identifier_value };
+      });
+      return {
+        invitationId: invitationEntity.getDataValue('invitation_id'),
+        role: roles.find(item => item.id === invitationEntity.getDataValue('role_id')),
+        service: {
+          id: invitationEntity.Service.getDataValue('id'),
+          name: invitationEntity.Service.getDataValue('name'),
+        },
+        organisation: {
+          id: invitationEntity.Organisation.getDataValue('id'),
+          name: invitationEntity.Organisation.getDataValue('name'),
+        },
+        approvers,
+        externalIdentifiers,
+      };
+    }));
   } catch (e) {
     logger.error(`error getting services for invitation - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
@@ -73,7 +80,7 @@ const upsert = async (details, correlationId) => {
   logger.info(`Upsert invitation for request ${correlationId}`, { correlationId });
   const { invitationId, organisationId, serviceId, roleId } = details;
   try {
-    const invitation = await invitations.findOne(
+    let invitation = await invitations.findOne(
       {
         where: {
           invitation_id: {
@@ -91,12 +98,19 @@ const upsert = async (details, correlationId) => {
     if (invitation) {
       await invitation.destroy();
     }
-    await invitations.create({
+    invitation = await invitations.create({
       invitation_id: invitationId,
       organisation_id: organisationId,
       service_id: serviceId,
       role_id: roleId,
     });
+
+    if (details.externalIdentifiers) {
+      for (let i = 0; i < details.externalIdentifiers.length; i += 1) {
+        const extId = details.externalIdentifiers[i];
+        invitation.setExternalIdentifier(extId.key, extId.value);
+      }
+    }
   } catch (e) {
     logger.error(`Error in InvitationsStorage.upsert ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
