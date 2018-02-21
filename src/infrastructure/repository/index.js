@@ -185,6 +185,37 @@ users.prototype.getExternalIdentifiers = function () {
   });
 };
 
+
+const invitationExternalIdentifiers = db.define('invitation_service_identifiers', {
+  invitation_id: {
+    type: Sequelize.UUID,
+    primaryKey: true,
+    allowNull: false,
+  },
+  service_id: {
+    type: Sequelize.UUID,
+    primaryKey: true,
+    allowNull: false,
+  },
+  organisation_id: {
+    type: Sequelize.UUID,
+    primaryKey: true,
+    allowNull: false,
+  },
+  identifier_key: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+  identifier_value: {
+    type: Sequelize.STRING,
+    allowNull: false,
+  },
+}, {
+  timestamps: false,
+  tableName: 'invitation_service_identifiers',
+  schema: dbSchema,
+});
+
 const invitations = db.define('invitation_services', {
   invitation_id: {
     type: Sequelize.UUID,
@@ -224,6 +255,54 @@ invitations.prototype.getApprovers = function () {
 
   });
 };
+invitations.prototype.getExternalIdentifiers = function () {
+  return invitationExternalIdentifiers.findAll({
+    where:
+      {
+        invitation_id:
+          {
+            [Op.eq]: this.invitation_id,
+          },
+        service_id:
+          {
+            [Op.eq]: this.service_id,
+          },
+        organisation_id: {
+          [Op.eq]: this.organisation_id,
+        },
+      },
+  });
+};
+invitations.prototype.setExternalIdentifier = async function (key, value) {
+  const existing = await invitationExternalIdentifiers.find({
+    where:
+      {
+        invitation_id: {
+          [Op.eq]: this.invitation_id,
+        },
+        service_id: {
+          [Op.eq]: this.service_id,
+        },
+        organisation_id: {
+          [Op.eq]: this.organisation_id,
+        },
+        identifier_key: {
+          [Op.eq]: key,
+        },
+      },
+  });
+  if (existing) {
+    existing.destroy();
+  }
+  await invitationExternalIdentifiers.create({
+    invitation_id: this.invitation_id,
+    organisation_id: this.organisation_id,
+    service_id: this.service_id,
+    identifier_key: key,
+    identifier_value: value,
+  });
+};
+
 
 const roles = [
   { id: 0, name: 'End user' },
