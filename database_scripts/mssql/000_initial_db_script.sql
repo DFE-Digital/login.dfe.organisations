@@ -45,8 +45,8 @@ BEGIN
         role_id smallint DEFAULT 0 NOT NULL,
         organisation_id uniqueidentifier,
         service_id uniqueidentifier,
-        createdAt datetime NOT NULL,
-        updatedAt datetime NOT NULL,
+        createdAt datetime2 NOT NULL,
+        updatedAt datetime2 NOT NULL,
         CONSTRAINT user_services_organisation_id_fk FOREIGN KEY (organisation_id) REFERENCES organisation (id),
         CONSTRAINT user_services_service_id_fk FOREIGN KEY (service_id) REFERENCES service (id)
     );
