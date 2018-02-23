@@ -1,13 +1,13 @@
-jest.mock('./../../../src/infrastructure/logger', () => {
-  return {
-    error: jest.fn(),
-    info: jest.fn(),
-  };
-});
+jest.mock('./../../../src/infrastructure/logger', () => ({
+  error: jest.fn(),
+  info: jest.fn(),
+}));
 jest.mock('./../../../src/app/services/data/servicesStorage', () => {
   const upsert = jest.fn();
+  const get = jest.fn();
   return {
     upsertExternalIdentifier: jest.fn().mockImplementation(upsert),
+    getExternalIdentifier: jest.fn().mockImplementation(get),
   };
 });
 
@@ -29,8 +29,8 @@ describe('when putting a single service identifier', () => {
         sid: 'svc1',
       },
       body: {
-        idKey: 'key1',
-        idValue: 'value1',
+        id_key: 'key1',
+        id_value: 'value1',
       },
       headers: {
         'x-correlation-id': expectedRequestCorrelationId,
@@ -43,7 +43,8 @@ describe('when putting a single service identifier', () => {
     res = httpMocks.createResponse();
 
     servicesStorage.upsertExternalIdentifier.mockReset();
-
+    servicesStorage.getExternalIdentifier.mockReset();
+    servicesStorage.getExternalIdentifier.mockReturnValue(null);
   });
   afterEach(() => {
     expect(res._isEndCalled()).toBe(true);
@@ -51,7 +52,7 @@ describe('when putting a single service identifier', () => {
   it('then it should upsert record with put data', async () => {
     await putSingleServiceIdentifier(req, res);
 
-    expect(servicesStorage.upsertExternalIdentifier.mock.calls.length).toBe(1);
+    expect(servicesStorage.upsertExternalIdentifier.mock.calls).toHaveLength(1);
     expect(servicesStorage.upsertExternalIdentifier.mock.calls[0][0]).toBe('svc1');
     expect(servicesStorage.upsertExternalIdentifier.mock.calls[0][1]).toBe('user1');
     expect(servicesStorage.upsertExternalIdentifier.mock.calls[0][2]).toBe('org1');
@@ -61,7 +62,6 @@ describe('when putting a single service identifier', () => {
   });
 
   it('then if the body key value is not supplied a bad request is returned', async () => {
-
     req.body = { };
 
     await putSingleServiceIdentifier(req, res);
@@ -73,6 +73,12 @@ describe('when putting a single service identifier', () => {
     await putSingleServiceIdentifier(req, res);
 
     expect(res.statusCode).toBe(202);
+  });
+  it('then if the value has already been used then a 409 is returned', async () => {
+    servicesStorage.getExternalIdentifier.mockReturnValue({});
 
+    await putSingleServiceIdentifier(req, res);
+
+    expect(res.statusCode).toBe(409);
   });
 });
