@@ -12,7 +12,9 @@ const invitationRoutes = () => {
   const router = express.Router();
 
   // Add auth middleware.
-  router.use(apiAuth(router, config));
+  if (config.hostingEnvironment.env !== 'dev') {
+    router.use(apiAuth(router, config));
+  }
 
   // Map routes to functions.
   router.get('/:inv_id', getInvitation);
@@ -24,7 +26,9 @@ const organisationRoutes = () => {
   const router = express.Router();
 
   // Add auth middleware.
-  router.use(apiAuth(router, config));
+  if (config.hostingEnvironment.env !== 'dev') {
+    router.use(apiAuth(router, config));
+  }
 
   // Map routes to functions.
   router.put('/:org_id/services/:svc_id/invitations/:inv_id', putInvitation);
