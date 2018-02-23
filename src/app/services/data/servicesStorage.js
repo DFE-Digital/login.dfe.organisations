@@ -345,7 +345,39 @@ const getExternalIdentifier = async (serviceId, identifierKey, identifierValue, 
       value: externalIdentifier.getDataValue('identifier_value'),
     };
   } catch (e) {
-    logger.error(`error getting service ${id} - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
+    logger.error(`error getting service ${serviceId} - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
+    throw e;
+  }
+};
+
+
+const upsertExternalIdentifier = async (serviceId, userId, organisationId, identifierKey, identifierValue, correlationId) => {
+  try {
+    logger.info(`Calling upsertExternalIdentifier for services storage for request ${correlationId}`, { correlationId });
+
+    const userService = await users.findOne(
+      {
+        where: {
+          user_id: {
+            [Op.eq]: userId,
+          },
+          service_id: {
+            [Op.eq]: serviceId,
+          },
+          organisation_id: {
+            [Op.eq]: organisationId,
+          },
+        },
+      });
+    if (!userService) {
+      return null;
+    }
+
+    await userService.setExternalIdentifier(identifierKey, identifierValue)
+
+
+  } catch (e) {
+    logger.error(`error calling upsertExternalIdentifier for user ${userId} - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
   }
 };
@@ -363,5 +395,6 @@ module.exports = {
   getUserService,
   getApproversOfServiceUserIds,
   getExternalIdentifier,
+  upsertExternalIdentifier,
 };
 
