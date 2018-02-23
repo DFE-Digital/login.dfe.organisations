@@ -29,8 +29,8 @@ describe('when putting a single service identifier', () => {
         sid: 'svc1',
       },
       body: {
-        id_key: 'key1',
-        id_value: 'value1',
+        idKey: 'key1',
+        idValue: 'value1',
       },
       headers: {
         'x-correlation-id': expectedRequestCorrelationId,
@@ -62,10 +62,7 @@ describe('when putting a single service identifier', () => {
 
   it('then if the body key value is not supplied a bad request is returned', async () => {
 
-    req.body = {
-      id_key: '',
-      id_value: '123',
-    };
+    req.body = { };
 
     await putSingleServiceIdentifier(req, res);
 

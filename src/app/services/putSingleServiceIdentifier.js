@@ -6,8 +6,8 @@ const putSingleServiceIdentifierForUser = async (req, res) => {
   const orgId = req.params.org_id ? req.params.org_id.toLowerCase() : '';
   const serviceId = req.params.sid ? req.params.sid.toLowerCase() : '';
   const userId = req.params.uid ? req.params.uid.toLowerCase() : '';
-  const identifierKey = req.body.id_key ? req.body.id_key.toLowerCase() : '';
-  const identifierValue = req.body.id_value ? req.body.id_value.toLowerCase() : '';
+  const identifierKey = req.body.idKey ? req.body.idKey.toLowerCase() : undefined;
+  const identifierValue = req.body.idValue ? req.body.idValue.toLowerCase() : '';
 
   if(!identifierKey) {
     return res.status(403).send();
