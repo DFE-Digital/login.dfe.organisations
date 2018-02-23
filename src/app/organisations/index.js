@@ -7,7 +7,9 @@ const router = express.Router();
 
 const routes = () => {
   // Add auth middleware.
-  router.use(apiAuth(router, config));
+  if (config.hostingEnvironment.env !== 'dev') {
+    router.use(apiAuth(router, config));
+  }
 
   // Map routes to functions.
   router.get('/', listOrganisations);
