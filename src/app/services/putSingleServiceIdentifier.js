@@ -1,4 +1,4 @@
-const { upsertExternalIdentifier } = require('./data/servicesStorage');
+const { upsertExternalIdentifier, getExternalIdentifier } = require('./data/servicesStorage');
 
 
 const putSingleServiceIdentifierForUser = async (req, res) => {
@@ -11,6 +11,12 @@ const putSingleServiceIdentifierForUser = async (req, res) => {
 
   if(!identifierKey) {
     return res.status(403).send();
+  }
+
+  const checkExternalIdentifier = await getExternalIdentifier(serviceId, identifierKey, identifierValue, req.header('x-correlation-id'));
+
+  if(checkExternalIdentifier) {
+    return res.status(409).send();
   }
 
   await upsertExternalIdentifier(serviceId, userId, orgId, identifierKey, identifierValue, req.header('x-correlation-id'));
