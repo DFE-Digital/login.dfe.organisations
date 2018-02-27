@@ -2,7 +2,7 @@
 
 require('winston-redis').Redis;
 const winston = require('winston');
-const config = require('./../config');
+const config = require('./../config')();
 const appInsights = require('applicationinsights');
 const WinstonApplicationInsights = require('winston-azure-application-insights').AzureApplicationInsightsLogger;
 
