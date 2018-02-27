@@ -3,6 +3,9 @@ jest.mock('./../../../src/app/services/data/servicesStorage', () => {
     getExternalIdentifier: jest.fn(),
   };
 });
+jest.mock('./../../../src/infrastructure/logger', () => {
+  return {};
+});
 
 const httpMocks = require('node-mocks-http');
 const { getExternalIdentifier } = require('./../../../src/app/services/data/servicesStorage');

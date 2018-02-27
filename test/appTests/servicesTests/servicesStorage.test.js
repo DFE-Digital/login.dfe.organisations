@@ -1,5 +1,8 @@
 jest.mock('./../../../src/infrastructure/config');
 jest.mock('assert');
+jest.mock('./../../../src/infrastructure/logger', () => {
+  return {};
+});
 
 describe('When using servicesStorage Data for a user', () => {
   describe('and initialising the class', () => {

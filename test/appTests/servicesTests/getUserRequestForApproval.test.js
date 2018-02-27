@@ -8,7 +8,9 @@ jest.mock('./../../../src/app/services/data/servicesStorage', () => {
     getUserService: jest.fn().mockImplementation(getUserService),
   };
 });
-jest.mock('./../../../src/infrastructure/logger');
+jest.mock('./../../../src/infrastructure/logger', () => {
+  return {};
+});
 jest.mock('./../../../src/infrastructure/config');
 
 jest.mock('./../../../src/infrastructure/repository', () => {
