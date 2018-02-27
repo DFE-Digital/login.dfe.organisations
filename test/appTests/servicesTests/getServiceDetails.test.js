@@ -12,6 +12,9 @@ jest.mock('./../../../src/infrastructure/repository', () => {
   const SequalizeMock = require('sequelize-mock');
   return new SequalizeMock();
 });
+jest.mock('./../../../src/infrastructure/logger', () => {
+  return {};
+});
 
 const servicesStorage = require('./../../../src/app/services/data/servicesStorage');
 const getServiceDetails = require('./../../../src/app/services/getServiceDetails');
