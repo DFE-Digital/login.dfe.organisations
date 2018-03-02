@@ -3,6 +3,8 @@
 const express = require('express');
 const apiAuth = require('login.dfe.api.auth');
 const config = require('./../../infrastructure/config')();
+const { asyncWrapper } = require('login.dfe.express-error-handling');
+
 const getUserAssociatedServices = require('./getUserAssociatedServices');
 const getUnassociatedWithUserServices = require('./getUserUnassociatedServices');
 const getServiceDetails = require('./getServiceDetails');
@@ -21,10 +23,10 @@ const servicesRouteExport = () => {
     router.use(apiAuth(router, config));
   }
   // Map routed to functions.
-  router.get('/:sid', getServiceById);
-  router.get('/:sid/identifiers/:id_key/:id_value', getSingleServiceIdentifier);
-  router.get('/associated-with-user/:uid', getUserAssociatedServices);
-  router.get('/unassociated-with-user/:uid', getUnassociatedWithUserServices);
+  router.get('/:sid', asyncWrapper(getServiceById));
+  router.get('/:sid/identifiers/:id_key/:id_value', asyncWrapper(getSingleServiceIdentifier));
+  router.get('/associated-with-user/:uid', asyncWrapper(getUserAssociatedServices));
+  router.get('/unassociated-with-user/:uid', asyncWrapper(getUnassociatedWithUserServices));
   return router;
 };
 
@@ -33,11 +35,11 @@ const organisationsRouteExport = () => {
   if (config.hostingEnvironment.env !== 'dev') {
     router.use(apiAuth(router, config));
   }
-  router.get('/:org_id/services/:sid', getServiceDetails);
-  router.get('/:org_id/services/:sid/request/:uid', getUserRequestForApproval);
-  router.get('/:org_id/services/:sid/users', getServiceUsers);
-  router.get('/:org_id/services/:sid/approvers', getApproversOfService);
-  router.put('/:org_id/services/:sid/identifiers/:uid', putSingleServiceIdentifier);
+  router.get('/:org_id/services/:sid', asyncWrapper(getServiceDetails));
+  router.get('/:org_id/services/:sid/request/:uid', asyncWrapper(getUserRequestForApproval));
+  router.get('/:org_id/services/:sid/users', asyncWrapper(getServiceUsers));
+  router.get('/:org_id/services/:sid/approvers', asyncWrapper(getApproversOfService));
+  router.put('/:org_id/services/:sid/identifiers/:uid', asyncWrapper(putSingleServiceIdentifier));
   return router;
 };
 
