@@ -1,6 +1,8 @@
 const express = require('express');
 const apiAuth = require('login.dfe.api.auth');
 const config = require('./../../infrastructure/config')();
+const { asyncWrapper } = require('login.dfe.express-error-handling');
+
 const listOrganisations = require('./listOrganisations');
 
 const router = express.Router();
@@ -12,7 +14,7 @@ const routes = () => {
   }
 
   // Map routes to functions.
-  router.get('/', listOrganisations);
+  router.get('/', asyncWrapper(listOrganisations));
 
   return router;
 };
