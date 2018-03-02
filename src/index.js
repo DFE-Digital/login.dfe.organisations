@@ -14,6 +14,7 @@ const organisations = require('./app/organisations');
 const { organisationInvitations, invitations } = require('./app/invitations');
 const dev = require('./app/dev');
 const healthCheck = require('login.dfe.healthcheck');
+const { getErrorHandler } = require('login.dfe.express-error-handling');
 
 const { organisationsSchema, validateConfigAndQuitOnError } = require('login.dfe.config.schema');
 
@@ -46,6 +47,10 @@ if (config.hostingEnvironment.useDevViews) {
     res.redirect('/manage');
   });
 }
+
+app.use(getErrorHandler({
+  logger,
+}));
 
 if (config.hostingEnvironment.env === 'dev') {
   app.proxy = true;
