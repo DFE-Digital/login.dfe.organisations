@@ -74,11 +74,18 @@ describe('when putting a single service identifier', () => {
 
     expect(res.statusCode).toBe(202);
   });
-  it('then if the value has already been used then a 409 is returned', async () => {
-    servicesStorage.getExternalIdentifier.mockReturnValue({});
+  it('then if the value has already been used and not assigned to that user then a 409 is returned', async () => {
+    servicesStorage.getExternalIdentifier.mockReturnValue({ userId: '4rfv' });
 
     await putSingleServiceIdentifier(req, res);
 
     expect(res.statusCode).toBe(409);
+  });
+  it('then if the user is assigned to that value already then it is updated' , async () => {
+    servicesStorage.getExternalIdentifier.mockReturnValue({ userId: 'user1' });
+
+    await putSingleServiceIdentifier(req, res);
+
+    expect(res.statusCode).toBe(202);
   });
 });
