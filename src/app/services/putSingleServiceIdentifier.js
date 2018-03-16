@@ -15,7 +15,7 @@ const putSingleServiceIdentifierForUser = async (req, res) => {
 
   const checkExternalIdentifier = await getExternalIdentifier(serviceId, identifierKey, identifierValue, req.header('x-correlation-id'));
 
-  if(checkExternalIdentifier) {
+  if(checkExternalIdentifier && checkExternalIdentifier.userId.toLowerCase() !== userId) {
     return res.status(409).send();
   }
 
