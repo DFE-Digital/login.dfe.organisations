@@ -49,6 +49,7 @@ if (config.database && config.database.postgresUrl) {
     },
     host: config.database.host,
     dialect: config.database.dialect,
+    operatorsAliases:Op,
     dialectOptions: {
       encrypt: encryptDb,
     },
