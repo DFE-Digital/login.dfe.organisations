@@ -12,7 +12,7 @@
     "fs": "0.0.1-security",
     "lodash": "^4.17.4",
     "login.dfe.api.auth": "github:DFE-Digital/login.dfe.api.auth#v1.0.0",
-    "login.dfe.config.schema": "git+https://github.com/DFE-Digital/login.dfe.config.schema.git#v4.4",
+    "login.dfe.config.schema": "git+https://github.com/DFE-Digital/login.dfe.config.schema.git#v4.6",
     "login.dfe.express-error-handling": "git+https://github.com/DFE-Digital/login.dfe.express-error-handling.git#v1.2",
     "login.dfe.healthcheck": "git+https://github.com/DFE-Digital/login.dfe.healthcheck.git#v1.4",
     "morgan": "^1.9.0",
@@ -23,8 +23,7 @@
     "tedious": "^2.2.0",
     "uuid": "^3.1.0",
     "winston": "^2.4.0",
-    "winston-azure-application-insights": "^1.1.1",
-    "winston-redis": "^1.0.0"
+    "winston-azure-application-insights": "^1.1.1"
   },
   "devDependencies": {
     "eslint": "^4.12.1",
