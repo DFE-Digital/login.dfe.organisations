@@ -136,7 +136,7 @@ const getUserAssociatedServices = async (id, correlationId) => {
         include: ['Organisation', 'Service'],
       });
 
-    const mappedUserService =[];
+    const mappedUserService = [];
     for (let i = 0; i <= userServices.length; i += 1) {
       const userService = userServices[i];
       if (userService) {
