@@ -136,13 +136,13 @@ const getUserAssociatedServices = async (id, correlationId) => {
         include: ['Organisation', 'Service'],
       });
 
-    return await Promise.all(userServices.map(async (userService) => {
+    const mappedUserService = [];
+    for (let i = 0; i <= userServices.length; i += 1) {
+      const userService = userServices[i];
       if (userService) {
         const approvers = await userService.getApprovers().map(user => user.user_id);
-        const externalIdentifiers = await userService.getExternalIdentifiers().map((id) => {
-          return { key: id.identifier_key, value: id.identifier_value };
-        });
-        return {
+        const externalIdentifiers = await userService.getExternalIdentifiers().map(id => ({ key: id.identifier_key, value: id.identifier_value }));
+        mappedUserService.push({
           id: userService.Service.getDataValue('id'),
           name: userService.Service.getDataValue('name'),
           description: userService.Service.getDataValue('description'),
@@ -156,10 +156,10 @@ const getUserAssociatedServices = async (id, correlationId) => {
           },
           role: roles.find(item => item.id === userService.getDataValue('role_id')),
           externalIdentifiers,
-        };
+        });
       }
-      return {};
-    }));
+    }
+    return mappedUserService;
   } catch (e) {
     logger.error(`error getting user associated services of user ${id} - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
@@ -373,9 +373,7 @@ const upsertExternalIdentifier = async (serviceId, userId, organisationId, ident
       return null;
     }
 
-    await userService.setExternalIdentifier(identifierKey, identifierValue)
-
-
+    await userService.setExternalIdentifier(identifierKey, identifierValue);
   } catch (e) {
     logger.error(`error calling upsertExternalIdentifier for user ${userId} - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
