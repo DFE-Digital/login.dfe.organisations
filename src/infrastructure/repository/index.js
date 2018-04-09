@@ -1,7 +1,7 @@
 'use strict';
 
 
-const Sequelize = require('sequelize');
+const Sequelize = require('sequelize').default;
 
 const Op = Sequelize.Op;
 const assert = require('assert');
@@ -49,7 +49,7 @@ if (config.database && config.database.postgresUrl) {
     },
     host: config.database.host,
     dialect: config.database.dialect,
-    operatorsAliases:Op,
+    operatorsAliases: Op,
     dialectOptions: {
       encrypt: encryptDb,
     },
@@ -106,7 +106,38 @@ const organisations = db.define('organisation', {
     type: Sequelize.STRING,
     allowNull: false,
   },
-
+  Category: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
+  Type: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
+  URN: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
+  UID: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
+  UKPRN: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
+  EstablishmentNumber: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
+  Status: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+  },
+  ClosedOn: {
+    type: Sequelize.DATE,
+    allowNull: true,
+  },
 }, {
   timestamps: false,
   tableName: 'organisation',
@@ -374,10 +405,24 @@ const roles = [
   { id: 10000, name: 'Approver' },
 ];
 
+const organisationStatus = [
+  { id: 1, name: 'Open' },
+  { id: 2, name: 'Closed' },
+];
+
+const organisationCategory = [
+  { id: '001', name: 'Establishment' },
+  { id: '002', name: 'Local Authority' },
+  { id: '010', name: 'Multi-Academy Trust' },
+  { id: '013', name: 'Single-Academy Trust' },
+];
+
 module.exports = {
   users,
   services,
   organisations,
   roles,
   invitations,
+  organisationStatus,
+  organisationCategory,
 };
