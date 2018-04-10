@@ -1,6 +1,7 @@
 const { list } = require('./../../services/data/organisationsStorage');
 const { organisations, organisationStatus, organisationCategory } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
+const Op = Sequelize.Op;
 
 const pagedList = async (pageNumber = 1, pageSize = 25) => {
   const countResult = await organisations.findAll({
@@ -43,7 +44,40 @@ const pagedList = async (pageNumber = 1, pageSize = 25) => {
   };
 };
 
+const add = async (organisation) => {
+  const entity = {
+    id: organisation.id,
+    name: organisation.name,
+    Category: organisation.category.id,
+    Type: organisation.type,
+    URN: organisation.urn,
+    UID: organisation.uid,
+    UKPRN: organisation.ukprn,
+    EstablishmentNumber: organisation.establishmentNumber,
+    Status: organisation.status.id,
+    ClosedOn: organisation.closedOn,
+  };
+  await organisations.create(entity);
+};
+
+const update = async (organisation) => {
+  const existing = await organisations.find({
+    where: {
+      id:
+        {
+          [Op.eq]: organisation.id,
+        },
+    },
+  });
+  if (existing) {
+    await existing.destroy();
+  }
+  await add(organisation);
+};
+
 module.exports = {
   list,
   pagedList,
+  add,
+  update,
 };

@@ -1,7 +1,7 @@
 'use strict';
 
 const logger = require('./../../../infrastructure/logger');
-const { organisations } = require('./../../../infrastructure/repository');
+const { organisations, organisationCategory, organisationStatus } = require('./../../../infrastructure/repository');
 
 
 const list = async () => {
@@ -14,6 +14,14 @@ const list = async () => {
     return await Promise.all(orgEntities.map(async serviceEntity => ({
       id: serviceEntity.getDataValue('id'),
       name: serviceEntity.getDataValue('name'),
+      category: organisationCategory.find(c => c.id === serviceEntity.Category),
+      type: serviceEntity.Type,
+      urn: serviceEntity.URN,
+      uid: serviceEntity.UID,
+      ukprn: serviceEntity.UKPRN,
+      establishmentNumber: serviceEntity.EstablishmentNumber,
+      status: organisationStatus.find(c => c.id === serviceEntity.Status),
+      closedOn: serviceEntity.ClosedOn,
     })));
   } catch (e) {
     logger.error(`error getting organisations - ${e.message}`, e);

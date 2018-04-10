@@ -408,6 +408,8 @@ const roles = [
 const organisationStatus = [
   { id: 1, name: 'Open' },
   { id: 2, name: 'Closed' },
+  { id: 3, name: 'Proposed to close' },
+  { id: 4, name: 'Proposed to open' },
 ];
 
 const organisationCategory = [
