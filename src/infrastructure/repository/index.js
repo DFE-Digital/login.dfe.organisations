@@ -138,6 +138,10 @@ const organisations = db.define('organisation', {
     type: Sequelize.DATE,
     allowNull: true,
   },
+  Address: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
 }, {
   timestamps: false,
   tableName: 'organisation',

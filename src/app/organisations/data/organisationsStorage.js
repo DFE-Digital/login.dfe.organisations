@@ -29,13 +29,16 @@ const pagedList = async (pageNumber = 1, pageSize = 25) => {
       id: entity.id,
       name: entity.name,
       category: organisationCategory.find(c => c.id === entity.Category),
-      type: entity.Type,
+      type: {
+        id: entity.Type,
+      },
       urn: entity.URN,
       uid: entity.UID,
       ukprn: entity.UKPRN,
       establishmentNumber: entity.EstablishmentNumber,
       status: organisationStatus.find(c => c.id === entity.Status),
       closedOn: entity.ClosedOn,
+      address: entity.Address,
     };
   });
   return {
@@ -49,13 +52,14 @@ const add = async (organisation) => {
     id: organisation.id,
     name: organisation.name,
     Category: organisation.category.id,
-    Type: organisation.type,
+    Type: organisation.type.id,
     URN: organisation.urn,
     UID: organisation.uid,
     UKPRN: organisation.ukprn,
     EstablishmentNumber: organisation.establishmentNumber,
     Status: organisation.status.id,
     ClosedOn: organisation.closedOn,
+    Address: organisation.address,
   };
   await organisations.create(entity);
 };

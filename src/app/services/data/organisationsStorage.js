@@ -15,13 +15,16 @@ const list = async () => {
       id: serviceEntity.getDataValue('id'),
       name: serviceEntity.getDataValue('name'),
       category: organisationCategory.find(c => c.id === serviceEntity.Category),
-      type: serviceEntity.Type,
+      type: {
+        id: serviceEntity.Type,
+      },
       urn: serviceEntity.URN,
       uid: serviceEntity.UID,
       ukprn: serviceEntity.UKPRN,
       establishmentNumber: serviceEntity.EstablishmentNumber,
       status: organisationStatus.find(c => c.id === serviceEntity.Status),
       closedOn: serviceEntity.ClosedOn,
+      address: serviceEntity.Address,
     })));
   } catch (e) {
     logger.error(`error getting organisations - ${e.message}`, e);
