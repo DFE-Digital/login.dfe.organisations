@@ -1,5 +1,8 @@
 'use strict';
 
+const Sequelize = require('sequelize');
+
+const Op = Sequelize.Op;
 const logger = require('./../../../infrastructure/logger');
 const { organisations } = require('./../../../infrastructure/repository');
 
