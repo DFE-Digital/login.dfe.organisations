@@ -1,7 +1,7 @@
 'use strict';
 
 const logger = require('./../../../infrastructure/logger');
-const { organisations, organisationCategory, organisationStatus } = require('./../../../infrastructure/repository');
+const { organisations, organisationCategory, organisationStatus ,establishmentTypes } = require('./../../../infrastructure/repository');
 
 
 const list = async () => {
@@ -15,9 +15,7 @@ const list = async () => {
       id: serviceEntity.getDataValue('id'),
       name: serviceEntity.getDataValue('name'),
       category: organisationCategory.find(c => c.id === serviceEntity.Category),
-      type: {
-        id: serviceEntity.Type,
-      },
+      type: establishmentTypes.find(c => c.id === serviceEntity.Type),
       urn: serviceEntity.URN,
       uid: serviceEntity.UID,
       ukprn: serviceEntity.UKPRN,

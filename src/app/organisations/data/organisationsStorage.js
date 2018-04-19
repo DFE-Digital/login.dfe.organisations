@@ -1,5 +1,5 @@
 const { list } = require('./../../services/data/organisationsStorage');
-const { organisations, organisationStatus, organisationCategory } = require('./../../../infrastructure/repository');
+const { organisations, organisationStatus, organisationCategory, establishmentTypes } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
@@ -29,9 +29,7 @@ const pagedList = async (pageNumber = 1, pageSize = 25) => {
       id: entity.id,
       name: entity.name,
       category: organisationCategory.find(c => c.id === entity.Category),
-      type: {
-        id: entity.Type,
-      },
+      type: establishmentTypes.find(c => c.id === entity.Type),
       urn: entity.URN,
       uid: entity.UID,
       ukprn: entity.UKPRN,
