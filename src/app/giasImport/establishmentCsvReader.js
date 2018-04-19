@@ -36,6 +36,7 @@ const mapRow = (row) => {
     status,
     closedOn,
     ukprn: row[14] || null,
+    address: row[20] || null,
   };
 };
 
