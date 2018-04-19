@@ -43,10 +43,43 @@ const createOrg = async (id, name) => {
   });
 };
 
+const getOrgByUrn = async (urn) => {
+  try {
+    return await organisations.findOne(
+      {
+        where: {
+          URN: {
+            [Op.eq]: urn,
+          },
+        },
+      });
+  } catch (e) {
+    logger.error(`error getting organisation by urn - ${e.message}`, e);
+    throw e;
+  }
+};
+
+const getOrgByUid = async (uid) => {
+  try {
+    return await organisations.findOne(
+      {
+        where: {
+          UID: {
+            [Op.eq]: uid,
+          },
+        },
+      });
+  } catch (e) {
+    logger.error(`error getting organisation by uid - ${e.message}`, e);
+    throw e;
+  }
+};
 
 module.exports = {
   list,
   getOrgById,
   updateOrg,
   createOrg,
+  getOrgByUrn,
+  getOrgByUid,
 };

@@ -14,6 +14,7 @@ const getApproversOfService = require('./getApproversOfService');
 const getServiceById = require('./getServiceById');
 const getSingleServiceIdentifier = require('./getSingleServiceIdentifier');
 const putSingleServiceIdentifier = require('./putSingleServiceIdentifier');
+const postServiceUser = require('./postServiceUser');
 
 const router = express.Router();
 
@@ -35,11 +36,14 @@ const organisationsRouteExport = () => {
   if (config.hostingEnvironment.env !== 'dev') {
     router.use(apiAuth(router, config));
   }
+
   router.get('/:org_id/services/:sid', asyncWrapper(getServiceDetails));
   router.get('/:org_id/services/:sid/request/:uid', asyncWrapper(getUserRequestForApproval));
   router.get('/:org_id/services/:sid/users', asyncWrapper(getServiceUsers));
   router.get('/:org_id/services/:sid/approvers', asyncWrapper(getApproversOfService));
   router.put('/:org_id/services/:sid/identifiers/:uid', asyncWrapper(putSingleServiceIdentifier));
+  router.post('/:ext_org_id/services/:sid/create/:uid', asyncWrapper(postServiceUser));
+
   return router;
 };
 
