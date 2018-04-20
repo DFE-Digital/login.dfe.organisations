@@ -1,8 +1,17 @@
 const { parse } = require('./establishmentCsvReader');
-const { list, add, update } = require('./../organisations/data/organisationsStorage');
-const { getEstablishmentsFile, getEstablishmentsLinksFile } = require('./../../infrastructure/gias');
+const { list, add, update, listOfCategory, setAssociation } = require('./../organisations/data/organisationsStorage');
+const { getEstablishmentsFile } = require('./../../infrastructure/gias');
 const uuid = require('uuid/v4');
 
+const isEstablishmentImportable = (importing) => {
+  const importableTypes = ['01', '02', '03', '05', '06', '07', '08', '10', '11', '12', '14', '15', '18', '24', '25', '26', '28', '30', '32', '33', '34', '35', '36', '38', '39', '40', '41', '42', '43', '44', '45', '46'];
+
+  if (!importableTypes.find(t => t === importing.type)) {
+    return false;
+  }
+
+  return true;
+};
 const mapImportRecordForStorage = (importing) => {
   return {
     id: uuid(),
@@ -25,7 +34,9 @@ const mapImportRecordForStorage = (importing) => {
   };
 };
 const addEstablishment = async (importing) => {
-  await add(mapImportRecordForStorage(importing));
+  const organisation = mapImportRecordForStorage(importing);
+  await add(organisation);
+  return organisation.id;
 };
 const hasBeenUpdated = (newValue, oldValue) => {
   if ((newValue && !oldValue) || (!newValue && oldValue)) {
@@ -40,21 +51,36 @@ const hasBeenUpdated = (newValue, oldValue) => {
 };
 const updateEstablishment = async (importing, existing) => {
   const updated = mapImportRecordForStorage(importing);
+  updated.id = existing.id;
+
   if (hasBeenUpdated(updated.name, existing.name) || hasBeenUpdated(updated.category.id, existing.category.id)
     || hasBeenUpdated(updated.type.id, existing.type.id) || hasBeenUpdated(updated.ukprn, existing.ukprn) || hasBeenUpdated(updated.establishmentNumber, existing.establishmentNumber)
     || hasBeenUpdated(updated.status.id, existing.status.id) || hasBeenUpdated(updated.closedOn, existing.closedOn) || hasBeenUpdated(updated.address, existing.address)) {
-    updated.id = existing.id;
     await update(updated);
   }
+
+  return updated.id;
 };
-const addOrUpdateEstablishments = async (importingEstablishments, existingEstablishments) => {
+const addOrUpdateEstablishments = async (importingEstablishments, existingEstablishments, localAuthorities) => {
   for (let i = 0; i < importingEstablishments.length; i += 1) {
     const importing = importingEstablishments[i];
-    const existing = existingEstablishments.find(e => e.urn === importing.urn);
-    if (existing) {
-      await updateEstablishment(importing, existing);
-    } else {
-      await addEstablishment(importing);
+    if (isEstablishmentImportable(importing)) {
+      const existing = existingEstablishments.find(e => e.urn === importing.urn);
+
+      let organisationId;
+      if (existing) {
+        organisationId = await updateEstablishment(importing, existing);
+      } else {
+        organisationId = await addEstablishment(importing);
+      }
+
+      const localAuthority = localAuthorities.find(la => la.establishmentNumber === importing.laCode);
+      if (localAuthority) {
+        // TODO: Check if association requires updating
+        await setAssociation(organisationId, localAuthority.id, 'LA');
+      } else {
+        debugger;
+      }
     }
   }
 };
@@ -64,8 +90,9 @@ const importEstablishments = async () => {
 
   const importingEstablishments = await parse(data);
   const existingEstablishments = await list();
+  const localAuthorities = await listOfCategory('002');
 
-  await addOrUpdateEstablishments(importingEstablishments, existingEstablishments);
+  await addOrUpdateEstablishments(importingEstablishments, existingEstablishments, localAuthorities);
 
   // TODO: Handle establishments that are no longer in feed
 };
