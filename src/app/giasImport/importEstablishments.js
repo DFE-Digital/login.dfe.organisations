@@ -1,5 +1,5 @@
 const { parse } = require('./establishmentCsvReader');
-const { list, add, update, listOfCategory, setAssociation } = require('./../organisations/data/organisationsStorage');
+const { list, add, update, listOfCategory, addAssociation, removeAssociationsOfType } = require('./../organisations/data/organisationsStorage');
 const { getEstablishmentsFile } = require('./../../infrastructure/gias');
 const uuid = require('uuid/v4');
 
@@ -74,12 +74,14 @@ const addOrUpdateEstablishments = async (importingEstablishments, existingEstabl
         organisationId = await addEstablishment(importing);
       }
 
+
       const localAuthority = localAuthorities.find(la => la.establishmentNumber === importing.laCode);
-      if (localAuthority) {
-        // TODO: Check if association requires updating
-        await setAssociation(organisationId, localAuthority.id, 'LA');
-      } else {
-        debugger;
+      const existingLAAssociation = existing.associations.find(a => a.associationType === 'LA');
+      if (localAuthority && (!existingLAAssociation || existingLAAssociation.associatedOrganisationId.toLowerCase() !== localAuthority.id.toLowerCase())) {
+        await removeAssociationsOfType(organisationId, 'LA');
+        await addAssociation(organisationId, localAuthority.id, 'LA');
+      } else if (!localAuthority && existingLAAssociation) {
+        await removeAssociationsOfType(organisationId, 'LA');
       }
     }
   }
@@ -89,7 +91,7 @@ const importEstablishments = async () => {
   const data = await getEstablishmentsFile();
 
   const importingEstablishments = await parse(data);
-  const existingEstablishments = await list();
+  const existingEstablishments = await list(true);
   const localAuthorities = await listOfCategory('002');
 
   await addOrUpdateEstablishments(importingEstablishments, existingEstablishments, localAuthorities);

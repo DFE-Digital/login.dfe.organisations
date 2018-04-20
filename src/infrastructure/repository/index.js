@@ -96,6 +96,28 @@ const externalIdentifiers = db.define('user_service_identifiers', {
   schema: dbSchema,
 });
 
+const organisationAssociations = db.define('organisation_association', {
+  organisation_id: {
+    type: Sequelize.UUID,
+    allowNull: false,
+    primaryKey: true,
+  },
+  associated_organisation_id: {
+    type: Sequelize.UUID,
+    allowNull: false,
+    primaryKey: true,
+  },
+  link_type: {
+    type: Sequelize.STRING,
+    allowNull: false,
+    primaryKey: true,
+  },
+}, {
+  timestamps: false,
+  tableName: 'organisation_association',
+  schema: dbSchema,
+});
+
 const organisations = db.define('organisation', {
   id: {
     type: Sequelize.UUID,
@@ -147,29 +169,7 @@ const organisations = db.define('organisation', {
   tableName: 'organisation',
   schema: dbSchema,
 });
-
-const organisationAssociations = db.define('organisation_association', {
-  organisation_id: {
-    type: Sequelize.UUID,
-    allowNull: false,
-    primaryKey: true,
-  },
-  associated_organisation_id: {
-    type: Sequelize.UUID,
-    allowNull: false,
-    primaryKey: true,
-  },
-  link_type: {
-    type: Sequelize.STRING,
-    allowNull: false,
-    primaryKey: true,
-  },
-}, {
-  timestamps: false,
-  tableName: 'organisation_association',
-  schema: dbSchema,
-});
-organisationAssociations.belongsTo(organisations, { as: 'Organisation', foreignKey: 'organisation_id' });
+organisations.hasMany(organisationAssociations, { as: 'associations', foreignKey: 'organisation_id' });
 
 
 const services = db.define('service', {
