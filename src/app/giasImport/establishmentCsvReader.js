@@ -4,7 +4,9 @@ const moment = require('moment');
 const parseCsv = async (data) => {
   return new Promise((resolve, reject) => {
     try {
-      csv.parse(data, (err, rows) => {
+      csv.parse(data, {
+        auto_parse: false,
+      }, (err, rows) => {
         if (err) {
           reject(err);
         } else {

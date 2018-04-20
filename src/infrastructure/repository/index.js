@@ -148,6 +148,29 @@ const organisations = db.define('organisation', {
   schema: dbSchema,
 });
 
+const organisationAssociations = db.define('organisation_association', {
+  organisation_id: {
+    type: Sequelize.UUID,
+    allowNull: false,
+    primaryKey: true,
+  },
+  associated_organisation_id: {
+    type: Sequelize.UUID,
+    allowNull: false,
+    primaryKey: true,
+  },
+  link_type: {
+    type: Sequelize.STRING,
+    allowNull: false,
+    primaryKey: true,
+  },
+}, {
+  timestamps: false,
+  tableName: 'organisation_association',
+  schema: dbSchema,
+});
+organisationAssociations.belongsTo(organisations, { as: 'Organisation', foreignKey: 'organisation_id' });
+
 
 const services = db.define('service', {
   id: {
@@ -462,6 +485,7 @@ module.exports = {
   users,
   services,
   organisations,
+  organisationAssociations,
   roles,
   invitations,
   organisationStatus,
