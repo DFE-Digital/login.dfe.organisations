@@ -112,7 +112,16 @@ const listOfCategory = async (category) => {
   });
 };
 
-const setAssociation = async (organisationId, associatedOrganisationId, linkType) => {
+const addAssociation = async (organisationId, associatedOrganisationId, linkType) => {
+  const entity = {
+    organisation_id: organisationId,
+    associated_organisation_id: associatedOrganisationId,
+    link_type: linkType,
+  };
+  await organisationAssociations.create(entity);
+};
+
+const removeAssociationsOfType = async (organisationId, linkType) => {
   await organisationAssociations.destroy({
     where: {
       organisation_id: {
@@ -123,13 +132,6 @@ const setAssociation = async (organisationId, associatedOrganisationId, linkType
       },
     },
   });
-
-  const entity = {
-    organisation_id: organisationId,
-    associated_organisation_id: associatedOrganisationId,
-    link_type: linkType,
-  };
-  await organisationAssociations.create(entity);
 };
 
 module.exports = {
@@ -138,5 +140,6 @@ module.exports = {
   add,
   update,
   listOfCategory,
-  setAssociation,
+  addAssociation,
+  removeAssociationsOfType,
 };
