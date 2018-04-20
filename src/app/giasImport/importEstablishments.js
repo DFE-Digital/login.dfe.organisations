@@ -1,3 +1,4 @@
+const logger = require('./../../infrastructure/logger');
 const { parse } = require('./establishmentCsvReader');
 const { list, add, update, listOfCategory, addAssociation, removeAssociationsOfType } = require('./../organisations/data/organisationsStorage');
 const { getEstablishmentsFile } = require('./../../infrastructure/gias');
@@ -36,6 +37,7 @@ const mapImportRecordForStorage = (importing) => {
 const addEstablishment = async (importing) => {
   const organisation = mapImportRecordForStorage(importing);
   await add(organisation);
+  logger.info(`Added establishment ${importing.urn}`);
   return organisation.id;
 };
 const hasBeenUpdated = (newValue, oldValue) => {
@@ -57,6 +59,9 @@ const updateEstablishment = async (importing, existing) => {
     || hasBeenUpdated(updated.type.id, existing.type.id) || hasBeenUpdated(updated.ukprn, existing.ukprn) || hasBeenUpdated(updated.establishmentNumber, existing.establishmentNumber)
     || hasBeenUpdated(updated.status.id, existing.status.id) || hasBeenUpdated(updated.closedOn, existing.closedOn) || hasBeenUpdated(updated.address, existing.address)) {
     await update(updated);
+    logger.info(`Updated establishment ${importing.urn}`);
+  } else {
+    logger.info(`Skipped establishment ${importing.urn} as it has not changed`);
   }
 
   return updated.id;
@@ -80,18 +85,28 @@ const addOrUpdateEstablishments = async (importingEstablishments, existingEstabl
       if (localAuthority && (!existingLAAssociation || existingLAAssociation.associatedOrganisationId.toLowerCase() !== localAuthority.id.toLowerCase())) {
         await removeAssociationsOfType(organisationId, 'LA');
         await addAssociation(organisationId, localAuthority.id, 'LA');
+        logger.info(`Updated LA link for establishment ${importing.urn}`);
       } else if (!localAuthority && existingLAAssociation) {
         await removeAssociationsOfType(organisationId, 'LA');
+        logger.info(`Removed LA link for establishment ${importing.urn}`);
       }
+    } else {
+      logger.info(`Not importing establishment ${importing.urn} as it does meet importable criteria`);
     }
   }
 };
 
 const importEstablishments = async () => {
+  logger.debug('Getting establishment data');
   const data = await getEstablishmentsFile();
 
+  logger.debug('Parsing establishment data');
   const importingEstablishments = await parse(data);
+
+  logger.debug('Getting existing establishments');
   const existingEstablishments = await list(true);
+
+  logger.debug('Getting local authorities');
   const localAuthorities = await listOfCategory('002');
 
   await addOrUpdateEstablishments(importingEstablishments, existingEstablishments, localAuthorities);

@@ -50,7 +50,7 @@
   "scripts": {
     "test": "./node_modules/.bin/jest",
     "setup": "./generate-certs.sh",
-    "dev": "settings=login.dfe.organisation.dev.json node src/index.js "
+    "web": "settings=login.dfe.organisation.dev.json node src/web.js "
   },
   "engines": {
     "node": "8.x.x"
