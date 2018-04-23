@@ -18,9 +18,9 @@ const healthCheck = require('login.dfe.healthcheck');
 const { getErrorHandler } = require('login.dfe.express-error-handling');
 const KeepAliveAgent = require('agentkeepalive');
 
-const { organisationsSchema, validateConfigAndQuitOnError } = require('login.dfe.config.schema');
+const { organisationsSchema, validateConfig } = require('login.dfe.config.schema');
 
-validateConfigAndQuitOnError(organisationsSchema, config, logger);
+validateConfig(organisationsSchema, config, logger, config.hostingEnvironment.env !== 'dev');
 
 http.GlobalAgent = new KeepAliveAgent({
   maxSockets: config.hostingEnvironment.agentKeepAlive.maxSockets,
