@@ -6,7 +6,7 @@ const Op = Sequelize.Op;
 const updateEntityFromOrganisation = (entity, organisation) => {
   entity.name = organisation.name;
   entity.Category = organisation.category.id;
-  entity.Type = organisation.type.id;
+  entity.Type = organisation.type ? organisation.type.id : null;
   entity.URN = organisation.urn;
   entity.UID = organisation.uid;
   entity.UKPRN = organisation.ukprn;
@@ -84,8 +84,8 @@ const update = async (organisation) => {
   await existing.save();
 };
 
-const listOfCategory = async (category) => {
-  const orgEntities = await organisations.findAll({
+const listOfCategory = async (category, includeAssociations = false) => {
+  const query = {
     where: {
       Category: {
         [Op.eq]: category,
@@ -94,7 +94,11 @@ const listOfCategory = async (category) => {
     order: [
       ['name', 'ASC'],
     ],
-  });
+  };
+  if (includeAssociations) {
+    query.include = ['associations'];
+  }
+  const orgEntities = await organisations.findAll(query);
   return orgEntities.map((entity) => {
     return {
       id: entity.id,

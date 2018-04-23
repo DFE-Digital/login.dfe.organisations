@@ -104,7 +104,7 @@ const importEstablishments = async () => {
   const importingEstablishments = await parse(data);
 
   logger.debug('Getting existing establishments');
-  const existingEstablishments = await list(true);
+  const existingEstablishments = await list(true); //TODO: Filter to establishments only
 
   logger.debug('Getting local authorities');
   const localAuthorities = await listOfCategory('002');
