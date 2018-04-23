@@ -77,7 +77,7 @@ const update = async (organisation) => {
   });
 
   if (!existing) {
-    throw new Error(`Cannot find organisation in databse with id ${organisation.id}`);
+    throw new Error(`Cannot find organisation in database with id ${organisation.id}`);
   }
 
   updateEntityFromOrganisation(existing, organisation);
