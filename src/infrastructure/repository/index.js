@@ -53,6 +53,7 @@ if (config.database && config.database.postgresUrl) {
     dialectOptions: {
       encrypt: encryptDb,
     },
+    logging: false,
   };
   if (config.database.pool) {
     dbOpts.pool = {
