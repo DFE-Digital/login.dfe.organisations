@@ -16,27 +16,32 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.Address = organisation.address;
 };
 
-const pagedList = async (pageNumber = 1, pageSize = 25) => {
-  const countResult = await organisations.findAll({
-    attributes: [[Sequelize.fn('COUNT', Sequelize.col('id')), 'NumberOfOrganisations']],
-  });
-  const count = countResult[0].get('NumberOfOrganisations');
-  const totalNumberOfPages = Math.ceil(count / pageSize);
-  if (totalNumberOfPages < pageNumber) {
-    return {
-      organisations: [],
-      totalNumberOfPages,
-    };
-  }
-
+const search = async (criteria, pageNumber = 1, pageSize = 25) => {
   const offset = (pageNumber - 1) * pageSize;
-  const orgEntities = await organisations.findAll({
+  const result = await organisations.findAndCountAll({
+    where: {
+      [Op.or]: {
+        name: {
+          [Op.like]: `%${criteria}%`,
+        },
+        urn: {
+          [Op.like]: `%${criteria}%`,
+        },
+        uid: {
+          [Op.like]: `%${criteria}%`,
+        },
+        ukprn: {
+          [Op.like]: `%${criteria}%`,
+        },
+      },
+    },
     order: [
       ['name', 'ASC'],
     ],
     limit: pageSize,
     offset,
   });
+  const orgEntities = result.rows;
   const orgs = orgEntities.map((entity) => {
     return {
       id: entity.id,
@@ -52,9 +57,46 @@ const pagedList = async (pageNumber = 1, pageSize = 25) => {
       address: entity.Address,
     };
   });
+  const totalNumberOfRecords = result.count;
+  const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
   return {
     organisations: orgs,
     totalNumberOfPages,
+    totalNumberOfRecords,
+  };
+};
+
+const pagedList = async (pageNumber = 1, pageSize = 25) => {
+  const offset = (pageNumber - 1) * pageSize;
+  const result = await organisations.findAndCountAll({
+    order: [
+      ['name', 'ASC'],
+    ],
+    limit: pageSize,
+    offset,
+  });
+  const orgEntities = result.rows;
+  const orgs = orgEntities.map((entity) => {
+    return {
+      id: entity.id,
+      name: entity.name,
+      category: organisationCategory.find(c => c.id === entity.Category),
+      type: establishmentTypes.find(c => c.id === entity.Type),
+      urn: entity.URN,
+      uid: entity.UID,
+      ukprn: entity.UKPRN,
+      establishmentNumber: entity.EstablishmentNumber,
+      status: organisationStatus.find(c => c.id === entity.Status),
+      closedOn: entity.ClosedOn,
+      address: entity.Address,
+    };
+  });
+  const totalNumberOfRecords = result.count;
+  const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
+  return {
+    organisations: orgs,
+    totalNumberOfPages,
+    totalNumberOfRecords,
   };
 };
 
@@ -140,6 +182,7 @@ const removeAssociationsOfType = async (organisationId, linkType) => {
 
 module.exports = {
   list,
+  search,
   pagedList,
   add,
   update,
