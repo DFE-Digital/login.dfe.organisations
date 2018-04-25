@@ -55,4 +55,21 @@ IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'orga
     END
 GO
 
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'organisation' AND COLUMN_NAME = 'Address')
+    BEGIN
+        ALTER TABLE [organisation]
+        ADD Address varchar(512)
+    END
+GO
+
 UPDATE organisation SET Category = '002' WHERE id = 'FA460F7C-8AB9-4CEE-AAFF-82D6D341D702';
+
+IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'organisation_association')
+    BEGIN
+      CREATE TABLE organisation_association (
+        organisation_id uniqueidentifier NOT NULL REFERENCES organisation(id),
+        associated_organisation_id uniqueidentifier NOT NULL REFERENCES organisation(id),
+        link_type varchar(25) NOT NULL
+      )
+    END
+GO

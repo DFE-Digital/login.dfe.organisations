@@ -53,6 +53,7 @@ if (config.database && config.database.postgresUrl) {
     dialectOptions: {
       encrypt: encryptDb,
     },
+    logging: false,
   };
   if (config.database.pool) {
     dbOpts.pool = {
@@ -93,6 +94,28 @@ const externalIdentifiers = db.define('user_service_identifiers', {
 }, {
   timestamps: false,
   tableName: 'user_service_identifiers',
+  schema: dbSchema,
+});
+
+const organisationAssociations = db.define('organisation_association', {
+  organisation_id: {
+    type: Sequelize.UUID,
+    allowNull: false,
+    primaryKey: true,
+  },
+  associated_organisation_id: {
+    type: Sequelize.UUID,
+    allowNull: false,
+    primaryKey: true,
+  },
+  link_type: {
+    type: Sequelize.STRING,
+    allowNull: false,
+    primaryKey: true,
+  },
+}, {
+  timestamps: false,
+  tableName: 'organisation_association',
   schema: dbSchema,
 });
 
@@ -138,11 +161,16 @@ const organisations = db.define('organisation', {
     type: Sequelize.DATE,
     allowNull: true,
   },
+  Address: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
 }, {
   timestamps: false,
   tableName: 'organisation',
   schema: dbSchema,
 });
+organisations.hasMany(organisationAssociations, { as: 'associations', foreignKey: 'organisation_id' });
 
 
 const services = db.define('service', {
@@ -408,6 +436,8 @@ const roles = [
 const organisationStatus = [
   { id: 1, name: 'Open' },
   { id: 2, name: 'Closed' },
+  { id: 3, name: 'Proposed to close' },
+  { id: 4, name: 'Proposed to open' },
 ];
 
 const organisationCategory = [
@@ -417,12 +447,49 @@ const organisationCategory = [
   { id: '013', name: 'Single-Academy Trust' },
 ];
 
+const establishmentTypes = [
+  { id: '01', name: 'Community School' },
+  { id: '02', name: 'Voluntary Aided School' },
+  { id: '03', name: 'Voluntary Controlled School' },
+  { id: '05', name: 'Foundation School' },
+  { id: '06', name: 'City Technology College' },
+  { id: '07', name: 'Community Special School' },
+  { id: '08', name: 'Non-Maintained Special School' },
+  { id: '10', name: 'Other Independent Special School' },
+  { id: '11', name: 'Other Independent School' },
+  { id: '12', name: 'Foundation Special School' },
+  { id: '14', name: 'Pupil Referral Unit' },
+  { id: '15', name: 'LA Nursery School' },
+  { id: '18', name: 'Further Education' },
+  { id: '24', name: 'Secure Units' },
+  { id: '25', name: 'Offshore Schools' },
+  { id: '26', name: 'Service Childrens Education' },
+  { id: '28', name: 'Academy Sponsor Led' },
+  { id: '30', name: 'Welsh Establishment' },
+  { id: '32', name: 'Special Post 16 Institution' },
+  { id: '33', name: 'Academy Special Sponsor Led' },
+  { id: '34', name: 'Academy Converter' },
+  { id: '35', name: 'Free Schools' },
+  { id: '36', name: 'Free Schools Special' },
+  { id: '38', name: 'Free Schools - Alternative Provision' },
+  { id: '39', name: 'Free Schools - 16-19' },
+  { id: '40', name: 'University Technical College' },
+  { id: '41', name: 'Studio Schools' },
+  { id: '42', name: 'Academy Alternative Provision Converter' },
+  { id: '43', name: 'Academy Alternative Provision Sponsor Led' },
+  { id: '44', name: 'Academy Special Converter' },
+  { id: '45', name: 'Academy 16-19 Converter' },
+  { id: '46', name: 'Academy 16-19 Sponsor Led' },
+];
+
 module.exports = {
   users,
   services,
   organisations,
+  organisationAssociations,
   roles,
   invitations,
   organisationStatus,
   organisationCategory,
+  establishmentTypes,
 };

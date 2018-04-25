@@ -4,20 +4,44 @@ const Sequelize = require('sequelize');
 
 const Op = Sequelize.Op;
 const logger = require('./../../../infrastructure/logger');
-const { organisations } = require('./../../../infrastructure/repository');
+const { organisations, organisationCategory, organisationStatus, establishmentTypes } = require('./../../../infrastructure/repository');
 
 
-const list = async () => {
+const list = async (includeAssociations = false) => {
   try {
-    const orgEntities = await organisations.findAll();
+    const findOrgsOpts = {};
+    if (includeAssociations) {
+      findOrgsOpts.include = ['associations'];
+    }
+    const orgEntities = await organisations.findAll(findOrgsOpts);
     if (!orgEntities) {
       return null;
     }
 
-    return await Promise.all(orgEntities.map(async serviceEntity => ({
-      id: serviceEntity.getDataValue('id'),
-      name: serviceEntity.getDataValue('name'),
-    })));
+    return await Promise.all(orgEntities.map(async (serviceEntity) => {
+      const organisation = {
+        id: serviceEntity.getDataValue('id'),
+        name: serviceEntity.getDataValue('name'),
+        category: organisationCategory.find(c => c.id === serviceEntity.Category),
+        type: establishmentTypes.find(c => c.id === serviceEntity.Type),
+        urn: serviceEntity.URN,
+        uid: serviceEntity.UID,
+        ukprn: serviceEntity.UKPRN,
+        establishmentNumber: serviceEntity.EstablishmentNumber,
+        status: organisationStatus.find(c => c.id === serviceEntity.Status),
+        closedOn: serviceEntity.ClosedOn,
+        address: serviceEntity.Address,
+      };
+
+      if (serviceEntity.associations) {
+        organisation.associations = serviceEntity.associations.map((assEntity) => ({
+          associatedOrganisationId: assEntity.associated_organisation_id,
+          associationType: assEntity.link_type,
+        }));
+      }
+
+      return organisation;
+    }));
   } catch (e) {
     logger.error(`error getting organisations - ${e.message}`, e);
     throw e;
