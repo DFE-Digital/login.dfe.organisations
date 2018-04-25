@@ -1,4 +1,4 @@
-const { list } = require('./../../services/data/organisationsStorage');
+const { list, getOrgById } = require('./../../services/data/organisationsStorage');
 const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
@@ -182,6 +182,7 @@ const removeAssociationsOfType = async (organisationId, linkType) => {
 
 module.exports = {
   list,
+  getOrgById,
   search,
   pagedList,
   add,
