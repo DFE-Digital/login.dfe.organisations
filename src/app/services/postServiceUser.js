@@ -10,7 +10,6 @@ const action = async (req, res) => {
   let organisationId;
   if (req.body.org_type === '010' || req.body.org_type === '013') {
     const org = await getOrgByUid(req.params.ext_org_id);
-    organisationId = org.id;
     if (org) {
       organisationId = org.id.toLowerCase();
     }
