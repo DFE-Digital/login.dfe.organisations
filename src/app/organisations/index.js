@@ -5,6 +5,7 @@ const { asyncWrapper } = require('login.dfe.express-error-handling');
 
 const listOrganisations = require('./listOrganisations');
 const getOrganisation = require('./getOrganisation');
+const getOrganisationByExternalId = require('./getOrganisationByExternalId');
 
 const router = express.Router();
 
@@ -17,6 +18,7 @@ const routes = () => {
   // Map routes to functions.
   router.get('/', asyncWrapper(listOrganisations));
   router.get('/:id', asyncWrapper(getOrganisation));
+  router.get('/by-external-id/:type/:id', asyncWrapper(getOrganisationByExternalId))
 
   return router;
 };
