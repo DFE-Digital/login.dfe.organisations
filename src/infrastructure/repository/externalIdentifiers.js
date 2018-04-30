@@ -1,5 +1,4 @@
 const Sequelize = require('sequelize').default;
-const Op = Sequelize.Op;
 
 const define = (db, schema) => {
   return db.define('user_service_identifiers', {
@@ -33,10 +32,7 @@ const define = (db, schema) => {
   });
 };
 
-const extend = () => {
-};
-
 module.exports = {
+  name: 'externalIdentifiers',
   define,
-  extend,
 };

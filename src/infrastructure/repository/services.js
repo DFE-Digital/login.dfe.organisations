@@ -46,6 +46,7 @@ const extend = ({ services, externalIdentifiers }) => {
 };
 
 module.exports = {
+  name: 'services',
   define,
   extend,
 };

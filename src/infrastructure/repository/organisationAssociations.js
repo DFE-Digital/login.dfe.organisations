@@ -25,10 +25,7 @@ const define = (db, schema) => {
   });
 };
 
-const extend = () => {
-};
-
 module.exports = {
+  name: 'organisationAssociations',
   define,
-  extend,
 };

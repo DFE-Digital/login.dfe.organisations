@@ -8,11 +8,6 @@ const define = (db, schema) => {
       primaryKey: true,
       allowNull: false,
     },
-    role_id: {
-      type: Sequelize.SMALLINT,
-      allowNull: false,
-      defaultValue: 0,
-    },
   }, {
     timestamps: false,
     tableName: 'invitation_services',
@@ -20,28 +15,19 @@ const define = (db, schema) => {
   });
 };
 
-const extend = ({ invitations, organisations, services, users, invitationExternalIdentifiers }) => {
+const extend = ({ invitations, organisations, services, users, invitationExternalIdentifiers, invitationOrganisations, roles, userOrganisations }) => {
   invitations.belongsTo(organisations, { as: 'Organisation', foreignKey: 'organisation_id' });
   invitations.belongsTo(services, { as: 'Service', foreignKey: 'service_id' });
   invitations.prototype.getApprovers = function () {
-    return users.findAll({
-      where:
-        {
-          service_id:
-            {
-              [Op.eq]: this.service_id,
-            },
-          organisation_id: {
-            [Op.eq]: this.organisation_id,
-          },
-          role_id: {
-            [Op.eq]: 10000,
-          },
-          status: {
-            [Op.eq]: 1,
-          },
+    return userOrganisations.findAll({
+      where: {
+        organisation_id: {
+          [Op.eq]: this.organisation_id,
         },
-
+        role_id: {
+          [Op.eq]: 10000,
+        },
+      },
     });
   };
   invitations.prototype.getExternalIdentifiers = function () {
@@ -91,9 +77,27 @@ const extend = ({ invitations, organisations, services, users, invitationExterna
       identifier_value: value,
     });
   };
+  invitations.prototype.getRole = async function () {
+    const invitationOrganisation = await invitationOrganisations.find({
+      where: {
+        invitation_id: {
+          [Op.eq]: this.invitation_id,
+        },
+        organisation_id: {
+          [Op.eq]: this.organisation_id,
+        },
+      },
+    });
+    if (!invitationOrganisation) {
+      return undefined;
+    }
+
+    return roles.find(r => r.id === invitationOrganisation.role_id);
+  };
 };
 
 module.exports = {
+  name: 'invitations',
   define,
   extend,
 };

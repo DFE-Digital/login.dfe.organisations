@@ -60,6 +60,7 @@ const extend = ({ organisations, organisationAssociations }) => {
 };
 
 module.exports = {
+  name: 'organisations',
   define,
   extend,
 };

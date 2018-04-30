@@ -17,11 +17,6 @@ const define = (db, schema) => {
       type: Sequelize.SMALLINT,
       allowNull: false,
     },
-    role_id: {
-      type: Sequelize.SMALLINT,
-      allowNull: false,
-      defaultValue: 0,
-    },
   }, {
     timestamps: true,
     tableName: 'user_services',
@@ -29,28 +24,19 @@ const define = (db, schema) => {
   });
 };
 
-const extend = ({ users, organisations, services, externalIdentifiers }) => {
+const extend = ({ users, organisations, services, externalIdentifiers, userOrganisations, roles }) => {
   users.belongsTo(organisations, { as: 'Organisation', foreignKey: 'organisation_id' });
   users.belongsTo(services, { as: 'Service', foreignKey: 'service_id' });
   users.prototype.getApprovers = function () {
-    return users.findAll({
-      where:
-        {
-          service_id:
-            {
-              [Op.eq]: this.service_id,
-            },
-          organisation_id: {
-            [Op.eq]: this.organisation_id,
-          },
-          role_id: {
-            [Op.eq]: 10000,
-          },
-          status: {
-            [Op.eq]: 1,
-          },
+    return userOrganisations.findAll({
+      where: {
+        organisation_id: {
+          [Op.eq]: this.organisation_id,
         },
-
+        role_id: {
+          [Op.eq]: 10000,
+        },
+      },
     });
   };
   users.prototype.getExternalIdentifiers = function () {
@@ -100,9 +86,27 @@ const extend = ({ users, organisations, services, externalIdentifiers }) => {
       identifier_value: value,
     });
   };
+  users.prototype.getRole = async function () {
+    const userOrganisation = await userOrganisations.find({
+      where: {
+        user_id: {
+          [Op.eq]: this.user_id,
+        },
+        organisation_id: {
+          [Op.eq]: this.organisation_id,
+        },
+      },
+    });
+    if (!userOrganisation) {
+      return undefined;
+    }
+
+    return roles.find(r => r.id === userOrganisation.role_id);
+  };
 };
 
 module.exports = {
+  name: 'users',
   define,
   extend,
 };
