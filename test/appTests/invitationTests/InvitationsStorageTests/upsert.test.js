@@ -19,6 +19,10 @@ jest.mock('./../../../../src/infrastructure/repository', () => {
       findOne: jest.fn().mockReturnValue(invitation),
       create: jest.fn(),
     },
+    invitationOrganisations: {
+      find: jest.fn(),
+      create: jest.fn(),
+    },
   };
 });
 jest.mock('./../../../../src/infrastructure/logger', () => {
@@ -33,17 +37,22 @@ const db = require('./../../../../src/infrastructure/repository');
 const { Op } = require('sequelize');
 const invitationStorage = require('./../../../../src/app/invitations/data/invitationsStorage');
 
-const details = {
-  invitationId: 'inv1',
-  organisationId: '',
-  serviceId: '',
-  roleId: 0,
-};
-
 describe('when upserting and invitation mapping', () => {
+  let details;
+
   beforeEach(() => {
+    details = {
+      invitationId: 'inv1',
+      organisationId: '',
+      serviceId: '',
+      roleId: 0,
+    };
+
     db.invitations.findOne.mockReset();
     db.invitations.create.mockReset();
+
+    db.invitationOrganisations.find.mockReset();
+    db.invitationOrganisations.create.mockReset();
   });
 
   it('then it should check for exiting record by invitation_id, service_id and organisation_id', async () => {
@@ -64,7 +73,7 @@ describe('when upserting and invitation mapping', () => {
     });
   });
 
-  it('then it should destory the existing record if found', async () => {
+  it('then it should destroy the existing record if found', async () => {
     const invitation = createJestMockForSequelizeEntity({
       invitation_id: 'inv1',
       role_id: '0',
@@ -85,7 +94,6 @@ describe('when upserting and invitation mapping', () => {
       invitation_id: details.invitationId,
       organisation_id: details.organisationId,
       service_id: details.serviceId,
-      role_id: details.roleId,
     });
   });
 
@@ -99,7 +107,66 @@ describe('when upserting and invitation mapping', () => {
       invitation_id: details.invitationId,
       organisation_id: details.organisationId,
       service_id: details.serviceId,
-      role_id: details.roleId,
     });
+  });
+
+
+  it('then it should destroy the existing organisation record if existing record found and role has changed', async () => {
+    const invitationOrganisation = createJestMockForSequelizeEntity({
+      invitation_id: 'inv1',
+      organisation_id: '',
+      role_id: 10000,
+    });
+    invitationOrganisation.destroy = jest.fn();
+    db.invitationOrganisations.find.mockReturnValue(invitationOrganisation);
+
+    await invitationStorage.upsert(details);
+
+    expect(invitationOrganisation.destroy.mock.calls.length).toBe(1);
+  });
+
+  it('then it should create new organisation record if existing record found and role has changed', async () => {
+    const invitationOrganisation = createJestMockForSequelizeEntity({
+      invitation_id: 'inv1',
+      organisation_id: '',
+      role_id: 10000,
+    });
+    invitationOrganisation.destroy = jest.fn();
+    db.invitationOrganisations.find.mockReturnValue(invitationOrganisation);
+
+    await invitationStorage.upsert(details);
+
+    expect(db.invitationOrganisations.create.mock.calls.length).toBe(1);
+    expect(db.invitationOrganisations.create.mock.calls[0][0]).toEqual({
+      invitation_id: 'inv1',
+      organisation_id: '',
+      role_id: 0,
+    });
+  });
+
+  it('then it should create new organisation record if existing record not found', async () => {
+    await invitationStorage.upsert(details);
+
+    expect(db.invitationOrganisations.create.mock.calls.length).toBe(1);
+    expect(db.invitationOrganisations.create.mock.calls[0][0]).toEqual({
+      invitation_id: 'inv1',
+      organisation_id: '',
+      role_id: 0,
+    });
+  });
+
+  it('then it should not modify organisations if existing record found but has not changed', async () => {
+    const invitationOrganisation = createJestMockForSequelizeEntity({
+      invitation_id: 'inv1',
+      organisation_id: '',
+      role_id: 0,
+    });
+    invitationOrganisation.destroy = jest.fn();
+    db.invitationOrganisations.find.mockReturnValue(invitationOrganisation);
+
+    await invitationStorage.upsert(details);
+
+    expect(invitationOrganisation.destroy.mock.calls.length).toBe(0);
+    expect(db.invitationOrganisations.create.mock.calls.length).toBe(0);
   });
 });

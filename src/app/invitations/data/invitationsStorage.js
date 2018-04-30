@@ -4,7 +4,7 @@ const Sequelize = require('sequelize');
 
 const Op = Sequelize.Op;
 const logger = require('./../../../infrastructure/logger');
-const { invitations, roles } = require('./../../../infrastructure/repository');
+const { invitations, invitationOrganisations } = require('./../../../infrastructure/repository');
 
 const list = async (correlationId) => {
   try {
@@ -16,18 +16,21 @@ const list = async (correlationId) => {
       return null;
     }
 
-    return await Promise.all(invitationEntities.map(async invitationEntity => ({
-      invitationId: invitationEntity.getDataValue('invitation_id'),
-      role: roles.find(item => item.id === invitationEntity.getDataValue('role_id')),
-      service: {
-        id: invitationEntity.Service.getDataValue('id'),
-        name: invitationEntity.Service.getDataValue('name'),
-      },
-      organisation: {
-        id: invitationEntity.Organisation.getDataValue('id'),
-        name: invitationEntity.Organisation.getDataValue('name'),
-      },
-    })));
+    return await Promise.all(invitationEntities.map(async (invitationEntity) => {
+      const role = invitationEntity.getRole();
+      return {
+        invitationId: invitationEntity.getDataValue('invitation_id'),
+        role,
+        service: {
+          id: invitationEntity.Service.getDataValue('id'),
+          name: invitationEntity.Service.getDataValue('name'),
+        },
+        organisation: {
+          id: invitationEntity.Organisation.getDataValue('id'),
+          name: invitationEntity.Organisation.getDataValue('name'),
+        },
+      };
+    }));
   } catch (e) {
     logger.error(`error getting invitations - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
@@ -52,12 +55,14 @@ const getForInvitationId = async (id, correlationId) => {
 
     return await Promise.all(invitationEntities.map(async (invitationEntity) => {
       const approvers = await invitationEntity.getApprovers().map(user => user.user_id);
-      const externalIdentifiers = await invitationEntity.getExternalIdentifiers().map((id) => {
-        return { key: id.identifier_key, value: id.identifier_value };
-      });
+      const externalIdentifiers = await invitationEntity.getExternalIdentifiers().map(extId => ({
+        key: extId.identifier_key,
+        value: extId.identifier_value,
+      }));
+      const role = await invitationEntity.getRole();
       return {
         invitationId: invitationEntity.getDataValue('invitation_id'),
-        role: roles.find(item => item.id === invitationEntity.getDataValue('role_id')),
+        role,
         service: {
           id: invitationEntity.Service.getDataValue('id'),
           name: invitationEntity.Service.getDataValue('name'),
@@ -94,7 +99,6 @@ const upsert = async (details, correlationId) => {
           },
         },
       });
-
     if (invitation) {
       await invitation.destroy();
     }
@@ -102,13 +106,34 @@ const upsert = async (details, correlationId) => {
       invitation_id: invitationId,
       organisation_id: organisationId,
       service_id: serviceId,
-      role_id: roleId,
     });
+
+    const invitationOrganisation = await invitationOrganisations.find({
+      where: {
+        invitation_id: {
+          [Op.eq]: invitationId,
+        },
+        organisation_id: {
+          [Op.eq]: this.organisation_id,
+        },
+      },
+    });
+    if (!invitationOrganisation || invitationOrganisation.role_id !== roleId) {
+      if (invitationOrganisation) {
+        await invitationOrganisation.destroy();
+      }
+
+      await invitationOrganisations.create({
+        invitation_id: invitationId,
+        organisation_id: organisationId,
+        role_id: roleId,
+      });
+    }
 
     if (details.externalIdentifiers) {
       for (let i = 0; i < details.externalIdentifiers.length; i += 1) {
         const extId = details.externalIdentifiers[i];
-        invitation.setExternalIdentifier(extId.key, extId.value);
+        await invitation.setExternalIdentifier(extId.key, extId.value);
       }
     }
   } catch (e) {
