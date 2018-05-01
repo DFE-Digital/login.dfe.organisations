@@ -4,7 +4,7 @@ const Sequelize = require('sequelize');
 
 const Op = Sequelize.Op;
 const logger = require('./../../../infrastructure/logger');
-const { users, services, roles, organisations } = require('./../../../infrastructure/repository');
+const { users, services, roles, organisations, userOrganisations } = require('./../../../infrastructure/repository');
 
 
 const list = async (correlationId) => {
@@ -29,7 +29,7 @@ const list = async (correlationId) => {
 const getServiceDetails = async (organisationId, serviceId, correlationId) => {
   try {
     logger.info(`Calling getServiceDetails for services storage for request ${correlationId}`, { correlationId });
-    const service = await this.getById(serviceId);
+    const service = await getById(serviceId);
     const organisation = await organisations.findById(organisationId);
 
     return { ...service, organisation: organisation.dataValues };
@@ -79,15 +79,18 @@ const getUsersOfService = async (organisationId, id, correlationId) => {
         include: ['Organisation'],
       });
 
-    return await Promise.all(userServiceEntities.map(async userServiceEntity => ({
-      id: userServiceEntity.getDataValue('user_id'),
-      status: userServiceEntity.getDataValue('status'),
-      role: roles.find(item => item.id === userServiceEntity.getDataValue('role_id')),
-      organisation: {
-        id: userServiceEntity.Organisation.getDataValue('id'),
-        name: userServiceEntity.Organisation.getDataValue('name'),
-      },
-    })));
+    return await Promise.all(userServiceEntities.map(async (userServiceEntity) => {
+      const role = await userServiceEntity.getRole();
+      return {
+        id: userServiceEntity.getDataValue('user_id'),
+        status: userServiceEntity.getDataValue('status'),
+        role,
+        organisation: {
+          id: userServiceEntity.Organisation.getDataValue('id'),
+          name: userServiceEntity.Organisation.getDataValue('name'),
+        },
+      }
+    }));
   } catch (e) {
     logger.error(`error getting users of service ${id} - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
@@ -97,20 +100,14 @@ const getUsersOfService = async (organisationId, id, correlationId) => {
 const getApproversOfServiceUserIds = async (organisationId, id, correlationId) => {
   try {
     logger.info(`Calling getApproversOfServiceUserIds for services storage for request ${correlationId}`, { correlationId });
-    const approversServiceEntities = await users.findAll(
+    const approversServiceEntities = await userOrganisations.findAll(
       {
         where: {
-          service_id: {
-            [Op.eq]: id,
-          },
           organisation_id: {
             [Op.eq]: organisationId,
           },
           role_id: {
             [Op.eq]: 10000,
-          },
-          status: {
-            [Op.eq]: 1,
           },
         },
       });
@@ -140,8 +137,12 @@ const getUserAssociatedServices = async (id, correlationId) => {
     for (let i = 0; i <= userServices.length; i += 1) {
       const userService = userServices[i];
       if (userService) {
+        const role = await userService.getRole();
         const approvers = await userService.getApprovers().map(user => user.user_id);
-        const externalIdentifiers = await userService.getExternalIdentifiers().map(id => ({ key: id.identifier_key, value: id.identifier_value }));
+        const externalIdentifiers = await userService.getExternalIdentifiers().map(id => ({
+          key: id.identifier_key,
+          value: id.identifier_value
+        }));
         mappedUserService.push({
           id: userService.Service.getDataValue('id'),
           name: userService.Service.getDataValue('name'),
@@ -154,7 +155,7 @@ const getUserAssociatedServices = async (id, correlationId) => {
             id: userService.Organisation.getDataValue('id'),
             name: userService.Organisation.getDataValue('name'),
           },
-          role: roles.find(item => item.id === userService.getDataValue('role_id')),
+          role,
           externalIdentifiers,
         });
       }
@@ -255,7 +256,6 @@ const upsertServiceUser = async (options, correlationId) => {
           },
         },
       });
-
     if (userService) {
       await userService.destroy();
     }
@@ -264,9 +264,30 @@ const upsertServiceUser = async (options, correlationId) => {
       user_id: userId,
       organisation_id: organisationId,
       service_id: serviceId,
-      role_id: roleId,
       status,
     });
+
+    const userOrganisation = await userOrganisations.find({
+      where: {
+        user_id: {
+          [Op.eq]: userId,
+        },
+        organisation_id: {
+          [Op.eq]: this.organisation_id,
+        },
+      },
+    });
+    if (!userOrganisation || userOrganisation.role_id !== roleId) {
+      if (userOrganisation) {
+        await userOrganisation.destroy();
+      }
+
+      await userOrganisations.create({
+        user_id: userId,
+        organisation_id: organisationId,
+        role_id: roleId,
+      });
+    }
 
     if (externalIdentifiers) {
       for (let i = 0; i < externalIdentifiers.length; i += 1) {
@@ -298,11 +319,12 @@ const getUserService = async (serviceId, organisationId, userId, correlationId) 
         },
         include: ['Organisation', 'Service'],
       });
+    const role = await userServiceEntity.getRole();
 
     return {
       userId: userServiceEntity.getDataValue('user_id'),
       status: userServiceEntity.getDataValue('status'),
-      role: roles.find(item => item.id === userServiceEntity.getDataValue('role_id')),
+      role,
       service: {
         id: userServiceEntity.Service.getDataValue('id'),
         name: userServiceEntity.Service.getDataValue('name'),
@@ -349,7 +371,6 @@ const getExternalIdentifier = async (serviceId, identifierKey, identifierValue, 
     throw e;
   }
 };
-
 
 const upsertExternalIdentifier = async (serviceId, userId, organisationId, identifierKey, identifierValue, correlationId) => {
   try {
