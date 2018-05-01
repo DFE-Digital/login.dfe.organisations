@@ -20,6 +20,7 @@ const invitationRoutes = () => {
   // Map routes to functions.
   router.get('/:inv_id', asyncWrapper(getInvitation));
   router.post('/:inv_id/migrate-to-user', asyncWrapper(postMigrateInvitationToUser));
+
   return router;
 };
 
@@ -32,6 +33,7 @@ const organisationRoutes = () => {
   }
 
   // Map routes to functions.
+  router.put('/:org_id/invitations/:inv_id', asyncWrapper(putInvitation));
   router.put('/:org_id/services/:svc_id/invitations/:inv_id', asyncWrapper(putInvitation));
 
   return router;
