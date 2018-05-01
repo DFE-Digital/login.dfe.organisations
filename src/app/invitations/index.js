@@ -4,8 +4,10 @@ const express = require('express');
 const apiAuth = require('login.dfe.api.auth');
 const config = require('./../../infrastructure/config')();
 const { asyncWrapper } = require('login.dfe.express-error-handling');
+const { deprecate } = require('./../../utils');
 
 const getInvitation = require('./getInvitation');
+const getInvitationV2 = require('./getInvitationV2');
 const putInvitation = require('./putInvitation');
 const postMigrateInvitationToUser = require('./migrateInvitationToUser');
 
@@ -18,7 +20,8 @@ const invitationRoutes = () => {
   }
 
   // Map routes to functions.
-  router.get('/:inv_id', asyncWrapper(getInvitation));
+  router.get('/:inv_id', deprecate('/invitations/v2/:inv_id'), asyncWrapper(getInvitation));
+  router.get('/v2/:inv_id', asyncWrapper(getInvitationV2));
   router.post('/:inv_id/migrate-to-user', asyncWrapper(postMigrateInvitationToUser));
 
   return router;

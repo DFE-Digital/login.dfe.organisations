@@ -40,39 +40,51 @@ const list = async (correlationId) => {
 const getForInvitationId = async (id, correlationId) => {
   try {
     logger.info(`Get invitation for request ${correlationId}`, { correlationId });
-    const invitationEntities = await invitations.findAll(
-      {
-        where: {
-          invitation_id: {
-            [Op.eq]: id,
-          },
-        },
-        include: ['Organisation', 'Service'],
-      });
-    if (!invitationEntities) {
-      return null;
-    }
 
-    return await Promise.all(invitationEntities.map(async (invitationEntity) => {
-      const approvers = await invitationEntity.getApprovers().map(user => user.user_id);
-      const externalIdentifiers = await invitationEntity.getExternalIdentifiers().map(extId => ({
-        key: extId.identifier_key,
-        value: extId.identifier_value,
-      }));
-      const role = await invitationEntity.getRole();
+    const invitationOrgs = await invitationOrganisations.findAll({
+      where: {
+        invitation_id: {
+          [Op.eq]: id,
+        },
+      },
+      include: ['Organisation'],
+    });
+    return Promise.all(invitationOrgs.map(async (invitationOrg) => {
+      const role = await invitationOrg.getRole();
+      const approvers = await invitationOrg.getApprovers().map(user => user.user_id);
+      const services = await invitations.findAll(
+        {
+          where: {
+            invitation_id: {
+              [Op.eq]: id,
+            },
+            organisation_id: {
+              [Op.eq]: invitationOrg.Organisation.getDataValue('id'),
+            },
+          },
+          include: ['Service'],
+        });
+
       return {
-        invitationId: invitationEntity.getDataValue('invitation_id'),
-        role,
-        service: {
-          id: invitationEntity.Service.getDataValue('id'),
-          name: invitationEntity.Service.getDataValue('name'),
-        },
+        invitationId: invitationOrg.getDataValue('invitation_id'),
         organisation: {
-          id: invitationEntity.Organisation.getDataValue('id'),
-          name: invitationEntity.Organisation.getDataValue('name'),
+          id: invitationOrg.Organisation.getDataValue('id'),
+          name: invitationOrg.Organisation.getDataValue('name'),
         },
+        role,
         approvers,
-        externalIdentifiers,
+        services: await Promise.all(services.map(async (service) => {
+          const externalIdentifiers = await service.getExternalIdentifiers().map(extId => ({
+            key: extId.identifier_key,
+            value: extId.identifier_value,
+          }));
+
+          return {
+            id: service.Service.getDataValue('id'),
+            name: service.Service.getDataValue('name'),
+            externalIdentifiers,
+          };
+        })),
       };
     }));
   } catch (e) {
@@ -85,7 +97,7 @@ const upsert = async (details, correlationId) => {
   logger.info(`Upsert invitation for request ${correlationId}`, { correlationId });
   const { invitationId, organisationId, serviceId, roleId } = details;
   try {
-    if(serviceId) {
+    if (serviceId) {
       let invitation = await invitations.findOne(
         {
           where: {
