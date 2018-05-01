@@ -43,8 +43,8 @@ describe('when upserting and invitation mapping', () => {
   beforeEach(() => {
     details = {
       invitationId: 'inv1',
-      organisationId: '',
-      serviceId: '',
+      organisationId: 'org1',
+      serviceId: 'svc1',
       roleId: 0,
     };
 
@@ -110,7 +110,6 @@ describe('when upserting and invitation mapping', () => {
     });
   });
 
-
   it('then it should destroy the existing organisation record if existing record found and role has changed', async () => {
     const invitationOrganisation = createJestMockForSequelizeEntity({
       invitation_id: 'inv1',
@@ -128,7 +127,7 @@ describe('when upserting and invitation mapping', () => {
   it('then it should create new organisation record if existing record found and role has changed', async () => {
     const invitationOrganisation = createJestMockForSequelizeEntity({
       invitation_id: 'inv1',
-      organisation_id: '',
+      organisation_id: 'org1',
       role_id: 10000,
     });
     invitationOrganisation.destroy = jest.fn();
@@ -139,7 +138,7 @@ describe('when upserting and invitation mapping', () => {
     expect(db.invitationOrganisations.create.mock.calls.length).toBe(1);
     expect(db.invitationOrganisations.create.mock.calls[0][0]).toEqual({
       invitation_id: 'inv1',
-      organisation_id: '',
+      organisation_id: 'org1',
       role_id: 0,
     });
   });
@@ -150,7 +149,7 @@ describe('when upserting and invitation mapping', () => {
     expect(db.invitationOrganisations.create.mock.calls.length).toBe(1);
     expect(db.invitationOrganisations.create.mock.calls[0][0]).toEqual({
       invitation_id: 'inv1',
-      organisation_id: '',
+      organisation_id: 'org1',
       role_id: 0,
     });
   });
@@ -158,7 +157,7 @@ describe('when upserting and invitation mapping', () => {
   it('then it should not modify organisations if existing record found but has not changed', async () => {
     const invitationOrganisation = createJestMockForSequelizeEntity({
       invitation_id: 'inv1',
-      organisation_id: '',
+      organisation_id: 'org1',
       role_id: 0,
     });
     invitationOrganisation.destroy = jest.fn();
@@ -168,5 +167,20 @@ describe('when upserting and invitation mapping', () => {
 
     expect(invitationOrganisation.destroy.mock.calls.length).toBe(0);
     expect(db.invitationOrganisations.create.mock.calls.length).toBe(0);
+  });
+
+  it('then it should not modify service invitation if service id not in details', async () => {
+    const invitation = createJestMockForSequelizeEntity({
+      invitation_id: 'inv1',
+      role_id: '0',
+    });
+    invitation.destroy = jest.fn();
+    db.invitations.findOne.mockReturnValue(invitation);
+
+    details.serviceId = undefined;
+    await invitationStorage.upsert(details);
+
+    expect(invitation.destroy.mock.calls.length).toBe(0);
+    expect(db.invitations.create.mock.calls.length).toBe(0);
   });
 });

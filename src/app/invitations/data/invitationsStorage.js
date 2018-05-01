@@ -85,28 +85,37 @@ const upsert = async (details, correlationId) => {
   logger.info(`Upsert invitation for request ${correlationId}`, { correlationId });
   const { invitationId, organisationId, serviceId, roleId } = details;
   try {
-    let invitation = await invitations.findOne(
-      {
-        where: {
-          invitation_id: {
-            [Op.eq]: invitationId,
+    if(serviceId) {
+      let invitation = await invitations.findOne(
+        {
+          where: {
+            invitation_id: {
+              [Op.eq]: invitationId,
+            },
+            service_id: {
+              [Op.eq]: serviceId,
+            },
+            organisation_id: {
+              [Op.eq]: organisationId,
+            },
           },
-          service_id: {
-            [Op.eq]: serviceId,
-          },
-          organisation_id: {
-            [Op.eq]: organisationId,
-          },
-        },
+        });
+      if (invitation) {
+        await invitation.destroy();
+      }
+      invitation = await invitations.create({
+        invitation_id: invitationId,
+        organisation_id: organisationId,
+        service_id: serviceId,
       });
-    if (invitation) {
-      await invitation.destroy();
+
+      if (details.externalIdentifiers) {
+        for (let i = 0; i < details.externalIdentifiers.length; i += 1) {
+          const extId = details.externalIdentifiers[i];
+          await invitation.setExternalIdentifier(extId.key, extId.value);
+        }
+      }
     }
-    invitation = await invitations.create({
-      invitation_id: invitationId,
-      organisation_id: organisationId,
-      service_id: serviceId,
-    });
 
     const invitationOrganisation = await invitationOrganisations.find({
       where: {
@@ -128,13 +137,6 @@ const upsert = async (details, correlationId) => {
         organisation_id: organisationId,
         role_id: roleId,
       });
-    }
-
-    if (details.externalIdentifiers) {
-      for (let i = 0; i < details.externalIdentifiers.length; i += 1) {
-        const extId = details.externalIdentifiers[i];
-        await invitation.setExternalIdentifier(extId.key, extId.value);
-      }
     }
   } catch (e) {
     logger.error(`Error in InvitationsStorage.upsert ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
