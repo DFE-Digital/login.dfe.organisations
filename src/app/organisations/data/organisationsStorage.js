@@ -226,6 +226,8 @@ const getOrganisationsForUser = async (userId) => {
           id: service.Service.getDataValue('id'),
           name: service.Service.getDataValue('name'),
           externalIdentifiers,
+          requestDate: service.getDataValue('createdAt'),
+          status: service.getDataValue('status'),
         };
       })),
     };
