@@ -23,11 +23,13 @@ const servicesRouteExport = () => {
   if (config.hostingEnvironment.env !== 'dev') {
     router.use(apiAuth(router, config));
   }
+
   // Map routed to functions.
   router.get('/:sid', asyncWrapper(getServiceById));
   router.get('/:sid/identifiers/:id_key/:id_value', asyncWrapper(getSingleServiceIdentifier));
   router.get('/associated-with-user/:uid', asyncWrapper(getUserAssociatedServices));
   router.get('/unassociated-with-user/:uid', asyncWrapper(getUnassociatedWithUserServices));
+
   return router;
 };
 
