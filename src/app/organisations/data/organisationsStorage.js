@@ -232,6 +232,14 @@ const getOrganisationsForUser = async (userId) => {
   }));
 };
 
+const setUserAccessToOrganisation = async (organisationId, userId, roleId) => {
+  return userOrganisations.upsert({
+    user_id: userId.toUpperCase(),
+    organisation_id: organisationId,
+    role_id: roleId,
+  });
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -245,4 +253,5 @@ module.exports = {
   getOrgByUrn,
   getOrgByUid,
   getOrganisationsForUser,
+  setUserAccessToOrganisation,
 };
