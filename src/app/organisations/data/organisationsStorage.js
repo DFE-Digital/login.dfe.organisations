@@ -1,6 +1,6 @@
 const logger = require('./../../../infrastructure/logger');
 const { list, getOrgById, getOrgByUrn, getOrgByUid } = require('./../../services/data/organisationsStorage');
-const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations } = require('./../../../infrastructure/repository');
+const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, users } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
@@ -181,6 +181,57 @@ const removeAssociationsOfType = async (organisationId, linkType) => {
   });
 };
 
+const getOrganisationsForUser = async (userId) => {
+  const userOrgs = await userOrganisations.findAll({
+    where: {
+      user_id: {
+        [Op.eq]: userId,
+      },
+    },
+    include: ['Organisation'],
+  });
+  if (!userOrgs || userOrgs.length === 0) {
+    return [];
+  }
+
+  return await Promise.all(userOrgs.map(async (userOrg) => {
+    const services = await users.findAll({
+      where: {
+        user_id: {
+          [Op.eq]: userId,
+        },
+        organisation_id: {
+          [Op.eq]: userOrg.organisation_id,
+        },
+      },
+      include: ['Service'],
+    });
+    const role = await userOrg.getRole();
+    const approvers = await userOrg.getApprovers().map(user => user.user_id);
+
+    return {
+      organisation: {
+        id: userOrg.Organisation.getDataValue('id'),
+        name: userOrg.Organisation.getDataValue('name'),
+      },
+      role,
+      approvers,
+      services: await Promise.all(services.map(async (service) => {
+        const externalIdentifiers = await service.getExternalIdentifiers().map(extId => ({
+          key: extId.identifier_key,
+          value: extId.identifier_value,
+        }));
+
+        return {
+          id: service.Service.getDataValue('id'),
+          name: service.Service.getDataValue('name'),
+          externalIdentifiers,
+        };
+      })),
+    };
+  }));
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -193,4 +244,5 @@ module.exports = {
   removeAssociationsOfType,
   getOrgByUrn,
   getOrgByUid,
+  getOrganisationsForUser,
 };

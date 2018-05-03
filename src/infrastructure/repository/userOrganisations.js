@@ -25,9 +25,25 @@ const define = (db, schema) => {
   });
 };
 
-const extend = ({ userOrganisations, organisations, users }) => {
+const extend = ({ userOrganisations, organisations, users, roles }) => {
   userOrganisations.belongsTo(organisations, { as: 'Organisation', foreignKey: 'organisation_id' });
   userOrganisations.belongsTo(users, { as: 'User', foreignKey: 'user_id' });
+
+  userOrganisations.prototype.getRole = function () {
+    return roles.find(r => r.id === this.role_id);
+  };
+  userOrganisations.prototype.getApprovers = function () {
+    return userOrganisations.findAll({
+      where: {
+        organisation_id: {
+          [Op.eq]: this.organisation_id,
+        },
+        role_id: {
+          [Op.eq]: 10000,
+        },
+      },
+    });
+  };
 };
 
 module.exports = {
