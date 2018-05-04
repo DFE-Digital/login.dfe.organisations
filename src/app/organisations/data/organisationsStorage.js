@@ -213,6 +213,9 @@ const getOrganisationsForUser = async (userId) => {
       organisation: {
         id: userOrg.Organisation.getDataValue('id'),
         name: userOrg.Organisation.getDataValue('name'),
+        urn: userOrg.Organisation.getDataValue('URN') || undefined,
+        uid: userOrg.Organisation.getDataValue('UID') || undefined,
+        ukprn: userOrg.Organisation.getDataValue('UKPRN') || undefined,
       },
       role,
       approvers,
@@ -225,6 +228,7 @@ const getOrganisationsForUser = async (userId) => {
         return {
           id: service.Service.getDataValue('id'),
           name: service.Service.getDataValue('name'),
+          description: service.Service.getDataValue('description'),
           externalIdentifiers,
           requestDate: service.getDataValue('createdAt'),
           status: service.getDataValue('status'),
