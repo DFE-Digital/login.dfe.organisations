@@ -10,7 +10,9 @@ const { users, services, roles, organisations, userOrganisations } = require('./
 const list = async (correlationId) => {
   try {
     logger.info(`Calling list for services storage for request ${correlationId}`, { correlationId });
-    const serviceEntities = await services.findAll();
+    const serviceEntities = await services.findAll({
+      order: ['name'],
+    });
     if (!serviceEntities) {
       return null;
     }
