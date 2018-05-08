@@ -216,6 +216,8 @@ const getOrganisationsForUser = async (userId) => {
         urn: userOrg.Organisation.getDataValue('URN') || undefined,
         uid: userOrg.Organisation.getDataValue('UID') || undefined,
         ukprn: userOrg.Organisation.getDataValue('UKPRN') || undefined,
+        category: organisationCategory.find(c => c.id === userOrg.Organisation.getDataValue('Category')),
+        type: establishmentTypes.find(t => t.id === userOrg.Organisation.getDataValue('Type')),
       },
       role,
       approvers,
