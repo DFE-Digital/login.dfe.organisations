@@ -4,7 +4,7 @@ const Sequelize = require('sequelize');
 
 const Op = Sequelize.Op;
 const logger = require('./../../../infrastructure/logger');
-const { invitations, invitationOrganisations } = require('./../../../infrastructure/repository');
+const { invitations, invitationOrganisations, organisationCategory, establishmentTypes } = require('./../../../infrastructure/repository');
 
 const list = async (correlationId) => {
   try {
@@ -70,6 +70,11 @@ const getForInvitationId = async (id, correlationId) => {
         organisation: {
           id: invitationOrg.Organisation.getDataValue('id'),
           name: invitationOrg.Organisation.getDataValue('name'),
+          urn: invitationOrg.Organisation.getDataValue('URN') || undefined,
+          uid: invitationOrg.Organisation.getDataValue('UID') || undefined,
+          ukprn: invitationOrg.Organisation.getDataValue('UKPRN') || undefined,
+          category: organisationCategory.find(c => c.id === invitationOrg.Organisation.getDataValue('Category')),
+          type: establishmentTypes.find(t => t.id === invitationOrg.Organisation.getDataValue('Type')),
         },
         role,
         approvers,
