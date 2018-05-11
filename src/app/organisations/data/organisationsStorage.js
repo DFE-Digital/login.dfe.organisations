@@ -261,6 +261,19 @@ const getOrganisationCategories = async () => {
   return Promise.resolve(categories);
 };
 
+const getOrganisationStates = async () => {
+  const categories = organisationStatus.sort((x, y) => {
+    if(x.name < y.name){
+      return -1;
+    }
+    if(x.name > y.name){
+      return 1;
+    }
+    return 0;
+  });
+  return Promise.resolve(categories);
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -276,4 +289,5 @@ module.exports = {
   getOrganisationsForUser,
   setUserAccessToOrganisation,
   getOrganisationCategories,
+  getOrganisationStates,
 };
