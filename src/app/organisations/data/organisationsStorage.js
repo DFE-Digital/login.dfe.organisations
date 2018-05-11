@@ -17,9 +17,9 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.Address = organisation.address;
 };
 
-const search = async (criteria, pageNumber = 1, pageSize = 25) => {
+const search = async (criteria, pageNumber = 1, pageSize = 25, filterCategories = undefined, filterStates = undefined) => {
   const offset = (pageNumber - 1) * pageSize;
-  const result = await organisations.findAndCountAll({
+  const query = {
     where: {
       [Op.or]: {
         name: {
@@ -41,7 +41,21 @@ const search = async (criteria, pageNumber = 1, pageSize = 25) => {
     ],
     limit: pageSize,
     offset,
-  });
+  };
+
+  if (filterCategories && filterCategories.length > 0) {
+    query.where.Category = {
+      [Op.in]: filterCategories,
+    };
+  }
+
+  if (filterStates && filterStates.length > 0) {
+    query.where.Status = {
+      [Op.in]: filterStates,
+    };
+  }
+
+  const result = await organisations.findAndCountAll(query);
   const orgEntities = result.rows;
   const orgs = orgEntities.map((entity) => {
     return {
@@ -250,10 +264,23 @@ const setUserAccessToOrganisation = async (organisationId, userId, roleId) => {
 
 const getOrganisationCategories = async () => {
   const categories = organisationCategory.sort((x, y) => {
-    if(x.name < y.name){
+    if (x.name < y.name) {
       return -1;
     }
-    if(x.name > y.name){
+    if (x.name > y.name) {
+      return 1;
+    }
+    return 0;
+  });
+  return Promise.resolve(categories);
+};
+
+const getOrganisationStates = async () => {
+  const categories = organisationStatus.sort((x, y) => {
+    if (x.name < y.name) {
+      return -1;
+    }
+    if (x.name > y.name) {
       return 1;
     }
     return 0;
@@ -276,4 +303,5 @@ module.exports = {
   getOrganisationsForUser,
   setUserAccessToOrganisation,
   getOrganisationCategories,
+  getOrganisationStates,
 };
