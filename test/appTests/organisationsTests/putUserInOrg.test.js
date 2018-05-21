@@ -37,6 +37,12 @@ describe('when setting a users access within an organisation', () => {
     expect(setUserAccessToOrganisation.mock.calls[0][2]).toBe(10000);
   });
 
+  it('then the status of the users access is pending', async () => {
+    await putUserInOrg(req, res);
+
+    expect(setUserAccessToOrganisation.mock.calls[0][3]).toBe(0);
+  });
+
   it('then it should return 201 if user was created', async () => {
     setUserAccessToOrganisation.mockReturnValue(true);
 

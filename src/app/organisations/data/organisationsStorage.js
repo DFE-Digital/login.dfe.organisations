@@ -254,11 +254,12 @@ const getOrganisationsForUser = async (userId) => {
   }));
 };
 
-const setUserAccessToOrganisation = async (organisationId, userId, roleId) => {
+const setUserAccessToOrganisation = async (organisationId, userId, roleId, status) => {
   return userOrganisations.upsert({
     user_id: userId.toUpperCase(),
     organisation_id: organisationId,
     role_id: roleId,
+    status,
   });
 };
 
