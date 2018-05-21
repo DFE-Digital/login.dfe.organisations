@@ -18,6 +18,11 @@ const define = (db, schema) => {
       allowNull: false,
       defaultValue: 0,
     },
+    status: {
+      type: Sequelize.SMALLINT,
+      allowNull: false,
+      defaultValue: 0,
+    }.
   }, {
     timestamps: true,
     tableName: 'user_organisation',
