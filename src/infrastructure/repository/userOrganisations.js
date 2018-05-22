@@ -22,7 +22,7 @@ const define = (db, schema) => {
       type: Sequelize.SMALLINT,
       allowNull: false,
       defaultValue: 0,
-    }.
+    }
   }, {
     timestamps: true,
     tableName: 'user_organisation',
