@@ -299,8 +299,8 @@ const getUsersAssociatedWithOrganisationForApproval = async (userId) => {
 
   const associatedUsersForApproval = await userOrganisations.findAll({
     where: {
-      org_id: {
-        [Op.in]: userOrgs.map(c => c.org_id),
+      organisation_id: {
+        [Op.in]: userOrgs.map(c => c.organisation_id),
       },
       status: {
         [Op.eq]: 0,
