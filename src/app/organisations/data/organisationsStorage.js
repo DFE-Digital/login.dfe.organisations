@@ -291,6 +291,9 @@ const getUsersAssociatedWithOrganisationForApproval = async (userId) => {
       role_id: {
         [Op.eq]: 10000,
       },
+      status: {
+        [Op.eq]: 1,
+      },
     },
   });
   if (!userOrgs || userOrgs.length === 0) {
@@ -305,6 +308,9 @@ const getUsersAssociatedWithOrganisationForApproval = async (userId) => {
       status: {
         [Op.eq]: 0,
       },
+      user_id: {
+        [Op.ne]: userId,
+      }
     },
     include: ['Organisation'],
   });
