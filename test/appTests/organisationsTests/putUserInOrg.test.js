@@ -20,6 +20,7 @@ describe('when setting a users access within an organisation', () => {
       },
       body: {
         roleId: 10000,
+        reason: 'Test',
       },
     };
 
@@ -35,6 +36,8 @@ describe('when setting a users access within an organisation', () => {
     expect(setUserAccessToOrganisation.mock.calls[0][0]).toBe('org1');
     expect(setUserAccessToOrganisation.mock.calls[0][1]).toBe('user1');
     expect(setUserAccessToOrganisation.mock.calls[0][2]).toBe(10000);
+    expect(setUserAccessToOrganisation.mock.calls[0][3]).toBe(0);
+    expect(setUserAccessToOrganisation.mock.calls[0][4]).toBe('Test');
   });
 
   it('then the status of the users access is pending', async () => {

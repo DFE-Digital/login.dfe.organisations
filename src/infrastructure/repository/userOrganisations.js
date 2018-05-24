@@ -22,7 +22,11 @@ const define = (db, schema) => {
       type: Sequelize.SMALLINT,
       allowNull: false,
       defaultValue: 0,
-    }
+    },
+    reason: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
   }, {
     timestamps: true,
     tableName: 'user_organisation',
