@@ -1,7 +1,8 @@
 const logger = require('./../../../infrastructure/logger');
 const { list, getOrgById, getOrgByUrn, getOrgByUid } = require('./../../services/data/organisationsStorage');
-const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, users } = require('./../../../infrastructure/repository');
+const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, users, organisationUserStatus } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
+
 const Op = Sequelize.Op;
 
 const updateEntityFromOrganisation = (entity, organisation) => {
@@ -57,21 +58,19 @@ const search = async (criteria, pageNumber = 1, pageSize = 25, filterCategories 
 
   const result = await organisations.findAndCountAll(query);
   const orgEntities = result.rows;
-  const orgs = orgEntities.map((entity) => {
-    return {
-      id: entity.id,
-      name: entity.name,
-      category: organisationCategory.find(c => c.id === entity.Category),
-      type: establishmentTypes.find(c => c.id === entity.Type),
-      urn: entity.URN,
-      uid: entity.UID,
-      ukprn: entity.UKPRN,
-      establishmentNumber: entity.EstablishmentNumber,
-      status: organisationStatus.find(c => c.id === entity.Status),
-      closedOn: entity.ClosedOn,
-      address: entity.Address,
-    };
-  });
+  const orgs = orgEntities.map(entity => ({
+    id: entity.id,
+    name: entity.name,
+    category: organisationCategory.find(c => c.id === entity.Category),
+    type: establishmentTypes.find(c => c.id === entity.Type),
+    urn: entity.URN,
+    uid: entity.UID,
+    ukprn: entity.UKPRN,
+    establishmentNumber: entity.EstablishmentNumber,
+    status: organisationStatus.find(c => c.id === entity.Status),
+    closedOn: entity.ClosedOn,
+    address: entity.Address,
+  }));
   const totalNumberOfRecords = result.count;
   const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
   return {
@@ -91,21 +90,19 @@ const pagedList = async (pageNumber = 1, pageSize = 25) => {
     offset,
   });
   const orgEntities = result.rows;
-  const orgs = orgEntities.map((entity) => {
-    return {
-      id: entity.id,
-      name: entity.name,
-      category: organisationCategory.find(c => c.id === entity.Category),
-      type: establishmentTypes.find(c => c.id === entity.Type),
-      urn: entity.URN,
-      uid: entity.UID,
-      ukprn: entity.UKPRN,
-      establishmentNumber: entity.EstablishmentNumber,
-      status: organisationStatus.find(c => c.id === entity.Status),
-      closedOn: entity.ClosedOn,
-      address: entity.Address,
-    };
-  });
+  const orgs = orgEntities.map(entity => ({
+    id: entity.id,
+    name: entity.name,
+    category: organisationCategory.find(c => c.id === entity.Category),
+    type: establishmentTypes.find(c => c.id === entity.Type),
+    urn: entity.URN,
+    uid: entity.UID,
+    ukprn: entity.UKPRN,
+    establishmentNumber: entity.EstablishmentNumber,
+    status: organisationStatus.find(c => c.id === entity.Status),
+    closedOn: entity.ClosedOn,
+    address: entity.Address,
+  }));
   const totalNumberOfRecords = result.count;
   const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
   return {
@@ -156,21 +153,19 @@ const listOfCategory = async (category, includeAssociations = false) => {
     query.include = ['associations'];
   }
   const orgEntities = await organisations.findAll(query);
-  return orgEntities.map((entity) => {
-    return {
-      id: entity.id,
-      name: entity.name,
-      category: organisationCategory.find(c => c.id === entity.Category),
-      type: establishmentTypes.find(c => c.id === entity.Type),
-      urn: entity.URN,
-      uid: entity.UID,
-      ukprn: entity.UKPRN,
-      establishmentNumber: entity.EstablishmentNumber,
-      status: organisationStatus.find(c => c.id === entity.Status),
-      closedOn: entity.ClosedOn,
-      address: entity.Address,
-    };
-  });
+  return orgEntities.map(entity => ({
+    id: entity.id,
+    name: entity.name,
+    category: organisationCategory.find(c => c.id === entity.Category),
+    type: establishmentTypes.find(c => c.id === entity.Type),
+    urn: entity.URN,
+    uid: entity.UID,
+    ukprn: entity.UKPRN,
+    establishmentNumber: entity.EstablishmentNumber,
+    status: organisationStatus.find(c => c.id === entity.Status),
+    closedOn: entity.ClosedOn,
+    address: entity.Address,
+  }));
 };
 
 const addAssociation = async (organisationId, associatedOrganisationId, linkType) => {
@@ -254,13 +249,13 @@ const getOrganisationsForUser = async (userId) => {
   }));
 };
 
-const setUserAccessToOrganisation = async (organisationId, userId, roleId) => {
-  return userOrganisations.upsert({
-    user_id: userId.toUpperCase(),
-    organisation_id: organisationId,
-    role_id: roleId,
-  });
-};
+const setUserAccessToOrganisation = async (organisationId, userId, roleId, status, reason) => userOrganisations.upsert({
+  user_id: userId.toUpperCase(),
+  organisation_id: organisationId,
+  role_id: roleId,
+  status,
+  reason,
+});
 
 const getOrganisationCategories = async () => {
   const categories = organisationCategory.sort((x, y) => {
@@ -288,6 +283,51 @@ const getOrganisationStates = async () => {
   return Promise.resolve(categories);
 };
 
+const getUsersPendingApprovalByUser = async (userId) => {
+  const userOrgs = await userOrganisations.findAll({
+    where: {
+      user_id: {
+        [Op.eq]: userId,
+      },
+      role_id: {
+        [Op.eq]: 10000,
+      },
+      status: {
+        [Op.eq]: 1,
+      },
+    },
+  });
+  if (!userOrgs || userOrgs.length === 0) {
+    return [];
+  }
+
+  const associatedUsersForApproval = await userOrganisations.findAll({
+    where: {
+      organisation_id: {
+        [Op.in]: userOrgs.map(c => c.organisation_id),
+      },
+      status: {
+        [Op.eq]: 0,
+      },
+      user_id: {
+        [Op.ne]: userId,
+      },
+    },
+    include: ['Organisation'],
+  });
+
+  if (!associatedUsersForApproval || associatedUsersForApproval.length === 0) {
+    return [];
+  }
+
+  return associatedUsersForApproval.map(entity => ({
+    org_id: entity.Organisation.getDataValue('id'),
+    org_name: entity.Organisation.getDataValue('name'),
+    user_id: entity.getDataValue('user_id'),
+    status: organisationUserStatus.find(c => c.id === entity.getDataValue('status')),
+  }));
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -304,4 +344,5 @@ module.exports = {
   setUserAccessToOrganisation,
   getOrganisationCategories,
   getOrganisationStates,
+  getUsersPendingApprovalByUser,
 };
