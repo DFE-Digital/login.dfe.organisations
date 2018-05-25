@@ -21,6 +21,12 @@ const defineStatic = (model) => {
     { id: 10000, name: 'Approver' },
   ];
 
+  model.organisationUserStatus = [
+    { id: -1, name: 'Rejected' },
+    { id: 0, name: 'Pending' },
+    { id: 1, name: 'Approved' },
+  ];
+
   model.organisationStatus = [
     { id: 1, name: 'Open' },
     { id: 2, name: 'Closed' },
@@ -96,7 +102,6 @@ buildDataModel(dataModel, db, [
   usersModel,
   userOrganisationsModel,
 ]);
-
 
 
 module.exports = dataModel;
