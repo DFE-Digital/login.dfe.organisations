@@ -24,7 +24,7 @@ describe('when putting a single service identifier', () => {
   beforeEach(() => {
     req = {
       params: {
-        uid: 'user1',
+        uid: 'User1',
         org_id: 'org1',
         sid: 'svc1',
       },
@@ -49,6 +49,7 @@ describe('when putting a single service identifier', () => {
   afterEach(() => {
     expect(res._isEndCalled()).toBe(true);
   });
+
   it('then it should upsert record with put data', async () => {
     await putSingleServiceIdentifier(req, res);
 
@@ -62,7 +63,7 @@ describe('when putting a single service identifier', () => {
   });
 
   it('then if the body key value is not supplied a bad request is returned', async () => {
-    req.body = { };
+    req.body = {};
 
     await putSingleServiceIdentifier(req, res);
 
@@ -74,6 +75,7 @@ describe('when putting a single service identifier', () => {
 
     expect(res.statusCode).toBe(202);
   });
+
   it('then if the value has already been used and not assigned to that user then a 409 is returned', async () => {
     servicesStorage.getExternalIdentifier.mockReturnValue({ userId: '4rfv' });
 
@@ -81,11 +83,22 @@ describe('when putting a single service identifier', () => {
 
     expect(res.statusCode).toBe(409);
   });
-  it('then if the user is assigned to that value already then it is updated' , async () => {
+
+  it('then if the user is assigned to that value already then it is updated', async () => {
     servicesStorage.getExternalIdentifier.mockReturnValue({ userId: 'user1' });
 
     await putSingleServiceIdentifier(req, res);
 
     expect(res.statusCode).toBe(202);
+  });
+
+  it('then it should allow multiple users to be assigned a blank value', async () => {
+    req.body.id_value = '';
+    servicesStorage.getExternalIdentifier.mockReturnValue({ userId: 'dsfsd' });
+
+    await putSingleServiceIdentifier(req, res);
+
+    expect(res.statusCode).toBe(202);
+    expect(servicesStorage.getExternalIdentifier.mock.calls).toHaveLength(0);
   });
 });
