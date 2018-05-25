@@ -198,6 +198,9 @@ const getOrganisationsForUser = async (userId) => {
       },
     },
     include: ['Organisation'],
+    order: [
+      ['Organisation', 'name', 'ASC'],
+    ],
   });
   if (!userOrgs || userOrgs.length === 0) {
     return [];
