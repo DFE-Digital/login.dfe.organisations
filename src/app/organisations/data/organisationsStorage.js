@@ -1,6 +1,6 @@
 const logger = require('./../../../infrastructure/logger');
 const { list, getOrgById, getOrgByUrn, getOrgByUid } = require('./../../services/data/organisationsStorage');
-const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, users } = require('./../../../infrastructure/repository');
+const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, users, organisationUserStatus } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 
 const Op = Sequelize.Op;
@@ -283,7 +283,7 @@ const getOrganisationStates = async () => {
   return Promise.resolve(categories);
 };
 
-const getUsersAssociatedWithOrganisationForApproval = async (userId) => {
+const getUsersPendingApprovalByUser = async (userId) => {
   const userOrgs = await userOrganisations.findAll({
     where: {
       user_id: {
@@ -311,7 +311,7 @@ const getUsersAssociatedWithOrganisationForApproval = async (userId) => {
       },
       user_id: {
         [Op.ne]: userId,
-      }
+      },
     },
     include: ['Organisation'],
   });
@@ -320,7 +320,12 @@ const getUsersAssociatedWithOrganisationForApproval = async (userId) => {
     return [];
   }
 
-  return associatedUsersForApproval;
+  return associatedUsersForApproval.map(entity => ({
+    org_id: entity.Organisation.getDataValue('id'),
+    org_name: entity.Organisation.getDataValue('name'),
+    user_id: entity.getDataValue('user_id'),
+    status: organisationUserStatus.find(c => c.id === entity.getDataValue('status')),
+  }));
 };
 
 module.exports = {
@@ -339,5 +344,5 @@ module.exports = {
   setUserAccessToOrganisation,
   getOrganisationCategories,
   getOrganisationStates,
-  getUsersAssociatedWithOrganisationForApproval,
+  getUsersPendingApprovalByUser,
 };
