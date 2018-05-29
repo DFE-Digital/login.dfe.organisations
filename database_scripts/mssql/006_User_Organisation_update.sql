@@ -3,7 +3,7 @@ IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'user
     BEGIN
         ALTER TABLE user_organisation ADD [status] smallint DEFAULT 0 NOT NULL
 
-        update user_organisation set [status] = 1
+        EXEC('update user_organisation set [status] = 1')
     END
 GO
 
