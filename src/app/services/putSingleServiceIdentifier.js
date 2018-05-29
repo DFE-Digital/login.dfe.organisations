@@ -9,14 +9,16 @@ const putSingleServiceIdentifierForUser = async (req, res) => {
   const identifierKey = req.body.id_key ? req.body.id_key.toLowerCase() : '';
   const identifierValue = req.body.id_value ? req.body.id_value.toLowerCase() : '';
 
-  if(!identifierKey) {
+  if (!identifierKey) {
     return res.status(403).send();
   }
 
-  const checkExternalIdentifier = await getExternalIdentifier(serviceId, identifierKey, identifierValue, req.header('x-correlation-id'));
+  if (identifierValue && identifierValue.length > 0) {
+    const checkExternalIdentifier = await getExternalIdentifier(serviceId, identifierKey, identifierValue, req.header('x-correlation-id'));
 
-  if(checkExternalIdentifier && checkExternalIdentifier.userId.toLowerCase() !== userId) {
-    return res.status(409).send();
+    if (checkExternalIdentifier && checkExternalIdentifier.userId.toLowerCase() !== userId) {
+      return res.status(409).send();
+    }
   }
 
   await upsertExternalIdentifier(serviceId, userId, orgId, identifierKey, identifierValue, req.header('x-correlation-id'));
