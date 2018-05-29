@@ -324,6 +324,7 @@ const getUsersPendingApprovalByUser = async (userId) => {
     org_id: entity.Organisation.getDataValue('id'),
     org_name: entity.Organisation.getDataValue('name'),
     user_id: entity.getDataValue('user_id'),
+    created_date: entity.getDataValue('createdAt'),
     status: organisationUserStatus.find(c => c.id === entity.getDataValue('status')),
   }));
 };
