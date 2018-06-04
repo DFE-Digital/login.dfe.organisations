@@ -4,6 +4,7 @@ const express = require('express');
 const apiAuth = require('login.dfe.api.auth');
 const config = require('./../../infrastructure/config')();
 const { asyncWrapper } = require('login.dfe.express-error-handling');
+const { deprecate } = require('./../../utils');
 
 const listServices = require('./listServices');
 const getUserAssociatedServices = require('./getUserAssociatedServices');
@@ -16,6 +17,8 @@ const getServiceById = require('./getServiceById');
 const getSingleServiceIdentifier = require('./getSingleServiceIdentifier');
 const putSingleServiceIdentifier = require('./putSingleServiceIdentifier');
 const postServiceUser = require('./postServiceUser');
+const putUserService = require('./putUserService');
+const deleteUserAccess = require('./deleteUserService');
 
 const router = express.Router();
 
@@ -46,7 +49,9 @@ const organisationsRouteExport = () => {
   router.get('/:org_id/services/:sid/users', asyncWrapper(getServiceUsers));
   router.get('/:org_id/services/:sid/approvers', asyncWrapper(getApproversOfService));
   router.put('/:org_id/services/:sid/identifiers/:uid', asyncWrapper(putSingleServiceIdentifier));
-  router.post('/:ext_org_id/services/:sid/create/:uid', asyncWrapper(postServiceUser));
+  router.post('/:ext_org_id/services/:sid/create/:uid', deprecate('/organisations/:org_id/services/:sid/users/:uid'), asyncWrapper(postServiceUser));
+  router.put('/:org_id/services/:sid/users/:uid', asyncWrapper(putUserService));
+  router.delete('/:org_id/services/:sid/users/:uid', asyncWrapper(deleteUserAccess));
 
   return router;
 };
