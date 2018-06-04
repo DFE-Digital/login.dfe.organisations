@@ -18,6 +18,7 @@ const getSingleServiceIdentifier = require('./getSingleServiceIdentifier');
 const putSingleServiceIdentifier = require('./putSingleServiceIdentifier');
 const postServiceUser = require('./postServiceUser');
 const putUserService = require('./putUserService');
+const deleteUserAccess = require('./deleteUserService');
 
 const router = express.Router();
 
@@ -50,6 +51,7 @@ const organisationsRouteExport = () => {
   router.put('/:org_id/services/:sid/identifiers/:uid', asyncWrapper(putSingleServiceIdentifier));
   router.post('/:ext_org_id/services/:sid/create/:uid', deprecate('/organisations/:org_id/services/:sid/users/:uid'), asyncWrapper(postServiceUser));
   router.put('/:org_id/services/:sid/users/:uid', asyncWrapper(putUserService));
+  router.delete('/:org_id/services/:sid/users/:uid', asyncWrapper(deleteUserAccess));
 
   return router;
 };
