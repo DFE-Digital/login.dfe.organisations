@@ -4,7 +4,8 @@ const Sequelize = require('sequelize');
 
 const Op = Sequelize.Op;
 const logger = require('./../../../infrastructure/logger');
-const { users, services, roles, organisations, userOrganisations } = require('./../../../infrastructure/repository');
+const { users, services, roles, organisations, userOrganisations, externalIdentifiers } = require('./../../../infrastructure/repository');
+const uuid = require('uuid/v4');
 
 
 const list = async (correlationId) => {
@@ -240,6 +241,7 @@ const update = async (id, name, description, correlationId) => {
   }
 };
 
+// TODO: Remove this method
 const upsertServiceUser = async (options, correlationId) => {
   logger.info(`Calling upsertServiceUser for services storage for request ${correlationId}`, { correlationId });
   const { id, userId, organisationId, serviceId, roleId, status, externalIdentifiers } = options;
@@ -403,6 +405,92 @@ const upsertExternalIdentifier = async (serviceId, userId, organisationId, ident
   }
 };
 
+const upsertUserService = async (organisationId, serviceId, userId, status, correlationId) => {
+  logger.info(`Calling upsertUserService for services storage for request ${correlationId}`, { correlationId });
+  try {
+    const userService = await users.findOne(
+      {
+        where: {
+          user_id: {
+            [Op.eq]: userId,
+          },
+          service_id: {
+            [Op.eq]: serviceId,
+          },
+          organisation_id: {
+            [Op.eq]: organisationId,
+          },
+        },
+      });
+    if (userService) {
+      if (userService.status !== status) {
+        userService.status = status;
+        await userService.save();
+      }
+      return userService.id;
+    }
+
+    const id = uuid();
+    await users.create({
+      id,
+      user_id: userId,
+      organisation_id: organisationId,
+      service_id: serviceId,
+      status,
+    });
+    return id;
+  } catch (e) {
+    logger.error(`Error in upsertUserService for request ${correlationId} - ${e.message}`, {
+      correlationId,
+      errorMessage: e.message,
+      errorCode: e.code,
+      stackTrace: e.stack,
+    });
+    throw e;
+  }
+};
+
+const deleteUserService = async (organisationId, serviceId, userId, correlationId) => {
+  logger.info(`Calling deleteUserService for services storage for request ${correlationId}`, { correlationId });
+  try {
+    await externalIdentifiers.destroy({
+      where: {
+        user_id: {
+          [Op.eq]: userId,
+        },
+        service_id: {
+          [Op.eq]: serviceId,
+        },
+        organisation_id: {
+          [Op.eq]: organisationId,
+        },
+      },
+    });
+
+    await users.destroy({
+      where: {
+        user_id: {
+          [Op.eq]: userId,
+        },
+        service_id: {
+          [Op.eq]: serviceId,
+        },
+        organisation_id: {
+          [Op.eq]: organisationId,
+        },
+      },
+    });
+  } catch (e) {
+    logger.error(`Error in deleteUserService for request ${correlationId} - ${e.message}`, {
+      correlationId,
+      errorMessage: e.message,
+      errorCode: e.code,
+      stackTrace: e.stack,
+    });
+    throw e;
+  }
+};
+
 module.exports = {
   list,
   getServiceDetails,
@@ -417,5 +505,7 @@ module.exports = {
   getApproversOfServiceUserIds,
   getExternalIdentifier,
   upsertExternalIdentifier,
+  upsertUserService,
+  deleteUserService,
 };
 
