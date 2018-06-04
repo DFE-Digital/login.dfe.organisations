@@ -4,7 +4,7 @@ const Sequelize = require('sequelize');
 
 const Op = Sequelize.Op;
 const logger = require('./../../../infrastructure/logger');
-const { users, services, roles, organisations, userOrganisations } = require('./../../../infrastructure/repository');
+const { users, services, roles, organisations, userOrganisations, externalIdentifiers } = require('./../../../infrastructure/repository');
 const uuid = require('uuid/v4');
 
 
@@ -450,6 +450,47 @@ const upsertUserService = async (organisationId, serviceId, userId, status, corr
   }
 };
 
+const deleteUserService = async (organisationId, serviceId, userId, correlationId) => {
+  logger.info(`Calling deleteUserService for services storage for request ${correlationId}`, { correlationId });
+  try {
+    await externalIdentifiers.destroy({
+      where: {
+        user_id: {
+          [Op.eq]: userId,
+        },
+        service_id: {
+          [Op.eq]: serviceId,
+        },
+        organisation_id: {
+          [Op.eq]: organisationId,
+        },
+      },
+    });
+
+    await users.destroy({
+      where: {
+        user_id: {
+          [Op.eq]: userId,
+        },
+        service_id: {
+          [Op.eq]: serviceId,
+        },
+        organisation_id: {
+          [Op.eq]: organisationId,
+        },
+      },
+    });
+  } catch (e) {
+    logger.error(`Error in deleteUserService for request ${correlationId} - ${e.message}`, {
+      correlationId,
+      errorMessage: e.message,
+      errorCode: e.code,
+      stackTrace: e.stack,
+    });
+    throw e;
+  }
+};
+
 module.exports = {
   list,
   getServiceDetails,
@@ -465,5 +506,6 @@ module.exports = {
   getExternalIdentifier,
   upsertExternalIdentifier,
   upsertUserService,
+  deleteUserService,
 };
 
