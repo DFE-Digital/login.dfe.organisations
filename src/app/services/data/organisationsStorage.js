@@ -94,6 +94,22 @@ const getOrgByUid = async (uid) => {
   }
 };
 
+const getOrgByEstablishmentNumber = async (establishmentNumber) => {
+  try {
+    return await organisations.findOne(
+      {
+        where: {
+          EstablishmentNumber: {
+            [Op.eq]: establishmentNumber,
+          },
+        },
+      });
+  } catch (e) {
+    logger.error(`error getting organisation by establishmentm number - ${e.message}`, e);
+    throw e;
+  }
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -101,4 +117,5 @@ module.exports = {
   createOrg,
   getOrgByUrn,
   getOrgByUid,
+  getOrgByEstablishmentNumber,
 };
