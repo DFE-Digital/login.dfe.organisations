@@ -1,14 +1,13 @@
 jest.mock('./../../../src/app/organisations/data/organisationsStorage', () => {
-  const getByUid = jest.fn();
-  const getByUrn = jest.fn();
   return {
-    getOrgByUrn: getByUrn,
-    getOrgByUid: getByUid,
+    getOrgByUrn: jest.fn(),
+    getOrgByUid: jest.fn(),
+    getOrgByEstablishmentNumber: jest.fn(),
   };
 });
 
 const httpMocks = require('node-mocks-http');
-const { getOrgByUrn, getOrgByUid } = require('./../../../src/app/organisations/data/organisationsStorage');
+const { getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber } = require('./../../../src/app/organisations/data/organisationsStorage');
 const get = require('./../../../src/app/organisations/getOrganisationByExternalId');
 const org = {
   id: '8B2A7DBA-BFD9-440F-9A14-03E94DDA4ED6',
@@ -40,6 +39,7 @@ describe('when getting an organisation by id', () => {
 
     getOrgByUrn.mockReset();
     getOrgByUid.mockReset();
+    getOrgByEstablishmentNumber.mockReset();
   });
 
   afterEach(() => {
@@ -69,6 +69,7 @@ describe('when getting an organisation by id', () => {
 
     expect(getOrgByUid.mock.calls).toHaveLength(1);
     expect(getOrgByUrn.mock.calls).toHaveLength(0);
+    expect(getOrgByEstablishmentNumber.mock.calls).toHaveLength(0);
     expect(res.statusCode).toBe(200);
     expect(res._isJSON()).toBe(true);
     expect(res._getData()).toEqual(org);
@@ -83,6 +84,7 @@ describe('when getting an organisation by id', () => {
 
     expect(getOrgByUid.mock.calls).toHaveLength(1);
     expect(getOrgByUrn.mock.calls).toHaveLength(0);
+    expect(getOrgByEstablishmentNumber.mock.calls).toHaveLength(0);
     expect(res.statusCode).toBe(200);
     expect(res._isJSON()).toBe(true);
     expect(res._getData()).toEqual(org);
@@ -97,6 +99,22 @@ describe('when getting an organisation by id', () => {
 
     expect(getOrgByUid.mock.calls).toHaveLength(0);
     expect(getOrgByUrn.mock.calls).toHaveLength(1);
+    expect(getOrgByEstablishmentNumber.mock.calls).toHaveLength(0);
+    expect(res.statusCode).toBe(200);
+    expect(res._isJSON()).toBe(true);
+    expect(res._getData()).toEqual(org);
+  });
+
+  it('it should return json for organisation if found by establishment number if of type 002', async () => {
+    req.params.type = '002';
+
+    getOrgByEstablishmentNumber.mockReturnValue(org);
+
+    await get(req, res);
+
+    expect(getOrgByUid.mock.calls).toHaveLength(0);
+    expect(getOrgByUrn.mock.calls).toHaveLength(0);
+    expect(getOrgByEstablishmentNumber.mock.calls).toHaveLength(1);
     expect(res.statusCode).toBe(200);
     expect(res._isJSON()).toBe(true);
     expect(res._getData()).toEqual(org);
