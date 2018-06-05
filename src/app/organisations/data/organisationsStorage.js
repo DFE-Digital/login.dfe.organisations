@@ -1,5 +1,5 @@
 const logger = require('./../../../infrastructure/logger');
-const { list, getOrgById, getOrgByUrn, getOrgByUid } = require('./../../services/data/organisationsStorage');
+const { list, getOrgById, getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber } = require('./../../services/data/organisationsStorage');
 const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, users, organisationUserStatus } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 
@@ -344,6 +344,7 @@ module.exports = {
   removeAssociationsOfType,
   getOrgByUrn,
   getOrgByUid,
+  getOrgByEstablishmentNumber,
   getOrganisationsForUser,
   setUserAccessToOrganisation,
   getOrganisationCategories,
