@@ -332,6 +332,32 @@ const getUsersPendingApprovalByUser = async (userId) => {
   }));
 };
 
+const getUsersPendingApproval = async (pageNumber = 1, pageSize = 25) => {
+  const offset = (pageNumber - 1) * pageSize;
+  const associatedUsersForApproval = await userOrganisations.findAll({
+    where: {
+      status: {
+        [Op.eq]: 0,
+      },
+    },
+    limit: pageSize,
+    offset,
+    include: ['Organisation'],
+  });
+
+  if (!associatedUsersForApproval || associatedUsersForApproval.length === 0) {
+    return [];
+  }
+
+  return associatedUsersForApproval.map(entity => ({
+    org_id: entity.Organisation.getDataValue('id'),
+    org_name: entity.Organisation.getDataValue('name'),
+    user_id: entity.getDataValue('user_id'),
+    created_date: entity.getDataValue('createdAt'),
+    status: organisationUserStatus.find(c => c.id === entity.getDataValue('status')),
+  }));
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -350,4 +376,5 @@ module.exports = {
   getOrganisationCategories,
   getOrganisationStates,
   getUsersPendingApprovalByUser,
+  getUsersPendingApproval,
 };
