@@ -28,6 +28,7 @@ const routes = () => {
   router.get('/by-external-id/:type/:id', asyncWrapper(getOrganisationByExternalId));
   router.get('/associated-with-user/:uid', asyncWrapper(getOrganisationsAssociatedWithUser));
   router.get('/users-for-approval/:uid', asyncWrapper(getUsersAssocatedWithOrganisationsForApproval));
+  router.get('/users-for-approval', asyncWrapper(getUsersAssocatedWithOrganisationsForApproval));
 
   router.put('/:id/users/:uid', asyncWrapper(putUserInOrg));
 
