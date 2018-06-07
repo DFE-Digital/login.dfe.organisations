@@ -1,11 +1,9 @@
 jest.mock('./../../../src/infrastructure/logger', () => ({
   error: jest.fn(),
 }));
-jest.mock('./../../../src/app/organisations/data/organisationsStorage', () => {
-  return {
-    getUsersPendingApproval: jest.fn(),
-  };
-});
+jest.mock('./../../../src/app/organisations/data/organisationsStorage', () => ({
+  getUsersPendingApproval: jest.fn(),
+}));
 
 const httpMocks = require('node-mocks-http');
 const logger = require('./../../../src/infrastructure/logger');
@@ -39,7 +37,7 @@ describe('when getting users associated to organisations for approval', () => {
 
     logger.error.mockReset();
 
-    getUsersPendingApproval.mockReset().mockReturnValue(userOrgMapping);
+    getUsersPendingApproval.mockReset().mockReturnValue({ usersForApproval: userOrgMapping, totalNumberOfRecords: 11, totalNumberOfPages: 1 });
   });
 
   it('then it should get a page of users from organisations for approval', async () => {
@@ -59,7 +57,10 @@ describe('when getting users associated to organisations for approval', () => {
     await get(req, res);
 
     expect(res._isJSON()).toBe(true);
-    expect(res._getData()).toEqual(userOrgMapping);
+    expect(res._getData().usersForApproval).toEqual(userOrgMapping);
+    expect(res._getData().page).toEqual(2);
+    expect(res._getData().totalNumberOfRecords).toEqual(11);
+    expect(res._getData().totalNumberOfPages).toEqual(1);
     expect(res._isEndCalled()).toBe(true);
   });
 
