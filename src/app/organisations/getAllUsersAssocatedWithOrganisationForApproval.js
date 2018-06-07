@@ -19,8 +19,13 @@ const getPageNumber = (req) => {
 const getUsersAssociatedWithOrganisation = async (req, res) => {
   try {
     const pageNumber = getPageNumber(req);
-    const userOrganisations = await getUsersPendingApproval(pageNumber, pageSize);
-    return res.contentType('json').send(userOrganisations);
+    const page = await getUsersPendingApproval(pageNumber, pageSize);
+    return res.contentType('json').send({
+      usersForApproval: page.usersForApproval,
+      page: pageNumber,
+      totalNumberOfPages: page.totalNumberOfPages,
+      totalNumberOfRecords: page.totalNumberOfRecords,
+    });
   } catch (e) {
     logger.error(`Error getting user organisations for approval - ${e.message}`);
     return res.status(500).send();
