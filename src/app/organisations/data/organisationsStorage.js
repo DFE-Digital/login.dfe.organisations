@@ -351,7 +351,7 @@ const getUsersPendingApproval = async (pageNumber = 1, pageSize = 25) => {
   const totalNumberOfRecords = associatedUsersForApproval.count;
   const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
 
-  const usersForApproval =  associatedUsersForApproval.map(entity => ({
+  const usersForApproval = associatedUsersForApproval.rows.map(entity => ({
     org_id: entity.Organisation.getDataValue('id'),
     org_name: entity.Organisation.getDataValue('name'),
     user_id: entity.getDataValue('user_id'),
