@@ -8,7 +8,7 @@ jest.mock('./../../../src/app/organisations/data/organisationsStorage', () => ({
 const httpMocks = require('node-mocks-http');
 const logger = require('./../../../src/infrastructure/logger');
 const { getUsersPendingApproval } = require('./../../../src/app/organisations/data/organisationsStorage');
-const get = require('./../../../src/app/organisations/getAllUsersAssocatedWithOrganisationForApproval');
+const get = require('./../../../src/app/organisations/getUsersAssociatedWithOrganisationForApproval');
 
 const userOrgMapping = [{
   organisation: {
