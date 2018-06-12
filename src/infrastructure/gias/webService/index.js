@@ -45,6 +45,37 @@ const getExtract = async (id) => {
   };
 };
 
+const getGroupsExtract = async () => {
+  const requestMessage = new SoapMessage('GetGroupExtract')
+    .setUsernamePassword(config.gias.params.username, config.gias.params.password).setMessageExpiry(10000).toXmlString();
+  const response = await rp({
+    method: 'POST',
+    uri: config.gias.params.webserviceUrl,
+    headers: {
+      'content-type': 'text/xml;charset=UTF-8',
+      SOAPAction: 'http://ws.edubase.texunatech.com/GetGroupExtract',
+    },
+    body: requestMessage,
+    resolveWithFullResponse: true,
+    encoding: null,
+  });
+  const responseMessage = MultipartMessage.parse(response.body, MultipartMessage.getBoundaryIdFromResponse(response));
+  const soapResponse = await parseXml(responseMessage.parts[0].content, {
+    tagNameProcessors: [processors.stripPrefix, processors.firstCharLowerCase],
+    explicitArray: false,
+  });
+
+  const attachmentId = soapResponse.envelope.body.getGroupExtractResponse.extract.include.$.href.substr(4).replace('%40', '@');
+  const attachment = responseMessage.parts.find(x => x.id === attachmentId);
+
+  return {
+    createdAt: new Date(soapResponse.envelope.header.security.timestamp.created),
+    expiresAt: new Date(soapResponse.envelope.header.security.timestamp.expires),
+    content: attachment.content,
+  };
+};
+
 module.exports = {
   getExtract,
+  getGroupsExtract,
 };

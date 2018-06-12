@@ -76,11 +76,13 @@ class SoapMessage {
     xml = `${xml}<soapenv:Body>`;
     xml = `${xml}<ws:${this.action}>`;
 
-    const paramNames = Object.keys(this.parameters);
-    paramNames.forEach((name) => {
-      const value = this.parameters[name];
-      xml = `${xml}<ws:${name}>${value}</ws:${name}>`;
-    });
+    if (this.parameters) {
+      const paramNames = Object.keys(this.parameters);
+      paramNames.forEach((name) => {
+        const value = this.parameters[name];
+        xml = `${xml}<ws:${name}>${value}</ws:${name}>`;
+      });
+    }
 
     xml = `${xml}</ws:${this.action}>`;
     xml = `${xml}</soapenv:Body>`;
