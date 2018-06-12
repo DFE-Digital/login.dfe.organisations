@@ -1,5 +1,5 @@
 const config = require('./../config')();
-const { getExtract } = require('./webService');
+const { getExtract, getGroupsExtract } = require('./webService');
 const { ReadableStream } = require('memory-streams');
 const unzipper = require('unzipper');
 
@@ -44,7 +44,16 @@ const getEstablishmentsFile = async (includeLinks = false) => {
 };
 
 const getGroupsFile = async (includeLinks = false) => {
-  return Promise.resolve(null);
+  const extract = await getGroupsExtract(config.gias.params.establishmentExtractId);
+  const files = await extractFilesFromZip(extract.content, includeLinks ? ['groups.csv', 'links.csv'] : ['groups.csv']);
+
+  const groups = files.find(x => x.name === 'groups.csv');
+  const links = files.find(x => x.name === 'links.csv');
+
+  return {
+    groups: groups ? groups.content.toString('utf8') : undefined,
+    links: links ? links.content.toString('utf8') : undefined,
+  };
 };
 
 module.exports = {
