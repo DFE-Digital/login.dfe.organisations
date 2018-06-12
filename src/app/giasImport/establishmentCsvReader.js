@@ -32,13 +32,19 @@ const mapRow = (row) => {
   return {
     urn: row[0] || null,
     laCode: row[1] || null,
+    laName: row[2] || null,
     establishmentNumber: row[3] || null,
     name: row[4] || null,
     type: row[5] || null,
     status,
     closedOn,
     ukprn: row[14] || null,
-    address: row[20] || null,
+    address1: row[15] || null,
+    address2: row[16] || null,
+    address3: row[17] || null,
+    town: row[18] || null,
+    county: row[20] || null,
+    postcode: row[21] || null,
   };
 };
 
