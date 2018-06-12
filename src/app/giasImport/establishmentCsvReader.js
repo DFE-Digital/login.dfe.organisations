@@ -32,6 +32,7 @@ const mapRow = (row) => {
   return {
     urn: row[0] || null,
     laCode: row[1] || null,
+    laName: row[2] || null,
     establishmentNumber: row[3] || null,
     name: row[4] || null,
     type: row[5] || null,
