@@ -98,7 +98,7 @@ const addOrUpdateEstablishments = async (importingEstablishments, existingEstabl
 
 const importEstablishments = async () => {
   logger.debug('Getting establishment data');
-  const data = await getEstablishmentsFile();
+  const data = await getEstablishmentsFile().establishments;
 
   logger.debug('Parsing establishment data');
   const importingEstablishments = await parse(data);

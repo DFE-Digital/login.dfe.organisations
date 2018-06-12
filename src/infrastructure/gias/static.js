@@ -1,22 +1,18 @@
-const getEstablishmentsFile = async () => {
-  return Promise.resolve(null);
+const getEstablishmentsFile = async (includeLinks = false) => {
+  return Promise.resolve({
+    establishments: null,
+    links: includeLinks ? null : undefined,
+  });
 };
 
-const getEstablishmentsLinksFile = async () => {
-  return Promise.resolve(null);
-};
-
-const getGroupsFile = async () => {
-  return Promise.resolve(null);
-};
-
-const getGroupsLinksFile = async () => {
-  return Promise.resolve(null);
+const getGroupsFile = async (includeLinks = false) => {
+  return Promise.resolve({
+    groups: null,
+    links: includeLinks ? null : undefined,
+  });
 };
 
 module.exports = {
   getEstablishmentsFile,
-  getEstablishmentsLinksFile,
   getGroupsFile,
-  getGroupsLinksFile,
 };
