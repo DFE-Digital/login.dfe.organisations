@@ -38,7 +38,12 @@ const mapRow = (row) => {
     status,
     closedOn,
     ukprn: row[14] || null,
-    address: row[20] || null,
+    address1: row[15] || null,
+    address2: row[16] || null,
+    address3: row[17] || null,
+    town: row[18] || null,
+    county: row[20] || null,
+    postcode: row[21] || null,
   };
 };
 

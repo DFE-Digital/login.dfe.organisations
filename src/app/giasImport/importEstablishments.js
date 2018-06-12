@@ -6,14 +6,27 @@ const uuid = require('uuid/v4');
 
 const isEstablishmentImportable = (importing) => {
   const importableTypes = ['01', '02', '03', '05', '06', '07', '08', '10', '11', '12', '14', '15', '18', '24', '25', '26', '28', '30', '32', '33', '34', '35', '36', '38', '39', '40', '41', '42', '43', '44', '45', '46'];
+  const importableStatuses = [1, 2, 3, 4];
 
   if (!importableTypes.find(t => t === importing.type)) {
+    return false;
+  }
+
+  if (!importableStatuses.find(s => s === importing.status)) {
     return false;
   }
 
   return true;
 };
 const mapImportRecordForStorage = (importing) => {
+  const address = [
+    importing.address1,
+    importing.address2,
+    importing.address3,
+    importing.town,
+    importing.county,
+    importing.postcode,
+  ].filter(x => x !== undefined && x !== null && x.trim().length > 0).join(', ');
   return {
     id: uuid(),
     name: importing.name,
@@ -31,7 +44,7 @@ const mapImportRecordForStorage = (importing) => {
       id: importing.status,
     },
     closedOn: importing.closedOn,
-    address: importing.address,
+    address,
   };
 };
 const addEstablishment = async (importing) => {
@@ -81,7 +94,7 @@ const addOrUpdateEstablishments = async (importingEstablishments, existingEstabl
 
 
       const localAuthority = localAuthorities.find(la => la.establishmentNumber === importing.laCode);
-      const existingLAAssociation = existing.associations.find(a => a.associationType === 'LA');
+      const existingLAAssociation = existing ? existing.associations.find(a => a.associationType === 'LA') : undefined;
       if (localAuthority && (!existingLAAssociation || existingLAAssociation.associatedOrganisationId.toLowerCase() !== localAuthority.id.toLowerCase())) {
         await removeAssociationsOfType(organisationId, 'LA');
         await addAssociation(organisationId, localAuthority.id, 'LA');
@@ -98,10 +111,10 @@ const addOrUpdateEstablishments = async (importingEstablishments, existingEstabl
 
 const importEstablishments = async () => {
   logger.debug('Getting establishment data');
-  const data = await getEstablishmentsFile().establishments;
+  const data = await getEstablishmentsFile();
 
   logger.debug('Parsing establishment data');
-  const importingEstablishments = await parse(data);
+  const importingEstablishments = await parse(data.establishments);
 
   logger.debug('Getting existing establishments');
   const existingEstablishments = await list(true); //TODO: Filter to establishments only
