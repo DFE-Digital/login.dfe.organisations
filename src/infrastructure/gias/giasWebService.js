@@ -3,17 +3,19 @@ const { getExtract } = require('./webService');
 const { ReadableStream } = require('memory-streams');
 const unzipper = require('unzipper');
 
-const extractFileFromZip = async (zipContent, attachmentName) => {
+const extractFilesFromZip = async (zipContent, attachmentNames) => {
   return new Promise((resolve, reject) => {
     const input = new ReadableStream(zipContent);
-    let hasResolved = false;
+    const files = [];
     input
       .pipe(unzipper.Parse())
       .on('entry', (entry) => {
-        if (entry.path === attachmentName) {
+        if (attachmentNames.find(x => x === entry.path)) {
           entry.buffer().then((content) => {
-            hasResolved = true;
-            resolve(content);
+            files.push({
+              name: entry.path,
+              content,
+            });
           });
         } else {
           entry.autodrain();
@@ -23,37 +25,29 @@ const extractFileFromZip = async (zipContent, attachmentName) => {
         reject(e);
       })
       .on('finish', () => {
-        if (!hasResolved) {
-          resolve(undefined);
-        }
+        resolve(files);
       });
   });
 };
-const getEstablishmentsAndExtractAttachment = async (attachmentName) => {
+
+const getEstablishmentsFile = async (includeLinks = false) => {
   const extract = await getExtract(config.gias.params.establishmentExtractId);
-  const buffer = await extractFileFromZip(extract.content, attachmentName);
-  return buffer.toString('utf8');
+  const files = await extractFilesFromZip(extract.content, includeLinks ? ['import.csv', 'links.csv'] : ['import.csv']);
+
+  const establishments = files.find(x => x.name === 'import.csv');
+  const links = files.find(x => x.name === 'links.csv');
+
+  return {
+    establishments: establishments ? establishments.content.toString('utf8') : undefined,
+    links: links ? links.content.toString('utf8') : undefined,
+  };
 };
 
-const getEstablishmentsFile = async () => {
-  return getEstablishmentsAndExtractAttachment('import.csv');
-};
-
-const getEstablishmentsLinksFile = async () => {
-  return getEstablishmentsAndExtractAttachment('links.csv');
-};
-
-const getGroupsFile = async () => {
-  return Promise.resolve(null);
-};
-
-const getGroupsLinksFile = async () => {
+const getGroupsFile = async (includeLinks = false) => {
   return Promise.resolve(null);
 };
 
 module.exports = {
   getEstablishmentsFile,
-  getEstablishmentsLinksFile,
   getGroupsFile,
-  getGroupsLinksFile,
 };
