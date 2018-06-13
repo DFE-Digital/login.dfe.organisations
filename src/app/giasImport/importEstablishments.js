@@ -49,10 +49,14 @@ const mapImportRecordForStorage = (importing) => {
   };
 };
 const addEstablishment = async (importing) => {
-  const organisation = mapImportRecordForStorage(importing);
-  await add(organisation);
-  logger.info(`Added establishment ${importing.urn}`);
-  return organisation.id;
+  try {
+    const organisation = mapImportRecordForStorage(importing);
+    await add(organisation);
+    logger.info(`Added establishment ${importing.urn}`);
+    return organisation.id;
+  } catch (e) {
+    throw new Error(`Error adding establishment ${importing.urn} - ${e.message}`);
+  }
 };
 const hasBeenUpdated = (newValue, oldValue) => {
   if ((newValue && !oldValue) || (!newValue && oldValue)) {
@@ -72,8 +76,12 @@ const updateEstablishment = async (importing, existing) => {
   if (hasBeenUpdated(updated.name, existing.name) || hasBeenUpdated(updated.category.id, existing.category.id)
     || hasBeenUpdated(updated.type.id, existing.type.id) || hasBeenUpdated(updated.ukprn, existing.ukprn) || hasBeenUpdated(updated.establishmentNumber, existing.establishmentNumber)
     || hasBeenUpdated(updated.status.id, existing.status.id) || hasBeenUpdated(updated.closedOn, existing.closedOn) || hasBeenUpdated(updated.address, existing.address)) {
-    await update(updated);
-    logger.info(`Updated establishment ${importing.urn}`);
+    try {
+      await update(updated);
+      logger.info(`Updated establishment ${importing.urn}`);
+    } catch (e) {
+      logger.info(`Error updating establishment ${importing.urn} - ${e.message}`);
+    }
   } else {
     logger.info(`Skipped establishment ${importing.urn} as it has not changed`);
   }
@@ -135,16 +143,24 @@ const mapImportLocalAuthorityForStorage = (importing) => {
   };
 };
 const addLocalAuthority = async (importing) => {
-  const organisation = mapImportLocalAuthorityForStorage(importing);
-  await add(organisation);
-  logger.info(`Added local authority ${importing.code} - ${importing.name}`);
-  return organisation.id;
+  try {
+    const organisation = mapImportLocalAuthorityForStorage(importing);
+    await add(organisation);
+    logger.info(`Added local authority ${importing.code} - ${importing.name}`);
+    return organisation.id;
+  } catch (e) {
+    logger.info(`Error adding local authority ${importing.code} - ${importing.name} - ${e.message}`);
+  }
 };
 const updateLocalAuthority = async (importing, existing) => {
-  const organisation = mapImportLocalAuthorityForStorage(importing);
-  organisation.id = existing.id;
-  await update(organisation);
-  logger.info(`Updated local authority ${importing.code} - ${importing.name}`);
+  try {
+    const organisation = mapImportLocalAuthorityForStorage(importing);
+    organisation.id = existing.id;
+    await update(organisation);
+    logger.info(`Updated local authority ${importing.code} - ${importing.name}`);
+  } catch (e) {
+    logger.info(`Error updating local authority ${importing.code} - ${importing.name} - ${e.message}`);
+  }
 };
 const addOrUpdateLocalAuthorities = async (importingEstablishments, localAuthorities) => {
   const importingLocalAuthorities = uniqBy(importingEstablishments.map(e => ({
