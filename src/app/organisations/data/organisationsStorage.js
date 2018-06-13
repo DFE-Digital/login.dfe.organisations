@@ -102,7 +102,7 @@ const search = async (criteria, pageNumber = 1, pageSize = 25, filterCategories 
       telephone: entity.telephone,
       region: regionCodes.find(c => c.id === entity.regionCode),
       localAuthority: laAssociation ? {
-        id: laAssociation.associated_organisation_id
+        id: laAssociation.associated_organisation_id,
       } : undefined,
       phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
       statutoryLowAge: entity.statutoryLowAge,
@@ -157,7 +157,7 @@ const pagedList = async (pageNumber = 1, pageSize = 25) => {
     };
   });
   await updateOrganisationsWithLocalAuthorityDetails(orgs);
-  
+
   const totalNumberOfRecords = result.count;
   const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
   return {
