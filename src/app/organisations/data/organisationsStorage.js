@@ -168,6 +168,47 @@ const listOfCategory = async (category, includeAssociations = false) => {
   }));
 };
 
+const pagedListOfCategory = async (category, includeAssociations = false, pageNumber = 1, pageSize = 25) => {
+  const offset = (pageNumber - 1) * pageSize;
+  const query = {
+    where: {
+      Category: {
+        [Op.eq]: category,
+      },
+    },
+    order: [
+      ['name', 'ASC'],
+    ],
+    limit: pageSize,
+    offset,
+  };
+  if (includeAssociations) {
+    query.include = ['associations'];
+  }
+  const result = await organisations.findAndCountAll(query);
+  const orgs = result.rows.map(entity => ({
+    id: entity.id,
+    name: entity.name,
+    category: organisationCategory.find(c => c.id === entity.Category),
+    type: establishmentTypes.find(c => c.id === entity.Type),
+    urn: entity.URN,
+    uid: entity.UID,
+    ukprn: entity.UKPRN,
+    establishmentNumber: entity.EstablishmentNumber,
+    status: organisationStatus.find(c => c.id === entity.Status),
+    closedOn: entity.ClosedOn,
+    address: entity.Address,
+  }));
+
+  const totalNumberOfRecords = result.count;
+  const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
+  return {
+    organisations: orgs,
+    totalNumberOfPages,
+    totalNumberOfRecords,
+  };
+};
+
 const addAssociation = async (organisationId, associatedOrganisationId, linkType) => {
   const entity = {
     organisation_id: organisationId,
@@ -385,4 +426,5 @@ module.exports = {
   getOrganisationStates,
   getUsersPendingApprovalByUser,
   getUsersPendingApproval,
+  pagedListOfCategory,
 };
