@@ -1,6 +1,6 @@
 const logger = require('./../../infrastructure/logger');
 const { parse } = require('./establishmentCsvReader');
-const { list, add, update, listOfCategory, addAssociation, removeAssociationsOfType } = require('./../organisations/data/organisationsStorage');
+const { list, add, update, pagedListOfCategory, addAssociation, removeAssociationsOfType } = require('./../organisations/data/organisationsStorage');
 const { getEstablishmentsFile } = require('./../../infrastructure/gias');
 const uuid = require('uuid/v4');
 const uniqBy = require('lodash/uniqBy');
@@ -185,6 +185,20 @@ const addOrUpdateLocalAuthorities = async (importingEstablishments, localAuthori
   }
 
   return updated;
+};
+
+const listOfCategory = async (category, includeAssociations = false) => {
+  const allOrgs = [];
+  let pageNumber = 1;
+  let hasMorePages = true;
+  while (hasMorePages) {
+    const page = await pagedListOfCategory(category, includeAssociations, pageNumber, 500);
+    allOrgs.push(...page.organisations);
+
+    hasMorePages = pageNumber < page.totalNumberOfPages;
+    pageNumber += 1;
+  }
+  return allOrgs;
 };
 
 const importEstablishmentsAndLocalAuthorities = async () => {
