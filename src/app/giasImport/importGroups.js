@@ -2,7 +2,7 @@ const logger = require('./../../infrastructure/logger');
 const { getGroupsFile } = require('./../../infrastructure/gias');
 const { parse: parseGroups } = require('./groupCsvReader');
 const { parse: parseGroupLinks } = require('./groupLinksCsvReader');
-const { add, update, listOfCategory, addAssociation, removeAssociationsOfType } = require('./../organisations/data/organisationsStorage');
+const { add, update, pagedListOfCategory, addAssociation, removeAssociationsOfType } = require('./../organisations/data/organisationsStorage');
 const uuid = require('uuid/v4');
 
 const isGroupImportable = (group) => {
@@ -137,6 +137,20 @@ const addOrUpdateGroups = async (importingGroups, importingGroupLinks, existingG
       logger.info(`Not importing group ${importing.uid} as it does meet importable criteria`);
     }
   }
+};
+
+const listOfCategory = async (category, includeAssociations = false) => {
+  const allOrgs = [];
+  let pageNumber = 1;
+  let hasMorePages = true;
+  while (hasMorePages) {
+    const page = await pagedListOfCategory(category, includeAssociations, pageNumber, 500);
+    allOrgs.push(...page.organisations);
+
+    hasMorePages = pageNumber < page.totalNumberOfPages;
+    pageNumber += 1;
+  }
+  return allOrgs;
 };
 
 const importGroups = async () => {
