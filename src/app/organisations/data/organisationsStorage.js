@@ -1,7 +1,8 @@
 const logger = require('./../../../infrastructure/logger');
 const { list, getOrgById, getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber } = require('./../../services/data/organisationsStorage');
-const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, users, organisationUserStatus } = require('./../../../infrastructure/repository');
+const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, users, organisationUserStatus, regionCodes, phasesOfEducation } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
+const uniq = require('lodash/uniq');
 
 const Op = Sequelize.Op;
 
@@ -16,6 +17,30 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.Status = organisation.status.id;
   entity.ClosedOn = organisation.closedOn;
   entity.Address = organisation.address;
+  entity.telephone = organisation.telephone;
+  entity.regionCode = organisation.region ? organisation.region.id : null;
+  entity.phaseOfEducation = organisation.phaseOfEducation ? organisation.phaseOfEducation.id : null;
+  entity.statutoryLowAge = organisation.statutoryLowAge;
+  entity.statutoryHighAge = organisation.statutoryHighAge;
+};
+const updateOrganisationsWithLocalAuthorityDetails = async (orgs) => {
+  const localAuthorityIds = uniq(orgs.filter(o => o.localAuthority).map(o => o.localAuthority.id));
+  const localAuthorityEntities = await organisations.findAll({
+    where: {
+      id: {
+        [Op.in]: localAuthorityIds,
+      },
+    },
+  });
+  localAuthorityEntities.forEach((laEntity) => {
+    const localAuthority = {
+      id: laEntity.id,
+      name: laEntity.name,
+      code: laEntity.EstablishmentNumber,
+    };
+    const laOrgs = orgs.filter(o => o.localAuthority && o.localAuthority.id === localAuthority.id);
+    laOrgs.forEach((org) => org.localAuthority = localAuthority);
+  });
 };
 
 const search = async (criteria, pageNumber = 1, pageSize = 25, filterCategories = undefined, filterStates = undefined) => {
@@ -40,6 +65,7 @@ const search = async (criteria, pageNumber = 1, pageSize = 25, filterCategories 
     order: [
       ['name', 'ASC'],
     ],
+    include: ['associations'],
     limit: pageSize,
     offset,
   };
@@ -58,19 +84,33 @@ const search = async (criteria, pageNumber = 1, pageSize = 25, filterCategories 
 
   const result = await organisations.findAndCountAll(query);
   const orgEntities = result.rows;
-  const orgs = orgEntities.map(entity => ({
-    id: entity.id,
-    name: entity.name,
-    category: organisationCategory.find(c => c.id === entity.Category),
-    type: establishmentTypes.find(c => c.id === entity.Type),
-    urn: entity.URN,
-    uid: entity.UID,
-    ukprn: entity.UKPRN,
-    establishmentNumber: entity.EstablishmentNumber,
-    status: organisationStatus.find(c => c.id === entity.Status),
-    closedOn: entity.ClosedOn,
-    address: entity.Address,
-  }));
+  const orgs = orgEntities.map((entity) => {
+    const laAssociation = entity.associations.find(a => a.link_type === 'LA');
+
+    return {
+      id: entity.id,
+      name: entity.name,
+      category: organisationCategory.find(c => c.id === entity.Category),
+      type: establishmentTypes.find(c => c.id === entity.Type),
+      urn: entity.URN,
+      uid: entity.UID,
+      ukprn: entity.UKPRN,
+      establishmentNumber: entity.EstablishmentNumber,
+      status: organisationStatus.find(c => c.id === entity.Status),
+      closedOn: entity.ClosedOn,
+      address: entity.Address,
+      telephone: entity.telephone,
+      region: regionCodes.find(c => c.id === entity.regionCode),
+      localAuthority: laAssociation ? {
+        id: laAssociation.associated_organisation_id
+      } : undefined,
+      phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
+      statutoryLowAge: entity.statutoryLowAge,
+      statutoryHighAge: entity.statutoryHighAge,
+    };
+  });
+  await updateOrganisationsWithLocalAuthorityDetails(orgs);
+
   const totalNumberOfRecords = result.count;
   const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
   return {
@@ -86,23 +126,38 @@ const pagedList = async (pageNumber = 1, pageSize = 25) => {
     order: [
       ['name', 'ASC'],
     ],
+    include: ['associations'],
     limit: pageSize,
     offset,
   });
   const orgEntities = result.rows;
-  const orgs = orgEntities.map(entity => ({
-    id: entity.id,
-    name: entity.name,
-    category: organisationCategory.find(c => c.id === entity.Category),
-    type: establishmentTypes.find(c => c.id === entity.Type),
-    urn: entity.URN,
-    uid: entity.UID,
-    ukprn: entity.UKPRN,
-    establishmentNumber: entity.EstablishmentNumber,
-    status: organisationStatus.find(c => c.id === entity.Status),
-    closedOn: entity.ClosedOn,
-    address: entity.Address,
-  }));
+  const orgs = orgEntities.map((entity) => {
+    const laAssociation = entity.associations.find(a => a.link_type === 'LA');
+
+    return {
+      id: entity.id,
+      name: entity.name,
+      category: organisationCategory.find(c => c.id === entity.Category),
+      type: establishmentTypes.find(c => c.id === entity.Type),
+      urn: entity.URN,
+      uid: entity.UID,
+      ukprn: entity.UKPRN,
+      establishmentNumber: entity.EstablishmentNumber,
+      status: organisationStatus.find(c => c.id === entity.Status),
+      closedOn: entity.ClosedOn,
+      address: entity.Address,
+      telephone: entity.telephone,
+      region: regionCodes.find(c => c.id === entity.regionCode),
+      localAuthority: laAssociation ? {
+        id: laAssociation.associated_organisation_id
+      } : undefined,
+      phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
+      statutoryLowAge: entity.statutoryLowAge,
+      statutoryHighAge: entity.statutoryHighAge,
+    };
+  });
+  await updateOrganisationsWithLocalAuthorityDetails(orgs);
+  
   const totalNumberOfRecords = result.count;
   const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
   return {
@@ -198,6 +253,11 @@ const pagedListOfCategory = async (category, includeAssociations = false, pageNu
     status: organisationStatus.find(c => c.id === entity.Status),
     closedOn: entity.ClosedOn,
     address: entity.Address,
+    telephone: entity.telephone,
+    region: regionCodes.find(c => c.id === entity.regionCode),
+    phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
+    statutoryLowAge: entity.statutoryLowAge,
+    statutoryHighAge: entity.statutoryHighAge,
   }));
 
   const totalNumberOfRecords = result.count;
