@@ -1,4 +1,4 @@
-IF NOT EXISTS (SELECT id FROM service WHERE id='0d15c5bd-ca2f-4211-b789-853bb34ce884')
+IF NOT EXISTS (SELECT id FROM service WHERE id='DF2AE7F3-917A-4489-8A62-8B9B536A71CC')
     BEGIN
       INSERT INTO service
       (id, name, description)
