@@ -46,6 +46,15 @@ const mapImportRecordForStorage = (importing) => {
     },
     closedOn: importing.closedOn,
     address,
+    telephone: importing.telephone,
+    region: {
+      id: importing.regionCode,
+    },
+    phaseOfEducation: {
+      id: importing.phaseOfEducation,
+    },
+    statutoryLowAge: importing.statutoryLowAge,
+    statutoryHighAge: importing.statutoryHighAge,
   };
 };
 const addEstablishment = async (importing) => {
@@ -58,24 +67,26 @@ const addEstablishment = async (importing) => {
     throw new Error(`Error adding establishment ${importing.urn} - ${e.message}`);
   }
 };
-const hasBeenUpdated = (newValue, oldValue) => {
-  if ((newValue && !oldValue) || (!newValue && oldValue)) {
+const hasBeenUpdated = (updated, existing) => {
+  if ((updated && !existing) || (!updated && existing)) {
     return true;
   }
 
-  if (newValue instanceof Date) {
-    return newValue.getTime() !== oldValue.getTime();
+  if (updated instanceof Object && Object.keys(updated).find(x => x === 'id')) {
+    return hasBeenUpdated(updated.id, existing.id);
   }
 
-  return newValue !== oldValue;
+  return updated !== existing;
 };
 const updateEstablishment = async (importing, existing) => {
   const updated = mapImportRecordForStorage(importing);
   updated.id = existing.id;
 
-  if (hasBeenUpdated(updated.name, existing.name) || hasBeenUpdated(updated.category.id, existing.category.id)
-    || hasBeenUpdated(updated.type.id, existing.type.id) || hasBeenUpdated(updated.ukprn, existing.ukprn) || hasBeenUpdated(updated.establishmentNumber, existing.establishmentNumber)
-    || hasBeenUpdated(updated.status.id, existing.status.id) || hasBeenUpdated(updated.closedOn, existing.closedOn) || hasBeenUpdated(updated.address, existing.address)) {
+  if (hasBeenUpdated(updated.name, existing.name) || hasBeenUpdated(updated.category, existing.category)
+    || hasBeenUpdated(updated.type, existing.type) || hasBeenUpdated(updated.ukprn, existing.ukprn) || hasBeenUpdated(updated.establishmentNumber, existing.establishmentNumber)
+    || hasBeenUpdated(updated.status.id, existing.status.id) || hasBeenUpdated(updated.closedOn, existing.closedOn) || hasBeenUpdated(updated.address, existing.address)
+    || hasBeenUpdated(updated.telephone, existing.telephone) || hasBeenUpdated(updated.region, existing.region) || hasBeenUpdated(updated.phaseOfEducation, existing.phaseOfEducation)
+    || hasBeenUpdated(updated.statutoryLowAge, existing.statutoryLowAge) || hasBeenUpdated(updated.statutoryHighAge, existing.statutoryHighAge)) {
     try {
       await update(updated);
       logger.info(`Updated establishment ${importing.urn}`);
@@ -140,6 +151,11 @@ const mapImportLocalAuthorityForStorage = (importing) => {
     },
     closedOn: null,
     address: null,
+    telephone: null,
+    region: null,
+    phaseOfEducation: null,
+    statutoryLowAge: null,
+    statutoryHighAge: null,
   };
 };
 const addLocalAuthority = async (importing) => {
