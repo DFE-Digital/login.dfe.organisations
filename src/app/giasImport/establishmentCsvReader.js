@@ -35,6 +35,11 @@ const getColumnIndices = (headerRow) => {
     { name: 'town', label: 'Town', required: false, index: -1 },
     { name: 'county', label: 'County (name)', required: false, index: -1 },
     { name: 'postcode', label: 'Postcode', required: false, index: -1 },
+    { name: 'phaseOfEducation', label: 'PhaseOfEducation (code)', required: false, index: -1 },
+    { name: 'statutoryLowAge', label: 'StatutoryLowAge', required: false, index: -1 },
+    { name: 'statutoryHighAge', label: 'StatutoryHighAge', required: false, index: -1 },
+    { name: 'telephone', label: 'TelephoneNum', required: false, index: -1 },
+    { name: 'regionCode', label: 'GOR (code)', required: false, index: -1 },
   ];
   const columnIndices = {};
 
@@ -64,6 +69,21 @@ const mapRow = (row, columnIndices) => {
     status = parseInt(row[columnIndices.status]);
   }
 
+  let phaseOfEducation = null;
+  if (columnIndices.phaseOfEducation > -1 && row[columnIndices.phaseOfEducation]) {
+    phaseOfEducation = parseInt(row[columnIndices.phaseOfEducation]);
+  }
+
+  let statutoryLowAge = null;
+  if (columnIndices.statutoryLowAge > -1 && row[columnIndices.statutoryLowAge]) {
+    statutoryLowAge = parseInt(row[columnIndices.statutoryLowAge]);
+  }
+
+  let statutoryHighAge = null;
+  if (columnIndices.statutoryHighAge > -1 && row[columnIndices.statutoryHighAge]) {
+    statutoryHighAge = parseInt(row[columnIndices.statutoryHighAge]);
+  }
+
   return {
     urn: row[columnIndices.urn] || null,
     laCode: row[columnIndices.laCode] || null,
@@ -80,6 +100,11 @@ const mapRow = (row, columnIndices) => {
     town: columnIndices.town > -1 ? row[columnIndices.town] || null : null,
     county: columnIndices.county > -1 ? row[columnIndices.county] || null : null,
     postcode: columnIndices.postcode > -1 ? row[columnIndices.postcode] || null : null,
+    telephone: columnIndices.telephone > -1 ? row[columnIndices.telephone] || null : null,
+    regionCode: columnIndices.regionCode > -1 ? row[columnIndices.regionCode] || null : null,
+    phaseOfEducation,
+    statutoryLowAge,
+    statutoryHighAge,
   };
 };
 
