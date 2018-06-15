@@ -59,6 +59,7 @@ const defineStatic = (model) => {
     { id: '25', name: 'Offshore Schools' },
     { id: '26', name: 'Service Childrens Education' },
     { id: '28', name: 'Academy Sponsor Led' },
+    { id: '29', name: 'Higher education institution' },
     { id: '30', name: 'Welsh Establishment' },
     { id: '32', name: 'Special Post 16 Institution' },
     { id: '33', name: 'Academy Special Sponsor Led' },
