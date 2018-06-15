@@ -72,6 +72,12 @@ const hasBeenUpdated = (updated, existing) => {
     return true;
   }
 
+  if (updated instanceof Date) {
+    const utime = updated.getTime();
+    const etime = existing.getTime();
+    return utime !== etime;
+  }
+
   if (updated instanceof Object && Object.keys(updated).find(x => x === 'id')) {
     return hasBeenUpdated(updated.id, existing.id);
   }

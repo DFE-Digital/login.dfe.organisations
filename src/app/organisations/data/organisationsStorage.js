@@ -240,25 +240,37 @@ const pagedListOfCategory = async (category, includeAssociations = false, pageNu
   if (includeAssociations) {
     query.include = ['associations'];
   }
+
   const result = await organisations.findAndCountAll(query);
-  const orgs = result.rows.map(entity => ({
-    id: entity.id,
-    name: entity.name,
-    category: organisationCategory.find(c => c.id === entity.Category),
-    type: establishmentTypes.find(c => c.id === entity.Type),
-    urn: entity.URN,
-    uid: entity.UID,
-    ukprn: entity.UKPRN,
-    establishmentNumber: entity.EstablishmentNumber,
-    status: organisationStatus.find(c => c.id === entity.Status),
-    closedOn: entity.ClosedOn,
-    address: entity.Address,
-    telephone: entity.telephone,
-    region: regionCodes.find(c => c.id === entity.regionCode),
-    phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
-    statutoryLowAge: entity.statutoryLowAge,
-    statutoryHighAge: entity.statutoryHighAge,
-  }));
+  const orgs = result.rows.map((entity) => {
+    const organisation = {
+      id: entity.id,
+      name: entity.name,
+      category: organisationCategory.find(c => c.id === entity.Category),
+      type: establishmentTypes.find(c => c.id === entity.Type),
+      urn: entity.URN,
+      uid: entity.UID,
+      ukprn: entity.UKPRN,
+      establishmentNumber: entity.EstablishmentNumber,
+      status: organisationStatus.find(c => c.id === entity.Status),
+      closedOn: entity.ClosedOn,
+      address: entity.Address,
+      telephone: entity.telephone,
+      region: regionCodes.find(c => c.id === entity.regionCode),
+      phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
+      statutoryLowAge: entity.statutoryLowAge,
+      statutoryHighAge: entity.statutoryHighAge,
+    };
+
+    if (entity.associations) {
+      organisation.associations = entity.associations.map((assEntity) => ({
+        associatedOrganisationId: assEntity.associated_organisation_id,
+        associationType: assEntity.link_type,
+      }));
+    }
+
+    return organisation;
+  });
 
   const totalNumberOfRecords = result.count;
   const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
