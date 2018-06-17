@@ -356,6 +356,11 @@ const getUsersPendingApproval = async (pageNumber = 1, pageSize = 25) => {
     org_name: entity.Organisation.getDataValue('name'),
     user_id: entity.getDataValue('user_id'),
     created_date: entity.getDataValue('createdAt'),
+    org_address: entity.Organisation.getDataValue('address'),
+    category: organisationCategory.find(c => c.id === entity.Organisation.getDataValue('Category')),
+    urn: entity.Organisation.getDataValue('URN'),
+    uid: entity.Organisation.getDataValue('UID'),
+    ukprn: entity.Organisation.getDataValue('UKPRN'),
     status: organisationUserStatus.find(c => c.id === entity.getDataValue('status')),
   }));
 
@@ -363,7 +368,7 @@ const getUsersPendingApproval = async (pageNumber = 1, pageSize = 25) => {
     usersForApproval,
     totalNumberOfRecords,
     totalNumberOfPages,
-  }
+  };
 };
 
 module.exports = {
