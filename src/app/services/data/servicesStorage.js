@@ -4,8 +4,56 @@ const Sequelize = require('sequelize');
 
 const Op = Sequelize.Op;
 const logger = require('./../../../infrastructure/logger');
-const { users, services, roles, organisations, userOrganisations, externalIdentifiers } = require('./../../../infrastructure/repository');
+const { users, services, roles, organisations, userOrganisations, externalIdentifiers, organisationCategory, establishmentTypes, organisationStatus, regionCodes, phasesOfEducation } = require('./../../../infrastructure/repository');
 const uuid = require('uuid/v4');
+
+
+const getOrganisationById = async (organisationId) => {
+  const entity = await organisations.find({
+    where: {
+      id: {
+        [Op.eq]: organisationId,
+      },
+    },
+    include: ['associations'],
+  });
+  const laAssociation = entity.associations.find(a => a.link_type === 'LA');
+  let localAuthority;
+  if (laAssociation) {
+    const localAuthorityEntity = await organisations.find({
+      where: {
+        id: {
+          [Op.eq]: laAssociation.associated_organisation_id,
+        },
+      },
+    });
+    localAuthority = {
+      id: localAuthorityEntity.id,
+      name: localAuthorityEntity.name,
+      code: localAuthorityEntity.EstablishmentNumber,
+    };
+  }
+
+  return {
+    id: entity.id,
+    name: entity.name,
+    category: organisationCategory.find(c => c.id === entity.Category),
+    type: establishmentTypes.find(c => c.id === entity.Type),
+    urn: entity.URN,
+    uid: entity.UID,
+    ukprn: entity.UKPRN,
+    establishmentNumber: entity.EstablishmentNumber,
+    status: organisationStatus.find(c => c.id === entity.Status),
+    closedOn: entity.ClosedOn,
+    address: entity.Address,
+    telephone: entity.telephone,
+    region: regionCodes.find(c => c.id === entity.regionCode),
+    localAuthority,
+    phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
+    statutoryLowAge: entity.statutoryLowAge,
+    statutoryHighAge: entity.statutoryHighAge,
+  };
+};
 
 
 const list = async (correlationId) => {
@@ -133,9 +181,10 @@ const getUserAssociatedServices = async (id, correlationId) => {
             [Op.eq]: id,
           },
         },
-        include: ['Organisation', 'Service'],
+        include: ['Service'],
       });
 
+    const orgCache = [];
     const mappedUserService = [];
     for (let i = 0; i <= userServices.length; i += 1) {
       const userService = userServices[i];
@@ -146,6 +195,13 @@ const getUserAssociatedServices = async (id, correlationId) => {
           key: id.identifier_key,
           value: id.identifier_value
         }));
+
+        const orgId = userService.getDataValue('organisation_id');
+        let organisation = orgCache.find(o => o.id === orgId);
+        if (!organisation) {
+          organisation = await getOrganisationById(orgId);
+        }
+
         mappedUserService.push({
           id: userService.Service.getDataValue('id'),
           name: userService.Service.getDataValue('name'),
@@ -154,10 +210,11 @@ const getUserAssociatedServices = async (id, correlationId) => {
           userId: userService.getDataValue('user_id'),
           requestDate: userService.getDataValue('createdAt'),
           approvers,
-          organisation: {
-            id: userService.Organisation.getDataValue('id'),
-            name: userService.Organisation.getDataValue('name'),
-          },
+          organisation,
+          // organisation: {
+          //   id: userService.Organisation.getDataValue('id'),
+          //   name: userService.Organisation.getDataValue('name'),
+          // },
           role,
           externalIdentifiers,
         });

@@ -12,25 +12,32 @@ const getFileFromBlob = async (path) => {
   });
 };
 
-const getEstablishmentsFile = async () => {
-  return await getFileFromBlob('establishments/import.csv');
+const getEstablishmentsFile = async (includeLinks = false) => {
+  const result = {
+    establishments: undefined,
+    links: undefined,
+  };
+  result.establishments = await getFileFromBlob('establishments/import.csv');
+  if (includeLinks) {
+    result.links = await getFileFromBlob('establishments/links.csv');
+  }
+  return result;
 };
 
-const getEstablishmentsLinksFile = async () => {
-  return await getFileFromBlob('establishments/links.csv');
-};
+const getGroupsFile = async (includeLinks = false) => {
 
-const getGroupsFile = async () => {
-  return await getFileFromBlob('groups/groups.csv');
-};
-
-const getGroupsLinksFile = async () => {
-  return await getFileFromBlob('groups/links.csv');
+  const result = {
+    groups: undefined,
+    links: undefined,
+  };
+  result.groups = await getFileFromBlob('groups/groups.csv');
+  if (includeLinks) {
+    result.links = await getFileFromBlob('groups/links.csv');
+  }
+  return result;
 };
 
 module.exports = {
   getEstablishmentsFile,
-  getEstablishmentsLinksFile,
   getGroupsFile,
-  getGroupsLinksFile,
 };

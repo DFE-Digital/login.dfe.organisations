@@ -59,6 +59,7 @@ const defineStatic = (model) => {
     { id: '25', name: 'Offshore Schools' },
     { id: '26', name: 'Service Childrens Education' },
     { id: '28', name: 'Academy Sponsor Led' },
+    { id: '29', name: 'Higher education institution' },
     { id: '30', name: 'Welsh Establishment' },
     { id: '32', name: 'Special Post 16 Institution' },
     { id: '33', name: 'Academy Special Sponsor Led' },
@@ -74,6 +75,31 @@ const defineStatic = (model) => {
     { id: '44', name: 'Academy Special Converter' },
     { id: '45', name: 'Academy 16-19 Converter' },
     { id: '46', name: 'Academy 16-19 Sponsor Led' },
+  ];
+
+  model.phasesOfEducation = [
+    { id: 0, name: 'Not applicable' },
+    { id: 1, name: 'Nursery' },
+    { id: 2, name: 'Primary' },
+    { id: 3, name: 'Middle deemed primary' },
+    { id: 4, name: 'Secondary' },
+    { id: 5, name: 'Middle deemed secondary' },
+    { id: 6, name: '16 plus' },
+    { id: 7, name: 'All through' },
+  ];
+
+  model.regionCodes = [
+    { id: 'A', name: 'North East' },
+    { id: 'B', name: 'North West' },
+    { id: 'D', name: 'Yorkshire and the Humber' },
+    { id: 'E', name: 'East Midlands' },
+    { id: 'F', name: 'West Midlands' },
+    { id: 'G', name: 'East of England' },
+    { id: 'H', name: 'London' },
+    { id: 'J', name: 'South East' },
+    { id: 'K', name: 'South West' },
+    { id: 'W', name: 'Wales (pseudo)' },
+    { id: 'Z', name: 'Not Applicable' },
   ];
 };
 const buildDataModel = (model, connection, entityModels) => {

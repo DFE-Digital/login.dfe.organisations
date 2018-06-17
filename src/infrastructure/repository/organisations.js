@@ -48,6 +48,26 @@ const define = (db, schema) => {
       type: Sequelize.STRING,
       allowNull: true,
     },
+    phaseOfEducation: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+    },
+    statutoryLowAge: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+    },
+    statutoryHighAge: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+    },
+    telephone: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+    regionCode: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
   }, {
     timestamps: false,
     tableName: 'organisation',

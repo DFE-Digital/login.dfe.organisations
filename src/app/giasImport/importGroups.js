@@ -1,8 +1,8 @@
 const logger = require('./../../infrastructure/logger');
-const { getGroupsFile, getGroupsLinksFile } = require('./../../infrastructure/gias');
+const { getGroupsFile } = require('./../../infrastructure/gias');
 const { parse: parseGroups } = require('./groupCsvReader');
 const { parse: parseGroupLinks } = require('./groupLinksCsvReader');
-const { add, update, listOfCategory, addAssociation, removeAssociationsOfType } = require('./../organisations/data/organisationsStorage');
+const { add, update, pagedListOfCategory, addAssociation, removeAssociationsOfType } = require('./../organisations/data/organisationsStorage');
 const uuid = require('uuid/v4');
 
 const isGroupImportable = (group) => {
@@ -139,18 +139,28 @@ const addOrUpdateGroups = async (importingGroups, importingGroupLinks, existingG
   }
 };
 
+const listOfCategory = async (category, includeAssociations = false) => {
+  const allOrgs = [];
+  let pageNumber = 1;
+  let hasMorePages = true;
+  while (hasMorePages) {
+    const page = await pagedListOfCategory(category, includeAssociations, pageNumber, 500);
+    allOrgs.push(...page.organisations);
+
+    hasMorePages = pageNumber < page.totalNumberOfPages;
+    pageNumber += 1;
+  }
+  return allOrgs;
+};
+
 const importGroups = async () => {
   logger.debug('Getting group data');
-  const groupData = await getGroupsFile();
+  const groupData = await getGroupsFile(true);
 
   logger.debug('Parsing group data');
-  const importingGroups = await parseGroups(groupData);
-
-  logger.debug('Getting group links');
-  const linksData = await getGroupsLinksFile();
-
+  const importingGroups = await parseGroups(groupData.groups);
   logger.debug('Parsing group links');
-  const importingGroupLinks = await parseGroupLinks(linksData);
+  const importingGroupLinks = await parseGroupLinks(groupData.links);
 
   logger.debug('Getting existing groups');
   const existingMATs = await listOfCategory('010', true);
