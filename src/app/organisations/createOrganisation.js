@@ -1,4 +1,4 @@
-const { add, getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber, getOrgByUkprn, getOrganisationCategories } = require('./data/organisationsStorage');
+const { add, getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber, getOrgByUkprn, getOrgByLegacyId, getOrganisationCategories } = require('./data/organisationsStorage');
 const uuid = require('uuid/v4');
 
 const mapOrg = (req) => {
@@ -28,6 +28,7 @@ const mapOrg = (req) => {
     } : undefined,
     statutoryLowAge: req.body.statutoryLowAge,
     statutoryHighAge: req.body.statutoryHighAge,
+    legacyId: req.body.legacyId,
   };
 };
 const validateOrg = async (organisation) => {
@@ -46,6 +47,9 @@ const validateOrg = async (organisation) => {
 const getExistingOrg = async (organisation) => {
   let existing;
 
+  if (!existing && organisation.legacyId) {
+    existing = await getOrgByLegacyId(organisation.legacyId);
+  }
   if (!existing && organisation.urn) {
     existing = await getOrgByUrn(organisation.urn);
   }

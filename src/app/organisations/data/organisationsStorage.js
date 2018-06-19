@@ -1,5 +1,5 @@
 const logger = require('./../../../infrastructure/logger');
-const { list, getOrgById, getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber, getOrgByUkprn } = require('./../../services/data/organisationsStorage');
+const { list, getOrgById, getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber, getOrgByUkprn, getOrgByLegacyId } = require('./../../services/data/organisationsStorage');
 const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, users, organisationUserStatus, regionCodes, phasesOfEducation } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 const uniq = require('lodash/uniq');
@@ -22,6 +22,7 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.phaseOfEducation = organisation.phaseOfEducation ? organisation.phaseOfEducation.id : null;
   entity.statutoryLowAge = organisation.statutoryLowAge;
   entity.statutoryHighAge = organisation.statutoryHighAge;
+  entity.legacyId = organisation.legacyId;
 };
 const updateOrganisationsWithLocalAuthorityDetails = async (orgs) => {
   const localAuthorityIds = uniq(orgs.filter(o => o.localAuthority).map(o => o.localAuthority.id));
@@ -107,6 +108,7 @@ const search = async (criteria, pageNumber = 1, pageSize = 25, filterCategories 
       phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
       statutoryLowAge: entity.statutoryLowAge,
       statutoryHighAge: entity.statutoryHighAge,
+      legacyId: entity.legacyId,
     };
   });
   await updateOrganisationsWithLocalAuthorityDetails(orgs);
@@ -149,11 +151,12 @@ const pagedList = async (pageNumber = 1, pageSize = 25) => {
       telephone: entity.telephone,
       region: regionCodes.find(c => c.id === entity.regionCode),
       localAuthority: laAssociation ? {
-        id: laAssociation.associated_organisation_id
+        id: laAssociation.associated_organisation_id,
       } : undefined,
       phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
       statutoryLowAge: entity.statutoryLowAge,
       statutoryHighAge: entity.statutoryHighAge,
+      legacyId: entity.legacyId,
     };
   });
   await updateOrganisationsWithLocalAuthorityDetails(orgs);
@@ -220,6 +223,7 @@ const listOfCategory = async (category, includeAssociations = false) => {
     status: organisationStatus.find(c => c.id === entity.Status),
     closedOn: entity.ClosedOn,
     address: entity.Address,
+    legacyId: entity.legacyId,
   }));
 };
 
@@ -260,6 +264,7 @@ const pagedListOfCategory = async (category, includeAssociations = false, pageNu
       phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
       statutoryLowAge: entity.statutoryLowAge,
       statutoryHighAge: entity.statutoryHighAge,
+      legacyId: entity.legacyId,
     };
 
     if (entity.associations) {
@@ -498,6 +503,7 @@ module.exports = {
   getOrgByUid,
   getOrgByEstablishmentNumber,
   getOrgByUkprn,
+  getOrgByLegacyId,
   getOrganisationsForUser,
   setUserAccessToOrganisation,
   getOrganisationCategories,
