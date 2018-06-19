@@ -44,6 +44,10 @@ const updateOrganisationsWithLocalAuthorityDetails = async (orgs) => {
   });
 };
 const mapOrganisationFromEntity = (entity) => {
+  if (!entity) {
+    return null;
+  }
+
   const laAssociation = entity.associations ? entity.associations.find(a => a.link_type === 'LA') : undefined;
 
   return {
