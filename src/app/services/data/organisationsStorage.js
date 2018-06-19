@@ -5,7 +5,7 @@ const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 const logger = require('./../../../infrastructure/logger');
 const { organisations, organisationCategory, organisationStatus, establishmentTypes } = require('./../../../infrastructure/repository');
-
+const { getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber, getOrgByUkprn, getOrgByLegacyId } = require('./../../organisations/data/organisationsStorage');
 
 const list = async (includeAssociations = false) => {
   try {
@@ -60,86 +60,6 @@ const createOrg = async (id, name) => {
     id,
     name,
   });
-};
-
-const getOrgByUrn = async (urn) => {
-  try {
-    return await organisations.findOne(
-      {
-        where: {
-          URN: {
-            [Op.eq]: urn,
-          },
-        },
-      });
-  } catch (e) {
-    logger.error(`error getting organisation by urn - ${e.message}`, e);
-    throw e;
-  }
-};
-
-const getOrgByUid = async (uid) => {
-  try {
-    return await organisations.findOne(
-      {
-        where: {
-          UID: {
-            [Op.eq]: uid,
-          },
-        },
-      });
-  } catch (e) {
-    logger.error(`error getting organisation by uid - ${e.message}`, e);
-    throw e;
-  }
-};
-
-const getOrgByEstablishmentNumber = async (establishmentNumber) => {
-  try {
-    return await organisations.findOne(
-      {
-        where: {
-          EstablishmentNumber: {
-            [Op.eq]: establishmentNumber,
-          },
-        },
-      });
-  } catch (e) {
-    logger.error(`error getting organisation by establishmentm number - ${e.message}`, e);
-    throw e;
-  }
-};
-
-const getOrgByUkprn = async (ukprn) => {
-  try {
-    return await organisations.findOne(
-      {
-        where: {
-          UKPRN: {
-            [Op.eq]: ukprn,
-          },
-        },
-      });
-  } catch (e) {
-    logger.error(`error getting organisation by UKPRN - ${e.message}`, e);
-    throw e;
-  }
-};
-
-const getOrgByLegacyId = async (legacyId) => {
-  try {
-    return await organisations.findOne(
-      {
-        where: {
-          legacyId: {
-            [Op.eq]: legacyId,
-          },
-        },
-      });
-  } catch (e) {
-    logger.error(`error getting organisation by legacy id - ${e.message}`, e);
-    throw e;
-  }
 };
 
 module.exports = {
