@@ -6,6 +6,7 @@ const { asyncWrapper } = require('login.dfe.express-error-handling');
 const listOrganisations = require('./listOrganisations');
 const listCategories = require('./listCategories');
 const listStates = require('./listStates');
+const createOrganisation = require('./createOrganisation');
 const getOrganisation = require('./getOrganisation');
 const getOrganisationByExternalId = require('./getOrganisationByExternalId');
 const getOrganisationsAssociatedWithUser = require('./getOrganisationsAssociatedWithUser');
@@ -24,6 +25,7 @@ const routes = () => {
   router.get('/', asyncWrapper(listOrganisations));
   router.get('/categories', asyncWrapper(listCategories));
   router.get('/states', asyncWrapper(listStates));
+  router.post('/', asyncWrapper(createOrganisation));
 
   router.get('/by-external-id/:type/:id', asyncWrapper(getOrganisationByExternalId));
   router.get('/associated-with-user/:uid', asyncWrapper(getOrganisationsAssociatedWithUser));
