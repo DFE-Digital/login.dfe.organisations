@@ -68,6 +68,10 @@ const define = (db, schema) => {
       type: Sequelize.STRING,
       allowNull: true,
     },
+    legacyId: {
+      type: Sequelize.BIGINT,
+      allowNull: true,
+    },
   }, {
     timestamps: false,
     tableName: 'organisation',
