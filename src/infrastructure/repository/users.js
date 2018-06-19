@@ -76,7 +76,7 @@ const extend = ({ users, organisations, services, externalIdentifiers, userOrgan
         },
     });
     if (existing) {
-      existing.destroy();
+      await existing.destroy();
     }
     await externalIdentifiers.create({
       user_id: this.user_id,
