@@ -126,6 +126,22 @@ const getOrgByUkprn = async (ukprn) => {
   }
 };
 
+const getOrgByLegacyId = async (legacyId) => {
+  try {
+    return await organisations.findOne(
+      {
+        where: {
+          legacyId: {
+            [Op.eq]: legacyId,
+          },
+        },
+      });
+  } catch (e) {
+    logger.error(`error getting organisation by legacy id - ${e.message}`, e);
+    throw e;
+  }
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -135,4 +151,5 @@ module.exports = {
   getOrgByUid,
   getOrgByEstablishmentNumber,
   getOrgByUkprn,
+  getOrgByLegacyId,
 };
