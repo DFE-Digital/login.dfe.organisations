@@ -19,6 +19,7 @@ const define = (db, schema) => {
     },
     identifier_key: {
       type: Sequelize.STRING,
+      primaryKey: true,
       allowNull: false,
     },
     identifier_value: {
