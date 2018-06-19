@@ -1,5 +1,5 @@
 const logger = require('./../../../infrastructure/logger');
-const { list, getOrgById, getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber } = require('./../../services/data/organisationsStorage');
+const { list, getOrgById } = require('./../../services/data/organisationsStorage');
 const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, users, organisationUserStatus, regionCodes, phasesOfEducation } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 const uniq = require('lodash/uniq');
@@ -22,6 +22,7 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.phaseOfEducation = organisation.phaseOfEducation ? organisation.phaseOfEducation.id : null;
   entity.statutoryLowAge = organisation.statutoryLowAge;
   entity.statutoryHighAge = organisation.statutoryHighAge;
+  entity.legacyId = organisation.legacyId;
 };
 const updateOrganisationsWithLocalAuthorityDetails = async (orgs) => {
   const localAuthorityIds = uniq(orgs.filter(o => o.localAuthority).map(o => o.localAuthority.id));
@@ -41,6 +42,32 @@ const updateOrganisationsWithLocalAuthorityDetails = async (orgs) => {
     const laOrgs = orgs.filter(o => o.localAuthority && o.localAuthority.id === localAuthority.id);
     laOrgs.forEach((org) => org.localAuthority = localAuthority);
   });
+};
+const mapOrganisationFromEntity = (entity) => {
+  const laAssociation = entity.associations ? entity.associations.find(a => a.link_type === 'LA') : undefined;
+
+  return {
+    id: entity.id,
+    name: entity.name,
+    category: organisationCategory.find(c => c.id === entity.Category),
+    type: establishmentTypes.find(c => c.id === entity.Type),
+    urn: entity.URN,
+    uid: entity.UID,
+    ukprn: entity.UKPRN,
+    establishmentNumber: entity.EstablishmentNumber,
+    status: organisationStatus.find(c => c.id === entity.Status),
+    closedOn: entity.ClosedOn,
+    address: entity.Address,
+    telephone: entity.telephone,
+    region: regionCodes.find(c => c.id === entity.regionCode),
+    localAuthority: laAssociation ? {
+      id: laAssociation.associated_organisation_id,
+    } : undefined,
+    phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
+    statutoryLowAge: entity.statutoryLowAge,
+    statutoryHighAge: entity.statutoryHighAge,
+    legacyId: entity.legacyId,
+  };
 };
 
 const search = async (criteria, pageNumber = 1, pageSize = 25, filterCategories = undefined, filterStates = undefined) => {
@@ -84,31 +111,7 @@ const search = async (criteria, pageNumber = 1, pageSize = 25, filterCategories 
 
   const result = await organisations.findAndCountAll(query);
   const orgEntities = result.rows;
-  const orgs = orgEntities.map((entity) => {
-    const laAssociation = entity.associations.find(a => a.link_type === 'LA');
-
-    return {
-      id: entity.id,
-      name: entity.name,
-      category: organisationCategory.find(c => c.id === entity.Category),
-      type: establishmentTypes.find(c => c.id === entity.Type),
-      urn: entity.URN,
-      uid: entity.UID,
-      ukprn: entity.UKPRN,
-      establishmentNumber: entity.EstablishmentNumber,
-      status: organisationStatus.find(c => c.id === entity.Status),
-      closedOn: entity.ClosedOn,
-      address: entity.Address,
-      telephone: entity.telephone,
-      region: regionCodes.find(c => c.id === entity.regionCode),
-      localAuthority: laAssociation ? {
-        id: laAssociation.associated_organisation_id,
-      } : undefined,
-      phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
-      statutoryLowAge: entity.statutoryLowAge,
-      statutoryHighAge: entity.statutoryHighAge,
-    };
-  });
+  const orgs = orgEntities.map(mapOrganisationFromEntity);
   await updateOrganisationsWithLocalAuthorityDetails(orgs);
 
   const totalNumberOfRecords = result.count;
@@ -149,11 +152,12 @@ const pagedList = async (pageNumber = 1, pageSize = 25) => {
       telephone: entity.telephone,
       region: regionCodes.find(c => c.id === entity.regionCode),
       localAuthority: laAssociation ? {
-        id: laAssociation.associated_organisation_id
+        id: laAssociation.associated_organisation_id,
       } : undefined,
       phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
       statutoryLowAge: entity.statutoryLowAge,
       statutoryHighAge: entity.statutoryHighAge,
+      legacyId: entity.legacyId,
     };
   });
   await updateOrganisationsWithLocalAuthorityDetails(orgs);
@@ -220,6 +224,7 @@ const listOfCategory = async (category, includeAssociations = false) => {
     status: organisationStatus.find(c => c.id === entity.Status),
     closedOn: entity.ClosedOn,
     address: entity.Address,
+    legacyId: entity.legacyId,
   }));
 };
 
@@ -260,6 +265,7 @@ const pagedListOfCategory = async (category, includeAssociations = false, pageNu
       phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
       statutoryLowAge: entity.statutoryLowAge,
       statutoryHighAge: entity.statutoryHighAge,
+      legacyId: entity.legacyId,
     };
 
     if (entity.associations) {
@@ -484,6 +490,91 @@ const getUsersPendingApproval = async (pageNumber = 1, pageSize = 25) => {
   };
 };
 
+const getOrgByUrn = async (urn) => {
+  try {
+    const entity = await organisations.findOne(
+      {
+        where: {
+          URN: {
+            [Op.eq]: urn,
+          },
+        },
+      });
+    return mapOrganisationFromEntity(entity);
+  } catch (e) {
+    logger.error(`error getting organisation by urn - ${e.message}`, e);
+    throw e;
+  }
+};
+
+const getOrgByUid = async (uid) => {
+  try {
+    const entity = await organisations.findOne(
+      {
+        where: {
+          UID: {
+            [Op.eq]: uid,
+          },
+        },
+      });
+    return mapOrganisationFromEntity(entity);
+  } catch (e) {
+    logger.error(`error getting organisation by uid - ${e.message}`, e);
+    throw e;
+  }
+};
+
+const getOrgByEstablishmentNumber = async (establishmentNumber) => {
+  try {
+    const entity = await organisations.findOne(
+      {
+        where: {
+          EstablishmentNumber: {
+            [Op.eq]: establishmentNumber,
+          },
+        },
+      });
+    return mapOrganisationFromEntity(entity);
+  } catch (e) {
+    logger.error(`error getting organisation by establishment number - ${e.message}`, e);
+    throw e;
+  }
+};
+
+const getOrgByUkprn = async (ukprn) => {
+  try {
+    const entity = await organisations.findOne(
+      {
+        where: {
+          UKPRN: {
+            [Op.eq]: ukprn,
+          },
+        },
+      });
+    return mapOrganisationFromEntity(entity);
+  } catch (e) {
+    logger.error(`error getting organisation by UKPRN - ${e.message}`, e);
+    throw e;
+  }
+};
+
+const getOrgByLegacyId = async (legacyId) => {
+  try {
+    const entity = await organisations.findOne(
+      {
+        where: {
+          legacyId: {
+            [Op.eq]: legacyId,
+          },
+        },
+      });
+    return mapOrganisationFromEntity(entity);
+  } catch (e) {
+    logger.error(`error getting organisation by legacy id - ${e.message}`, e);
+    throw e;
+  }
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -497,6 +588,8 @@ module.exports = {
   getOrgByUrn,
   getOrgByUid,
   getOrgByEstablishmentNumber,
+  getOrgByUkprn,
+  getOrgByLegacyId,
   getOrganisationsForUser,
   setUserAccessToOrganisation,
   getOrganisationCategories,
