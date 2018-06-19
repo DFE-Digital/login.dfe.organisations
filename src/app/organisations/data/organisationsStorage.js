@@ -1,5 +1,5 @@
 const logger = require('./../../../infrastructure/logger');
-const { list, getOrgById, getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber } = require('./../../services/data/organisationsStorage');
+const { list, getOrgById, getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber, getOrgByUkprn } = require('./../../services/data/organisationsStorage');
 const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, users, organisationUserStatus, regionCodes, phasesOfEducation } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 const uniq = require('lodash/uniq');
@@ -497,6 +497,7 @@ module.exports = {
   getOrgByUrn,
   getOrgByUid,
   getOrgByEstablishmentNumber,
+  getOrgByUkprn,
   getOrganisationsForUser,
   setUserAccessToOrganisation,
   getOrganisationCategories,

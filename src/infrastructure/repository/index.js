@@ -37,7 +37,12 @@ const defineStatic = (model) => {
   model.organisationCategory = [
     { id: '001', name: 'Establishment' },
     { id: '002', name: 'Local Authority' },
+    { id: '004', name: 'Early Year Setting' },
+    { id: '008', name: 'Other Stakeholders' },
+    { id: '009', name: 'Training Providers' },
     { id: '010', name: 'Multi-Academy Trust' },
+    { id: '011', name: 'Government' },
+    { id: '012', name: 'Other GIAS Stakeholder' },
     { id: '013', name: 'Single-Academy Trust' },
   ];
 
