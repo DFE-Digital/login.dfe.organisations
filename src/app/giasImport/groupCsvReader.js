@@ -18,26 +18,59 @@ const parseCsv = async (data) => {
     }
   });
 };
-const mapRow = (row) => {
+const getColumnIndices = (headerRow) => {
+  const columns = [
+    { name: 'uid', label: 'Group UID', required: true, index: -1 },
+    { name: 'name', label: 'Group Name', required: true, index: -1 },
+    { name: 'companyRegistrationNumber', label: 'Companies House Number', required: true, index: -1 },
+    { name: 'type', label: 'Group Type (code)', required: true, index: -1 },
+    { name: 'status', label: 'Group Status (code)', required: true, index: -1 },
+    { name: 'closedOn', label: 'Closed Date', required: false, index: -1 },
+    { name: 'address1', label: 'Group Contact Street', required: false, index: -1 },
+    { name: 'address2', label: 'Group Contact Locality', required: false, index: -1 },
+    { name: 'address3', label: 'Group Contact Address 3', required: false, index: -1 },
+    { name: 'town', label: 'Group Contact Town', required: false, index: -1 },
+    { name: 'county', label: 'Group Contact County', required: false, index: -1 },
+    { name: 'postCode', label: 'Group Contact Postcode', required: false, index: -1 },
+  ];
+  const columnIndices = {};
+
+  for (let i = 0; i < columns.length; i += 1) {
+    const column = columns[i];
+    for (let j = 0; j < headerRow.length && column.index === -1; j++) {
+      if (column.label.toLowerCase() === headerRow[j].toLowerCase()) {
+        column.index = j;
+      }
+    }
+    if (column.required && column.index === -1) {
+      throw new Error(`Column ${column.name} (label: ${column.label}) is required but not found`);
+    }
+    columnIndices[column.name] = column.index;
+  }
+
+  return columnIndices;
+};
+const mapRow = (row, columnIndices) => {
   let closedOn = null;
-  if (row[6]) {
-    closedOn = moment.utc(row[6], 'DD-MM-YYYY').toDate();
+  if (row[columnIndices.closedOn]) {
+    closedOn = moment.utc(row[columnIndices.closedOn], 'DD-MM-YYYY').toDate();
   }
 
   return {
-    uid: row[0] || null,
-    name: row[2] || null,
-    type: row[4] || null,
-    status: row[7] || null,
+    uid: row[columnIndices.uid] || null,
+    name: row[columnIndices.name] || null,
+    companyRegistrationNumber: row[columnIndices.companyRegistrationNumber] || null,
+    type: row[columnIndices.type] || null,
+    status: row[columnIndices.status] || null,
     closedOn,
     address: [
-      row[9] || null,
-      row[10] || null,
-      row[11] || null,
-      row[12] || null,
-      row[13] || null,
-      row[14] || null,
-    ]
+      row[columnIndices.address1] || null,
+      row[columnIndices.address2] || null,
+      row[columnIndices.address3] || null,
+      row[columnIndices.town] || null,
+      row[columnIndices.county] || null,
+      row[columnIndices.postCode] || null,
+    ],
   };
 };
 
@@ -47,7 +80,9 @@ const parse = async (data) => {
     return [];
   }
 
-  return rows.slice(1).map(mapRow);
+  const columnIndices = getColumnIndices(rows[0]);
+
+  return rows.slice(1).map(row => mapRow(row, columnIndices));
 };
 
 module.exports = {
