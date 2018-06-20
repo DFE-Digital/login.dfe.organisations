@@ -1,4 +1,4 @@
-const { getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber } = require('./data/organisationsStorage');
+const { getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber, getOrgByLegacyId } = require('./data/organisationsStorage');
 
 const getOrganisationByExternalIdentifier = async (req, res) => {
   if (!req.params.id || !req.params.type) {
@@ -6,7 +6,10 @@ const getOrganisationByExternalIdentifier = async (req, res) => {
   }
 
   let org;
-  if (req.params.type === '010' || req.params.type === '013') {
+  if (req.params.type === '000') {
+    org = await getOrgByLegacyId(req.params.id);
+  }
+  else if (req.params.type === '010' || req.params.type === '013') {
     org = await getOrgByUid(req.params.id);
   } else if (req.params.type === '001') {
     org = await getOrgByUrn(req.params.id);
