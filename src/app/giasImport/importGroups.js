@@ -65,6 +65,7 @@ const mapImportRecordForStorage = (importing) => {
     status,
     closedOn: importing.closedOn,
     address,
+    companyRegistrationNumber: importing.companyRegistrationNumber,
   };
 };
 const addGroup = async (importing) => {
@@ -82,15 +83,19 @@ const hasBeenUpdated = (newValue, oldValue) => {
     return newValue.getTime() !== oldValue.getTime();
   }
 
+  if (newValue instanceof Object && Object.keys(newValue).find(x => x === 'id')) {
+    return hasBeenUpdated(newValue.id, oldValue.id);
+  }
+
   return newValue !== oldValue;
 };
 const updateGroup = async (importing, existing) => {
   const updated = mapImportRecordForStorage(importing);
   updated.id = existing.id;
 
-  if (hasBeenUpdated(updated.name, updated.name) || hasBeenUpdated(updated.category.id, updated.category.id)
-    || hasBeenUpdated(updated.status.id, updated.status.id) || hasBeenUpdated(updated.closedOn, updated.closedOn)
-    || hasBeenUpdated(updated.address, updated.address)) {
+  if (hasBeenUpdated(updated.name, existing.name) || hasBeenUpdated(updated.category, existing.category)
+    || hasBeenUpdated(updated.status, existing.status) || hasBeenUpdated(updated.closedOn, existing.closedOn)
+    || hasBeenUpdated(updated.address, existing.address) || hasBeenUpdated(updated.companyRegistrationNumber, existing.companyRegistrationNumber)) {
     await update(updated);
     logger.info(`Updated group ${importing.uid}`);
   } else {

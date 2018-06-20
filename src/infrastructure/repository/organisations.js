@@ -72,6 +72,10 @@ const define = (db, schema) => {
       type: Sequelize.BIGINT,
       allowNull: true,
     },
+    companyRegistrationNumber: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
   }, {
     timestamps: false,
     tableName: 'organisation',
