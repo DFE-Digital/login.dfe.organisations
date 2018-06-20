@@ -23,6 +23,7 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.statutoryLowAge = organisation.statutoryLowAge;
   entity.statutoryHighAge = organisation.statutoryHighAge;
   entity.legacyId = organisation.legacyId;
+  entity.companyRegistrationNumber = organisation.companyRegistrationNumber;
 };
 const updateOrganisationsWithLocalAuthorityDetails = async (orgs) => {
   const localAuthorityIds = uniq(orgs.filter(o => o.localAuthority).map(o => o.localAuthority.id));
@@ -71,6 +72,7 @@ const mapOrganisationFromEntity = (entity) => {
     statutoryLowAge: entity.statutoryLowAge,
     statutoryHighAge: entity.statutoryHighAge,
     legacyId: entity.legacyId,
+    companyRegistrationNumber: entity.companyRegistrationNumber,
   };
 };
 
@@ -162,6 +164,7 @@ const pagedList = async (pageNumber = 1, pageSize = 25) => {
       statutoryLowAge: entity.statutoryLowAge,
       statutoryHighAge: entity.statutoryHighAge,
       legacyId: entity.legacyId,
+      companyRegistrationNumber: entity.companyRegistrationNumber,
     };
   });
   await updateOrganisationsWithLocalAuthorityDetails(orgs);
@@ -229,6 +232,7 @@ const listOfCategory = async (category, includeAssociations = false) => {
     closedOn: entity.ClosedOn,
     address: entity.Address,
     legacyId: entity.legacyId,
+    companyRegistrationNumber: entity.companyRegistrationNumber,
   }));
 };
 
@@ -270,6 +274,7 @@ const pagedListOfCategory = async (category, includeAssociations = false, pageNu
       statutoryLowAge: entity.statutoryLowAge,
       statutoryHighAge: entity.statutoryHighAge,
       legacyId: entity.legacyId,
+      companyRegistrationNumber: entity.companyRegistrationNumber,
     };
 
     if (entity.associations) {
