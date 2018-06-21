@@ -1,5 +1,4 @@
 const logger = require('./../../../infrastructure/logger');
-const { list, getOrgById } = require('./../../services/data/organisationsStorage');
 const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, users, organisationUserStatus, regionCodes, phasesOfEducation } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 const uniq = require('lodash/uniq');
@@ -75,6 +74,50 @@ const mapOrganisationFromEntity = (entity) => {
     companyRegistrationNumber: entity.companyRegistrationNumber,
   };
 };
+
+
+const list = async (includeAssociations = false) => {
+  try {
+    const findOrgsOpts = {};
+    if (includeAssociations) {
+      findOrgsOpts.include = ['associations'];
+    }
+    const orgEntities = await organisations.findAll(findOrgsOpts);
+    if (!orgEntities) {
+      return null;
+    }
+
+    return await Promise.all(orgEntities.map(async (serviceEntity) => {
+      const organisation = {
+        id: serviceEntity.getDataValue('id'),
+        name: serviceEntity.getDataValue('name'),
+        category: organisationCategory.find(c => c.id === serviceEntity.Category),
+        type: establishmentTypes.find(c => c.id === serviceEntity.Type),
+        urn: serviceEntity.URN,
+        uid: serviceEntity.UID,
+        ukprn: serviceEntity.UKPRN,
+        establishmentNumber: serviceEntity.EstablishmentNumber,
+        status: organisationStatus.find(c => c.id === serviceEntity.Status),
+        closedOn: serviceEntity.ClosedOn,
+        address: serviceEntity.Address,
+      };
+
+      if (serviceEntity.associations) {
+        organisation.associations = serviceEntity.associations.map((assEntity) => ({
+          associatedOrganisationId: assEntity.associated_organisation_id,
+          associationType: assEntity.link_type,
+        }));
+      }
+
+      return organisation;
+    }));
+  } catch (e) {
+    logger.error(`error getting organisations - ${e.message}`, e);
+    throw e;
+  }
+};
+
+const getOrgById = async id => organisations.findById(id);
 
 const search = async (criteria, pageNumber = 1, pageSize = 25, filterCategories = undefined, filterStates = undefined) => {
   const offset = (pageNumber - 1) * pageSize;
