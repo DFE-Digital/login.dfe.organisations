@@ -23,7 +23,7 @@ const handler = async (req, res) => {
           serviceId: svc.id,
           roleId: org.role.id,
           status: APPROVED_STATUS,
-          externalIdentifiers: s.externalIdentifiers,
+          externalIdentifiers: svc.externalIdentifiers,
         }, req.header('x-correlation-id'));
       }
     }
