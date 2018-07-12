@@ -22,6 +22,7 @@ jest.mock('./../../../../src/infrastructure/repository', () => {
     invitationOrganisations: {
       find: jest.fn(),
       create: jest.fn(),
+      upsert: jest.fn(),
     },
   };
 });
@@ -53,6 +54,7 @@ describe('when upserting and invitation mapping', () => {
 
     db.invitationOrganisations.find.mockReset();
     db.invitationOrganisations.create.mockReset();
+    db.invitationOrganisations.upsert.mockReset();
   });
 
   it('then it should check for exiting record by invitation_id, service_id and organisation_id', async () => {
@@ -110,44 +112,11 @@ describe('when upserting and invitation mapping', () => {
     });
   });
 
-  it('then it should destroy the existing organisation record if existing record found and role has changed', async () => {
-    const invitationOrganisation = createJestMockForSequelizeEntity({
-      invitation_id: 'inv1',
-      organisation_id: '',
-      role_id: 10000,
-    });
-    invitationOrganisation.destroy = jest.fn();
-    db.invitationOrganisations.find.mockReturnValue(invitationOrganisation);
-
+  it('then it should upsert organisation record', async () => {
     await invitationStorage.upsert(details);
 
-    expect(invitationOrganisation.destroy.mock.calls.length).toBe(1);
-  });
-
-  it('then it should create new organisation record if existing record found and role has changed', async () => {
-    const invitationOrganisation = createJestMockForSequelizeEntity({
-      invitation_id: 'inv1',
-      organisation_id: 'org1',
-      role_id: 10000,
-    });
-    invitationOrganisation.destroy = jest.fn();
-    db.invitationOrganisations.find.mockReturnValue(invitationOrganisation);
-
-    await invitationStorage.upsert(details);
-
-    expect(db.invitationOrganisations.create.mock.calls.length).toBe(1);
-    expect(db.invitationOrganisations.create.mock.calls[0][0]).toEqual({
-      invitation_id: 'inv1',
-      organisation_id: 'org1',
-      role_id: 0,
-    });
-  });
-
-  it('then it should create new organisation record if existing record not found', async () => {
-    await invitationStorage.upsert(details);
-
-    expect(db.invitationOrganisations.create.mock.calls.length).toBe(1);
-    expect(db.invitationOrganisations.create.mock.calls[0][0]).toEqual({
+    expect(db.invitationOrganisations.upsert.mock.calls.length).toBe(1);
+    expect(db.invitationOrganisations.upsert.mock.calls[0][0]).toEqual({
       invitation_id: 'inv1',
       organisation_id: 'org1',
       role_id: 0,

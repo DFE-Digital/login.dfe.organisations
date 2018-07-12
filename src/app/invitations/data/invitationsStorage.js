@@ -134,27 +134,11 @@ const upsert = async (details, correlationId) => {
       }
     }
 
-    const invitationOrganisation = await invitationOrganisations.find({
-      where: {
-        invitation_id: {
-          [Op.eq]: invitationId,
-        },
-        organisation_id: {
-          [Op.eq]: this.organisation_id,
-        },
-      },
+    await invitationOrganisations.upsert({
+      invitation_id: invitationId,
+      organisation_id: organisationId,
+      role_id: roleId,
     });
-    if (!invitationOrganisation || invitationOrganisation.role_id !== roleId) {
-      if (invitationOrganisation) {
-        await invitationOrganisation.destroy();
-      }
-
-      await invitationOrganisations.create({
-        invitation_id: invitationId,
-        organisation_id: organisationId,
-        role_id: roleId,
-      });
-    }
   } catch (e) {
     logger.error(`Error in InvitationsStorage.upsert ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
     throw e;
