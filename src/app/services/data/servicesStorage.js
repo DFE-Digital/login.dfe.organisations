@@ -171,6 +171,65 @@ const getApproversOfServiceUserIds = async (organisationId, id, correlationId) =
   }
 };
 
+const listUserAssociatedServices = async (page, pageSize, correlationId) => {
+  try {
+    logger.info(`Calling listUserAssociatedServices for services storage for request ${correlationId}`, { correlationId });
+    const resultset = await users.findAndCountAll(
+      {
+        order: [
+          ['user_id', 'ASC'],
+          ['organisation_id', 'ASC'],
+        ],
+        limit: pageSize,
+        offset: page !== 1 ? pageSize * (page - 1) : 0,
+        include: ['Service'],
+      });
+    const userServices = resultset.rows;
+
+    const orgCache = [];
+    const mappedUserService = [];
+    for (let i = 0; i <= userServices.length; i += 1) {
+      const userService = userServices[i];
+      if (userService) {
+        const role = await userService.getRole();
+        const approvers = await userService.getApprovers().map(user => user.user_id);
+        const serviceExternalIdentifiers = await userService.getExternalIdentifiers().map(id => ({
+          key: id.identifier_key,
+          value: id.identifier_value,
+        }));
+
+        const orgId = userService.getDataValue('organisation_id');
+        let organisation = orgCache.find(o => o.id === orgId);
+        if (!organisation) {
+          organisation = await getOrganisationById(orgId);
+        }
+
+        mappedUserService.push({
+          id: userService.Service.getDataValue('id'),
+          name: userService.Service.getDataValue('name'),
+          description: userService.Service.getDataValue('description'),
+          status: userService.getDataValue('status'),
+          userId: userService.getDataValue('user_id'),
+          requestDate: userService.getDataValue('createdAt'),
+          approvers,
+          organisation,
+          role,
+          externalIdentifiers: serviceExternalIdentifiers,
+        });
+      }
+    }
+    return {
+      services: mappedUserService,
+      page,
+      totalNumberOfPages: Math.ceil(resultset.count / pageSize),
+      totalNumberOfRecords: resultset.count,
+    };
+  } catch (e) {
+    logger.error(`error getting listUserAssociatedServices - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
+    throw e;
+  }
+};
+
 const getUserAssociatedServices = async (id, correlationId) => {
   try {
     logger.info(`Calling getUserAssociatedServices for services storage for request ${correlationId}`, { correlationId });
@@ -553,6 +612,7 @@ module.exports = {
   getServiceDetails,
   getById,
   getUsersOfService,
+  listUserAssociatedServices,
   getUserAssociatedServices,
   getUserUnassociatedServices,
   create,

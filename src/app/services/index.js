@@ -7,6 +7,7 @@ const { asyncWrapper } = require('login.dfe.express-error-handling');
 const { deprecate } = require('./../../utils');
 
 const listServices = require('./listServices');
+const listUserAssociatedServices = require('./listUserAssociatedServices');
 const getUserAssociatedServices = require('./getUserAssociatedServices');
 const getUnassociatedWithUserServices = require('./getUserUnassociatedServices');
 const getServiceDetails = require('./getServiceDetails');
@@ -30,6 +31,7 @@ const servicesRouteExport = () => {
 
   // Map routed to functions.
   router.get('/', asyncWrapper(listServices));
+  router.get('/associated-with-user', asyncWrapper(listUserAssociatedServices));
   router.get('/:sid', asyncWrapper(getServiceById));
   router.get('/:sid/identifiers/:id_key/:id_value', asyncWrapper(getSingleServiceIdentifier));
   router.get('/associated-with-user/:uid', asyncWrapper(getUserAssociatedServices));
