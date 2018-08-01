@@ -37,6 +37,48 @@ const list = async (correlationId) => {
   }
 };
 
+const listInvitationServices = async (page, pageSize, correlationId) => {
+  try {
+    const resultset = await invitations.findAndCountAll({
+      limit: pageSize,
+      offset: page !== 1 ? pageSize * (page - 1) : 0,
+      include: ['Organisation', 'Service'],
+    });
+
+    const mapped = [];
+    for (let i = 0; i < resultset.rows.length; i++) {
+      const entity = resultset.rows[i];
+      const role = await entity.getRole();
+
+      mapped.push({
+        id: entity.Service.getDataValue('id'),
+        name: entity.Service.getDataValue('name'),
+        description: entity.Service.getDataValue('description'),
+        invitationId: entity.getDataValue('invitation_id'),
+        organisation: {
+          id: entity.Organisation.getDataValue('id'),
+          name: entity.Organisation.getDataValue('name'),
+          urn: entity.Organisation.getDataValue('URN') || undefined,
+          uid: entity.Organisation.getDataValue('UID') || undefined,
+          ukprn: entity.Organisation.getDataValue('UKPRN') || undefined,
+          category: organisationCategory.find(c => c.id === entity.Organisation.getDataValue('Category')),
+          type: establishmentTypes.find(t => t.id === entity.Organisation.getDataValue('Type')),
+        },
+        role,
+      });
+    }
+    return {
+      services: mapped,
+      page,
+      totalNumberOfPages: Math.ceil(resultset.count / pageSize),
+      totalNumberOfRecords: resultset.count,
+    };
+  } catch (e) {
+    logger.error(`error listing page ${page} of invitations (with size of ${pageSize}) - ${e.message} (correlation id: ${correlationId}`, { correlationId });
+    throw e;
+  }
+};
+
 const getForInvitationId = async (id, correlationId) => {
   try {
     logger.info(`Get invitation for request ${correlationId}`, { correlationId });
@@ -147,6 +189,7 @@ const upsert = async (details, correlationId) => {
 
 module.exports = {
   list,
+  listInvitationServices,
   getForInvitationId,
   upsert,
 };
