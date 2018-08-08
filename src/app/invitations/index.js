@@ -11,6 +11,7 @@ const getInvitation = require('./getInvitation');
 const getInvitationV2 = require('./getInvitationV2');
 const putInvitation = require('./putInvitation');
 const postMigrateInvitationToUser = require('./migrateInvitationToUser');
+const deleteInvitationOrganisation = require('./deleteInvitationOrganisation');
 
 const invitationRoutes = () => {
   const router = express.Router();
@@ -39,6 +40,7 @@ const organisationRoutes = () => {
 
   // Map routes to functions.
   router.put('/:org_id/invitations/:inv_id', asyncWrapper(putInvitation));
+  router.delete('/:org_id/invitations/:inv_id', asyncWrapper(deleteInvitationOrganisation));
   router.put('/:org_id/services/:svc_id/invitations/:inv_id', asyncWrapper(putInvitation));
 
   return router;
