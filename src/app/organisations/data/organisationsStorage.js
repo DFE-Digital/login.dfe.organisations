@@ -431,6 +431,26 @@ const setUserAccessToOrganisation = async (organisationId, userId, roleId, statu
   reason,
 });
 
+const deleteUserOrganisation = async (organisationId, userId) => {
+  try {
+    const userOrg = await userOrganisations.findOne(
+      {
+        where: {
+          user_id: {
+            [Op.eq]: userId,
+          },
+          organisation_id: {
+            [Op.eq]: organisationId,
+          },
+        },
+      });
+    await userOrg.destroy();
+  } catch (e) {
+    logger.error(`error deleting organisation for user- ${e.message}`, e);
+    throw e;
+  }
+};
+
 const getOrganisationCategories = async () => {
   const categories = organisationCategory.sort((x, y) => {
     if (x.name < y.name) {
@@ -644,6 +664,7 @@ module.exports = {
   getOrgByLegacyId,
   getOrganisationsForUser,
   setUserAccessToOrganisation,
+  deleteUserOrganisation,
   getOrganisationCategories,
   getOrganisationStates,
   getUsersPendingApprovalByUser,
