@@ -3,6 +3,7 @@
 const uuid = require('uuid/v4');
 const invitationStorage = require('./data/invitationsStorage');
 const serviceStorage = require('./../services/data/servicesStorage');
+const organisationsStorage = require('./../organisations/data/organisationsStorage');
 
 const APPROVED_STATUS = 1;
 
@@ -14,6 +15,9 @@ const handler = async (req, res) => {
   if (services) {
     for (let o = 0; o < services.length; o += 1) {
       const org = services[o];
+
+      await organisationsStorage.setUserAccessToOrganisation(org.organisation.id, userId, org.role.id, APPROVED_STATUS, '');
+
       for (let s = 0; s < org.services.length; s += 1) {
         const svc = org.services[s];
         await serviceStorage.upsertServiceUser({
