@@ -140,9 +140,10 @@ const getForInvitationId = async (id, correlationId) => {
   }
 };
 
-const deleteInvitationOrganisation = async (organisationId, invitationId) => {
+const deleteInvitationOrganisation = async (organisationId, invitationId, correlationId) => {
   try {
-    const invOrg = await invitationOrganisations.findOne(
+    logger.info(`Deleting org ${organisationId} for user ${invitationId} for ${correlationId}`, { correlationId });
+    await invitationOrganisations.destroy(
       {
         where: {
           invitation_id: {
@@ -153,9 +154,8 @@ const deleteInvitationOrganisation = async (organisationId, invitationId) => {
           },
         },
       });
-    await invOrg.destroy();
   } catch (e) {
-    logger.error(`error deleting organisation for invited user- ${e.message}`, e);
+    logger.error(`error deleting organisation for user- ${e.message} (id: ${correlationId})`, { correlationId });
     throw e;
   }
 };
