@@ -431,9 +431,10 @@ const setUserAccessToOrganisation = async (organisationId, userId, roleId, statu
   reason,
 });
 
-const deleteUserOrganisation = async (organisationId, userId) => {
+const deleteUserOrganisation = async (organisationId, userId, correlationId) => {
   try {
-    const userOrg = await userOrganisations.findOne(
+    logger.info(`Deleting org ${organisationId} for user ${userId} for ${correlationId}`, { correlationId });
+    await userOrganisations.destroy(
       {
         where: {
           user_id: {
@@ -444,9 +445,8 @@ const deleteUserOrganisation = async (organisationId, userId) => {
           },
         },
       });
-    await userOrg.destroy();
   } catch (e) {
-    logger.error(`error deleting organisation for user- ${e.message}`, e);
+    logger.error(`error deleting organisation for user- ${e.message} (id: ${correlationId})`, { correlationId });
     throw e;
   }
 };
