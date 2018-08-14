@@ -142,7 +142,7 @@ const getForInvitationId = async (id, correlationId) => {
 
 const deleteInvitationOrganisation = async (organisationId, invitationId, correlationId) => {
   try {
-    logger.info(`Deleting org ${organisationId} for user ${invitationId} for ${correlationId}`, { correlationId });
+    logger.info(`Deleting org ${organisationId} for invitation ${invitationId} for ${correlationId}`, { correlationId });
     await invitationOrganisations.destroy(
       {
         where: {
