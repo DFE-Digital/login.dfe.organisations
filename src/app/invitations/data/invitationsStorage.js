@@ -140,6 +140,26 @@ const getForInvitationId = async (id, correlationId) => {
   }
 };
 
+const deleteInvitationOrganisation = async (organisationId, invitationId, correlationId) => {
+  try {
+    logger.info(`Deleting org ${organisationId} for invitation ${invitationId} for ${correlationId}`, { correlationId });
+    await invitationOrganisations.destroy(
+      {
+        where: {
+          invitation_id: {
+            [Op.eq]: invitationId,
+          },
+          organisation_id: {
+            [Op.eq]: organisationId,
+          },
+        },
+      });
+  } catch (e) {
+    logger.error(`error deleting organisation for user- ${e.message} (id: ${correlationId})`, { correlationId });
+    throw e;
+  }
+};
+
 const upsert = async (details, correlationId) => {
   logger.info(`Upsert invitation for request ${correlationId}`, { correlationId });
   const { invitationId, organisationId, serviceId, roleId } = details;
@@ -192,4 +212,5 @@ module.exports = {
   listInvitationServices,
   getForInvitationId,
   upsert,
+  deleteInvitationOrganisation,
 };
