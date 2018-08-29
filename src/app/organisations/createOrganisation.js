@@ -46,21 +46,22 @@ const validateOrg = async (organisation) => {
 };
 const getExistingOrg = async (organisation) => {
   let existing;
+  const category = organisation.category ? organisation.category.id : undefined;
 
   if (!existing && organisation.legacyId) {
-    existing = await getOrgByLegacyId(organisation.legacyId);
+    existing = await getOrgByLegacyId(organisation.legacyId, category);
   }
   if (!existing && organisation.urn) {
-    existing = await getOrgByUrn(organisation.urn);
+    existing = await getOrgByUrn(organisation.urn, category);
   }
   if (!existing && organisation.uid) {
-    existing = await getOrgByUid(organisation.uid);
+    existing = await getOrgByUid(organisation.uid, category);
   }
   if (!existing && organisation.category.id === '002' && organisation.establishmentNumber) {
-    existing = await getOrgByEstablishmentNumber(organisation.establishmentNumber);
+    existing = await getOrgByEstablishmentNumber(organisation.establishmentNumber, category);
   }
   if (!existing && organisation.ukprn) {
-    existing = await getOrgByUkprn(organisation.ukprn);
+    existing = await getOrgByUkprn(organisation.ukprn, category);
   }
 
   return existing;
