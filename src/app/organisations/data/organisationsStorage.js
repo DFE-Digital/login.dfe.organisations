@@ -562,16 +562,21 @@ const getUsersPendingApproval = async (pageNumber = 1, pageSize = 25) => {
   };
 };
 
-const getOrgByUrn = async (urn) => {
+const getOrgByUrn = async (urn, category) => {
   try {
-    const entity = await organisations.findOne(
-      {
-        where: {
-          URN: {
-            [Op.eq]: urn,
-          },
+    const query = {
+      where: {
+        URN: {
+          [Op.eq]: urn,
         },
-      });
+      },
+    };
+    if (category) {
+      query.where.Category = {
+        [Op.eq]: category,
+      };
+    }
+    const entity = await organisations.findOne(query);
     return mapOrganisationFromEntity(entity);
   } catch (e) {
     logger.error(`error getting organisation by urn - ${e.message}`, e);
@@ -579,16 +584,21 @@ const getOrgByUrn = async (urn) => {
   }
 };
 
-const getOrgByUid = async (uid) => {
+const getOrgByUid = async (uid, category) => {
   try {
-    const entity = await organisations.findOne(
-      {
-        where: {
-          UID: {
-            [Op.eq]: uid,
-          },
+    const query = {
+      where: {
+        UID: {
+          [Op.eq]: uid,
         },
-      });
+      },
+    };
+    if (category) {
+      query.where.Category = {
+        [Op.eq]: category,
+      };
+    }
+    const entity = await organisations.findOne(query);
     return mapOrganisationFromEntity(entity);
   } catch (e) {
     logger.error(`error getting organisation by uid - ${e.message}`, e);
@@ -596,16 +606,21 @@ const getOrgByUid = async (uid) => {
   }
 };
 
-const getOrgByEstablishmentNumber = async (establishmentNumber) => {
+const getOrgByEstablishmentNumber = async (establishmentNumber, category) => {
   try {
-    const entity = await organisations.findOne(
-      {
-        where: {
-          EstablishmentNumber: {
-            [Op.eq]: establishmentNumber,
-          },
+    const query = {
+      where: {
+        EstablishmentNumber: {
+          [Op.eq]: establishmentNumber,
         },
-      });
+      },
+    };
+    if (category) {
+      query.where.Category = {
+        [Op.eq]: category,
+      };
+    }
+    const entity = await organisations.findOne(query);
     return mapOrganisationFromEntity(entity);
   } catch (e) {
     logger.error(`error getting organisation by establishment number - ${e.message}`, e);
@@ -613,16 +628,21 @@ const getOrgByEstablishmentNumber = async (establishmentNumber) => {
   }
 };
 
-const getOrgByUkprn = async (ukprn) => {
+const getOrgByUkprn = async (ukprn, category) => {
   try {
-    const entity = await organisations.findOne(
-      {
-        where: {
-          UKPRN: {
-            [Op.eq]: ukprn,
-          },
+    const query = {
+      where: {
+        UKPRN: {
+          [Op.eq]: ukprn,
         },
-      });
+      },
+    };
+    if (category) {
+      query.where.Category = {
+        [Op.eq]: category,
+      };
+    }
+    const entity = await organisations.findOne(query);
     return mapOrganisationFromEntity(entity);
   } catch (e) {
     logger.error(`error getting organisation by UKPRN - ${e.message}`, e);
@@ -630,16 +650,21 @@ const getOrgByUkprn = async (ukprn) => {
   }
 };
 
-const getOrgByLegacyId = async (legacyId) => {
+const getOrgByLegacyId = async (legacyId, category) => {
   try {
-    const entity = await organisations.findOne(
-      {
-        where: {
-          legacyId: {
-            [Op.eq]: legacyId,
-          },
+    const query = {
+      where: {
+        legacyId: {
+          [Op.eq]: legacyId,
         },
-      });
+      },
+    };
+    if (category) {
+      query.where.Category = {
+        [Op.eq]: category,
+      };
+    }
+    const entity = await organisations.findOne(query);
     return mapOrganisationFromEntity(entity);
   } catch (e) {
     logger.error(`error getting organisation by legacy id - ${e.message}`, e);
