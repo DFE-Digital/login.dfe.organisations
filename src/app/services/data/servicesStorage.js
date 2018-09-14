@@ -446,7 +446,7 @@ const upsertServiceUser = async (options, correlationId) => {
           [Op.eq]: userId,
         },
         organisation_id: {
-          [Op.eq]: this.organisation_id,
+          [Op.eq]: organisationId,
         },
       },
     });
@@ -465,7 +465,7 @@ const upsertServiceUser = async (options, correlationId) => {
     if (externalIdentifiers) {
       for (let i = 0; i < externalIdentifiers.length; i += 1) {
         const extId = externalIdentifiers[i];
-        userService.setExternalIdentifier(extId.key, extId.value);
+        await userService.setExternalIdentifier(extId.key, extId.value);
       }
     }
   } catch (e) {
