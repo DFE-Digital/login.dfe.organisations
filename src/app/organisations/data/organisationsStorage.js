@@ -117,7 +117,19 @@ const list = async (includeAssociations = false) => {
   }
 };
 
-const getOrgById = async id => organisations.findById(id);
+const getOrgById = async (id) => {
+  const entity = await organisations.find({
+    where: {
+      id: {
+        [Op.eq]: id,
+      },
+    },
+    include: ['associations'],
+  });
+  const org = mapOrganisationFromEntity(entity);
+  await updateOrganisationsWithLocalAuthorityDetails([org]);
+  return org;
+};
 
 const search = async (criteria, pageNumber = 1, pageSize = 25, filterCategories = undefined, filterStates = undefined) => {
   const offset = (pageNumber - 1) * pageSize;

@@ -5,7 +5,19 @@ const getOrganisation = async (req, res) => {
   if (!organisation) {
     return res.status(404).send();
   }
-  return res.contentType('json').send(organisation);
+  return res.contentType('json').send({
+    id: organisation.id,
+    name: organisation.name,
+    Category: organisation.category ? organisation.category.id : null,
+    Type: organisation.type ? organisation.type.id : null,
+    URN: organisation.urn,
+    UID: organisation.uid,
+    UKPRN: organisation.ukprn,
+    EstablishmentNumber: organisation.establishmentNumber,
+    Status: organisation.status ? organisation.status.id : null,
+    ClosedOn: organisation.closedOn,
+    Address: organisation.address,
+  });
 };
 
 module.exports = getOrganisation;
