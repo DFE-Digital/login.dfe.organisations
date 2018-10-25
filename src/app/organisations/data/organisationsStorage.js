@@ -684,6 +684,34 @@ const getOrgByLegacyId = async (legacyId, category) => {
   }
 };
 
+const getUsersAssociatedWithOrganisation = async (orgId, pageNumber = 1, pageSize = 25) => {
+  const offset = (pageNumber - 1) * pageSize;
+  const userOrgs = await userOrganisations.findAndCountAll({
+    where: {
+      organisation_id: {
+        [Op.eq]: orgId,
+      },
+    },
+    limit: pageSize,
+    offset,
+  });
+  if (!userOrgs || userOrgs.length === 0) {
+    return [];
+  }
+  const totalNumberOfRecords = userOrgs.count;
+  const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
+
+  return await Promise.all(userOrgs.rows.map(async (userOrgEntity) => {
+    const role = await userOrgEntity.getRole();
+    return {
+      id: userOrgEntity.getDataValue('user_id'),
+      status: userOrgEntity.getDataValue('status'),
+      role,
+      totalNumberOfPages,
+    };
+  }));
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -707,4 +735,5 @@ module.exports = {
   getUsersPendingApprovalByUser,
   getUsersPendingApproval,
   pagedListOfCategory,
+  getUsersAssociatedWithOrganisation
 };

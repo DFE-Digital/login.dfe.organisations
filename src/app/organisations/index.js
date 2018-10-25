@@ -14,6 +14,7 @@ const getOrganisationsAssociatedWithUser = require('./getOrganisationsAssociated
 const putUserInOrg = require('./putUserInOrg');
 const getUsersAssocatedWithOrganisationsForApproval = require('./getUsersAssociatedWithOrganisationForApproval');
 const deleteUserOrganisation = require('./deleteUserOrganisation');
+const getUsersForOrganisation = require('./getUsersForOrganisation');
 
 const router = express.Router();
 
@@ -32,6 +33,7 @@ const routes = () => {
   router.get('/by-external-id/:type/:id', asyncWrapper(getOrganisationByExternalId));
   router.get('/associated-with-user/:uid', asyncWrapper(getOrganisationsAssociatedWithUser));
   router.get('/users-for-approval/:uid?', asyncWrapper(getUsersAssocatedWithOrganisationsForApproval));
+  router.get('/:id/users', asyncWrapper(getUsersForOrganisation));
   router.get('/:id', asyncWrapper(getOrganisation));
   router.get('/v2/:id', asyncWrapper(getOrganisationV2));
   router.put('/:id/users/:uid', asyncWrapper(putUserInOrg));
