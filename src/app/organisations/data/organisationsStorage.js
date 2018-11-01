@@ -1,5 +1,5 @@
 const logger = require('./../../../infrastructure/logger');
-const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, users, organisationUserStatus, regionCodes, phasesOfEducation } = require('./../../../infrastructure/repository');
+const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, invitationOrganisations, users, organisationUserStatus, regionCodes, phasesOfEducation } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 const uniq = require('lodash/uniq');
 
@@ -743,6 +743,35 @@ const pagedListOfUsers = async (pageNumber = 1, pageSize = 25) => {
   };
 };
 
+const pagedListOfInvitations = async (pageNumber = 1, pageSize = 25) => {
+  const recordset = await invitationOrganisations.findAndCountAll({
+    limit: pageSize,
+    offset: (pageNumber - 1) * pageSize,
+    include: ['Organisation'],
+  });
+  const mappings = [];
+  for (let i = 0; i < recordset.rows.length; i += 1) {
+    const entity = recordset.rows[i];
+    const role = await entity.getRole();
+    const organisation = mapOrganisationFromEntity(entity.Organisation);
+    await updateOrganisationsWithLocalAuthorityDetails([organisation]);
+
+    mappings.push({
+      invitationId: entity.invitation_id,
+      organisation,
+      role,
+    });
+  }
+
+  const totalNumberOfRecords = recordset.count;
+  const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
+  return {
+    invitationOrganisations: mappings,
+    totalNumberOfRecords,
+    totalNumberOfPages,
+  };
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -768,4 +797,5 @@ module.exports = {
   pagedListOfCategory,
   getUsersAssociatedWithOrganisation,
   pagedListOfUsers,
+  pagedListOfInvitations,
 };
