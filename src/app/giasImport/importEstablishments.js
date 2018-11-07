@@ -1,6 +1,7 @@
 const logger = require('./../../infrastructure/logger');
 const { parse } = require('./establishmentCsvReader');
 const { list, add, update, pagedListOfCategory, addAssociation, removeAssociationsOfType } = require('./../organisations/data/organisationsStorage');
+const { raiseNotificationThatOrganisationHasChanged } = require('./../organisations/notifications');
 const { getEstablishmentsFile } = require('./../../infrastructure/gias');
 const uuid = require('uuid/v4');
 const uniqBy = require('lodash/uniqBy');
@@ -62,6 +63,8 @@ const addEstablishment = async (importing) => {
     const organisation = mapImportRecordForStorage(importing);
     await add(organisation);
     logger.info(`Added establishment ${importing.urn}`);
+    await raiseNotificationThatOrganisationHasChanged(update.id);
+    logger.info(`Notified addition of establishment ${organisation.urn}`);
     return organisation.id;
   } catch (e) {
     throw new Error(`Error adding establishment ${importing.urn} - ${e.message}`);
@@ -96,6 +99,8 @@ const updateEstablishment = async (importing, existing) => {
     try {
       await update(updated);
       logger.info(`Updated establishment ${importing.urn}`);
+      await raiseNotificationThatOrganisationHasChanged(update.id);
+      logger.info(`Notified update of establishment ${importing.urn}`);
     } catch (e) {
       logger.info(`Error updating establishment ${importing.urn} - ${e.message}`);
     }
@@ -169,6 +174,8 @@ const addLocalAuthority = async (importing) => {
     const organisation = mapImportLocalAuthorityForStorage(importing);
     await add(organisation);
     logger.info(`Added local authority ${importing.code} - ${importing.name}`);
+    await raiseNotificationThatOrganisationHasChanged(update.id);
+    logger.info(`Notified addition of local authority ${importing.code} - ${importing.name}`);
     return organisation.id;
   } catch (e) {
     logger.info(`Error adding local authority ${importing.code} - ${importing.name} - ${e.message}`);
@@ -180,6 +187,8 @@ const updateLocalAuthority = async (importing, existing) => {
     organisation.id = existing.id;
     await update(organisation);
     logger.info(`Updated local authority ${importing.code} - ${importing.name}`);
+    await raiseNotificationThatOrganisationHasChanged(organisation.id);
+    logger.info(`Notified update of local authority ${importing.code} - ${importing.name}`);
   } catch (e) {
     logger.info(`Error updating local authority ${importing.code} - ${importing.name} - ${e.message}`);
   }
