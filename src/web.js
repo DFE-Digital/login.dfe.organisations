@@ -1,6 +1,7 @@
 'use strict';
 
 const config = require('./infrastructure/config')();
+const configSchema = require('./infrastructure/config/schema');
 const logger = require('./infrastructure/logger');
 const express = require('express');
 const bodyParser = require('body-parser');
@@ -17,9 +18,7 @@ const healthCheck = require('login.dfe.healthcheck');
 const { getErrorHandler } = require('login.dfe.express-error-handling');
 const KeepAliveAgent = require('agentkeepalive');
 
-const { organisationsSchema, validateConfig } = require('login.dfe.config.schema');
-
-validateConfig(organisationsSchema, config, logger, config.hostingEnvironment.env !== 'dev');
+configSchema.validate();
 
 http.GlobalAgent = new KeepAliveAgent({
   maxSockets: config.hostingEnvironment.agentKeepAlive.maxSockets,
