@@ -1,4 +1,5 @@
 const { add, update, getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber, getOrgByUkprn, getOrgByLegacyId, getOrganisationCategories } = require('./data/organisationsStorage');
+const { raiseNotificationThatOrganisationHasChanged } = require('./notifications');
 const uuid = require('uuid/v4');
 
 const mapOrg = (req) => {
@@ -80,12 +81,14 @@ const action = async (req, res) => {
     existingOrg.name = organisation.name;
     existingOrg.legacyId = organisation.legacyId;
     await update(existingOrg);
+    await raiseNotificationThatOrganisationHasChanged(existingOrg.id);
 
     return res.status(202).send();
   }
 
   organisation.id = uuid();
   await add(organisation);
+  await raiseNotificationThatOrganisationHasChanged(organisation.id);
 
   return res.status(201).send();
 };
