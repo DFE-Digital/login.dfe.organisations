@@ -18,9 +18,30 @@
   "loggerSettings": {
     "applicationName": "Organisations API"
   },
+  "auth": {
+    "type": "secret",
+    "secret": "eyesight-faery-import-mimi"
+  },
   "database":{
     "host" :"localhost",
+    "name": "DFE_SIGNIN_ORGS",
     "username":"my-username",
-    "password":"my-password"
+    "password":"my-password",
+    "dialect": "mssql",
+    "schema": "dbo",
+    "pool": {
+      "max": 5,
+      "min": 0
+    }
+  },
+  "gias": {
+    "type": "static"
+  },
+  "notifications": {
+    "connectionString": "redis://localhost:6379"
+  },
+  "schedules": {
+    "establishmentImport": "5 * * * *",
+    "groupImport": "7 * * *"
   }
 }
