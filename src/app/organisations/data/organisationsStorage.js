@@ -710,6 +710,8 @@ const getUsersAssociatedWithOrganisation = async (orgId, pageNumber = 1, pageSiz
       id: userOrgEntity.getDataValue('user_id'),
       status: userOrgEntity.getDataValue('status'),
       role,
+      numericIdentifier: userOrgEntity.numeric_identifier || undefined,
+      textIdentifier: userOrgEntity.text_identifier || undefined,
       totalNumberOfPages,
     };
   }));
