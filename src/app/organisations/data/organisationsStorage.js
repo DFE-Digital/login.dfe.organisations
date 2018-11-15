@@ -432,6 +432,8 @@ const getOrganisationsForUser = async (userId) => {
           status: service.getDataValue('status'),
         };
       })),
+      numericIdentifier: userOrg.numeric_identifier || undefined,
+      textIdentifier: userOrg.text_identifier || undefined,
     };
   }));
 };
