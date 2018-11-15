@@ -1,5 +1,5 @@
 const logger = require('./../../../infrastructure/logger');
-const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, invitationOrganisations, users, organisationUserStatus, regionCodes, phasesOfEducation } = require('./../../../infrastructure/repository');
+const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, invitationOrganisations, users, organisationUserStatus, regionCodes, phasesOfEducation, counters } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 const uniq = require('lodash/uniq');
 
@@ -778,6 +778,32 @@ const pagedListOfInvitations = async (pageNumber = 1, pageSize = 25) => {
   };
 };
 
+const getUserOrganisationByTextIdentifier = async (textIdentifier) => {
+  const entity = await userOrganisations.find({
+    where: {
+      text_identifier: {
+        [Op.eq]: textIdentifier,
+      },
+    },
+  });
+  return entity || undefined;
+};
+
+const getNextUserOrgNumericIdentifier = async () => {
+  const entity = await counters.find({
+    where: {
+      counter_name: {
+        [Op.eq]: 'user_organisation_numeric_identifier',
+      },
+    },
+  });
+  const next = parseInt(entity.next_value);
+  await entity.update({
+    next_value: next + 1,
+  });
+  return next;
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -804,4 +830,6 @@ module.exports = {
   getUsersAssociatedWithOrganisation,
   pagedListOfUsers,
   pagedListOfInvitations,
+  getUserOrganisationByTextIdentifier,
+  getNextUserOrgNumericIdentifier,
 };
