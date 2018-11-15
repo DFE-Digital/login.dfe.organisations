@@ -6,8 +6,10 @@ const putUserInOrg = async (req, res) => {
   const roleId = req.body.roleId || 0;
   const status = req.body.status || 0;
   const reason = req.body.reason;
+  const numericIdentifier = req.body.numericIdentifier;
+  const textIdentifier = req.body.textIdentifier;
 
-  const created = await setUserAccessToOrganisation(organisationId, userId, roleId, status, reason);
+  const created = await setUserAccessToOrganisation(organisationId, userId, roleId, status, reason, numericIdentifier, textIdentifier);
 
   return res.status(created ? 201 : 202).send();
 };
