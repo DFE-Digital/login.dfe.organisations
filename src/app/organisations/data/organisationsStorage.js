@@ -438,12 +438,14 @@ const getOrganisationsForUser = async (userId) => {
   }));
 };
 
-const setUserAccessToOrganisation = async (organisationId, userId, roleId, status, reason) => userOrganisations.upsert({
+const setUserAccessToOrganisation = async (organisationId, userId, roleId, status, reason, numericIdentifier, textIdentifier) => userOrganisations.upsert({
   user_id: userId.toUpperCase(),
   organisation_id: organisationId,
   role_id: roleId,
   status,
   reason,
+  numeric_identifier: numericIdentifier,
+  text_identifier: textIdentifier,
 });
 
 const deleteUserOrganisation = async (organisationId, userId, correlationId) => {
