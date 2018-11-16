@@ -804,6 +804,21 @@ const getNextUserOrgNumericIdentifier = async () => {
   return next;
 };
 
+const getNextOrganisationLegacyId = async () => {
+  const entity = await counters.find({
+    where: {
+      counter_name: {
+        [Op.eq]: 'organisation_legacyid',
+      },
+    },
+  });
+  const next = parseInt(entity.next_value);
+  await entity.update({
+    next_value: next + 1,
+  });
+  return next;
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -832,4 +847,5 @@ module.exports = {
   pagedListOfInvitations,
   getUserOrganisationByTextIdentifier,
   getNextUserOrgNumericIdentifier,
+  getNextOrganisationLegacyId,
 };

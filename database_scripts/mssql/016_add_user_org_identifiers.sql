@@ -12,6 +12,7 @@ IF NOT EXISTS(SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'user_
       ALTER TABLE user_organisation
         ADD text_identifier varchar(25) NULL
     END
+GO
 
 
 UPDATE user_organisation
@@ -30,6 +31,7 @@ WHERE user_organisation.user_id = user_service_identifiers.user_id
 AND user_organisation.organisation_id = user_service_identifiers.organisation_id
 AND user_service_identifiers.identifier_key = 'saUsername'
 AND user_organisation.text_identifier IS NULL
+GO
 
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -46,6 +48,7 @@ IF NOT EXISTS(SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'counte
       CONSTRAINT [PK_counters] PRIMARY KEY (counter_name)
     )
   END
+GO
 
 IF NOT EXISTS (SELECT * FROM counters WHERE counter_name = 'user_organisation_numeric_identifier')
     BEGIN
@@ -56,3 +59,4 @@ IF NOT EXISTS (SELECT * FROM counters WHERE counter_name = 'organisation_legacyi
     BEGIN
       INSERT INTO counters (counter_name, next_value, createdAt, updatedAt) VALUES ('organisation_legacyid', 1, GETDATE(), GETDATE())
     END
+GO
