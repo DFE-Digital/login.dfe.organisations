@@ -12,6 +12,7 @@ const organisationsModel = require('./organisations');
 const servicesModel = require('./services');
 const usersModel = require('./users');
 const userOrganisationsModel = require('./userOrganisations');
+const countersModel = require('./counters');
 
 const db = makeConnection();
 
@@ -133,6 +134,7 @@ buildDataModel(dataModel, db, [
   servicesModel,
   usersModel,
   userOrganisationsModel,
+  countersModel,
 ]);
 
 
