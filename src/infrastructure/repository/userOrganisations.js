@@ -27,6 +27,14 @@ const define = (db, schema) => {
       type: Sequelize.STRING,
       allowNull: true,
     },
+    numeric_identifier: {
+      type: Sequelize.BIGINT,
+      allowNull: true,
+    },
+    text_identifier: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
   }, {
     timestamps: true,
     tableName: 'user_organisation',

@@ -75,6 +75,13 @@ const notificationsSchema = new SimpleSchema({
   connectionString: patterns.redis,
 });
 
+const togglesSchema = new SimpleSchema({
+  generateUserOrgIdentifiers: {
+    type: Boolean,
+    optional: true,
+  },
+});
+
 const schema = new SimpleSchema({
   loggerSettings: schemas.loggerSettings,
   hostingEnvironment: schemas.hostingEnvironment,
@@ -83,6 +90,10 @@ const schema = new SimpleSchema({
   database: schemas.sequelizeConnection,
   gias: giasSchema,
   notifications: notificationsSchema,
+  toggles: {
+    type: togglesSchema,
+    optional: true,
+  },
 });
 module.exports.validate = () => {
   validateConfigAgainstSchema(config, schema, logger)

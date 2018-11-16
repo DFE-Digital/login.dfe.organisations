@@ -1,5 +1,5 @@
 const logger = require('./../../../infrastructure/logger');
-const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, invitationOrganisations, users, organisationUserStatus, regionCodes, phasesOfEducation } = require('./../../../infrastructure/repository');
+const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, invitationOrganisations, users, organisationUserStatus, regionCodes, phasesOfEducation, counters } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 const uniq = require('lodash/uniq');
 
@@ -432,16 +432,20 @@ const getOrganisationsForUser = async (userId) => {
           status: service.getDataValue('status'),
         };
       })),
+      numericIdentifier: userOrg.numeric_identifier || undefined,
+      textIdentifier: userOrg.text_identifier || undefined,
     };
   }));
 };
 
-const setUserAccessToOrganisation = async (organisationId, userId, roleId, status, reason) => userOrganisations.upsert({
+const setUserAccessToOrganisation = async (organisationId, userId, roleId, status, reason, numericIdentifier, textIdentifier) => userOrganisations.upsert({
   user_id: userId.toUpperCase(),
   organisation_id: organisationId,
   role_id: roleId,
   status,
   reason,
+  numeric_identifier: numericIdentifier,
+  text_identifier: textIdentifier,
 });
 
 const deleteUserOrganisation = async (organisationId, userId, correlationId) => {
@@ -708,6 +712,8 @@ const getUsersAssociatedWithOrganisation = async (orgId, pageNumber = 1, pageSiz
       id: userOrgEntity.getDataValue('user_id'),
       status: userOrgEntity.getDataValue('status'),
       role,
+      numericIdentifier: userOrgEntity.numeric_identifier || undefined,
+      textIdentifier: userOrgEntity.text_identifier || undefined,
       totalNumberOfPages,
     };
   }));
@@ -772,6 +778,32 @@ const pagedListOfInvitations = async (pageNumber = 1, pageSize = 25) => {
   };
 };
 
+const getUserOrganisationByTextIdentifier = async (textIdentifier) => {
+  const entity = await userOrganisations.find({
+    where: {
+      text_identifier: {
+        [Op.eq]: textIdentifier,
+      },
+    },
+  });
+  return entity || undefined;
+};
+
+const getNextUserOrgNumericIdentifier = async () => {
+  const entity = await counters.find({
+    where: {
+      counter_name: {
+        [Op.eq]: 'user_organisation_numeric_identifier',
+      },
+    },
+  });
+  const next = parseInt(entity.next_value);
+  await entity.update({
+    next_value: next + 1,
+  });
+  return next;
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -798,4 +830,6 @@ module.exports = {
   getUsersAssociatedWithOrganisation,
   pagedListOfUsers,
   pagedListOfInvitations,
+  getUserOrganisationByTextIdentifier,
+  getNextUserOrgNumericIdentifier,
 };
