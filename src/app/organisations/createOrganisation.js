@@ -1,4 +1,5 @@
-const { add, update, getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber, getOrgByUkprn, getOrgByLegacyId, getOrganisationCategories } = require('./data/organisationsStorage');
+const config = require('./../../infrastructure/config')();
+const { add, update, getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber, getOrgByUkprn, getOrgByLegacyId, getOrganisationCategories, getNextOrganisationLegacyId } = require('./data/organisationsStorage');
 const { raiseNotificationThatOrganisationHasChanged } = require('./notifications');
 const uuid = require('uuid/v4');
 
@@ -67,6 +68,12 @@ const getExistingOrg = async (organisation) => {
 
   return existing;
 };
+const generateLegacyId = async () => {
+  if (!config.toggles || !config.toggles.generateOrganisationLegacyId) {
+    return undefined;
+  }
+  return await getNextOrganisationLegacyId();
+};
 
 const action = async (req, res) => {
   const organisation = mapOrg(req);
@@ -79,7 +86,7 @@ const action = async (req, res) => {
   const existingOrg = await getExistingOrg(organisation);
   if (existingOrg) {
     existingOrg.name = organisation.name;
-    existingOrg.legacyId = organisation.legacyId;
+    existingOrg.legacyId = organisation.legacyId || existingOrg.legacyId || await generateLegacyId();
     await update(existingOrg);
     await raiseNotificationThatOrganisationHasChanged(existingOrg.id);
 
@@ -87,6 +94,9 @@ const action = async (req, res) => {
   }
 
   organisation.id = uuid();
+  if (!organisation.legacyId) {
+    organisation.legacyId = await generateLegacyId();
+  }
   await add(organisation);
   await raiseNotificationThatOrganisationHasChanged(organisation.id);
 

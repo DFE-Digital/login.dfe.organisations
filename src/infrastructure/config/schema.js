@@ -80,6 +80,10 @@ const togglesSchema = new SimpleSchema({
     type: Boolean,
     optional: true,
   },
+  generateOrganisationLegacyId: {
+    type: Boolean,
+    optional: true,
+  },
 });
 
 const schema = new SimpleSchema({
