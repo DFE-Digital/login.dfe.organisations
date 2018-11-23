@@ -1,7 +1,7 @@
 const logger = require('./../../infrastructure/logger');
 const { parse } = require('./establishmentCsvReader');
 const { list, add, update, pagedListOfCategory, addAssociation, removeAssociationsOfType } = require('./../organisations/data/organisationsStorage');
-const { raiseNotificationThatOrganisationHasChanged } = require('./../organisations/notifications');
+const { raiseNotificationThatOrganisationHasChanged } = require('./../notifications');
 const { getEstablishmentsFile } = require('./../../infrastructure/gias');
 const uuid = require('uuid/v4');
 const uniqBy = require('lodash/uniqBy');

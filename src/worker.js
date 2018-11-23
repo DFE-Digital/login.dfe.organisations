@@ -5,6 +5,7 @@ const schedule = require('node-schedule');
 const { importEstablishments, importGroups } = require('./app/giasImport');
 const express = require('express');
 const healthCheck = require('login.dfe.healthcheck');
+const { startMonitoring, stopMonitoring } = require('./app/notifications');
 
 const runSchedule = (name, cronInterval, action) => {
   const job = schedule.scheduleJob(cronInterval, () => {
@@ -31,6 +32,18 @@ const runSchedule = (name, cronInterval, action) => {
 
 
 configSchema.validate();
+
+startMonitoring();
+process.once('SIGTERM', () => {
+  logger.info('stopping');
+  stopMonitoring.then(() => {
+    logger.info('stopped');
+    process.exit(0);
+  }).catch((e) => {
+    logger.error(`Error stopping - ${e.message}`);
+    process.exit(1);
+  });
+});
 
 runSchedule('import establishments', config.schedules.establishmentImport, importEstablishments);
 runSchedule('import groups', config.schedules.groupImport, importGroups);

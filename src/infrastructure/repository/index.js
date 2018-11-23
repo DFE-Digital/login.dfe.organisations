@@ -13,6 +13,7 @@ const servicesModel = require('./services');
 const usersModel = require('./users');
 const userOrganisationsModel = require('./userOrganisations');
 const countersModel = require('./counters');
+const webServiceStatusModel = require('./webServiceStatus');
 
 const db = makeConnection();
 
@@ -135,6 +136,7 @@ buildDataModel(dataModel, db, [
   usersModel,
   userOrganisationsModel,
   countersModel,
+  webServiceStatusModel,
 ]);
 
 

@@ -1,6 +1,6 @@
 const config = require('./../../infrastructure/config')();
 const { add, update, getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber, getOrgByUkprn, getOrgByLegacyId, getOrganisationCategories, getNextOrganisationLegacyId } = require('./data/organisationsStorage');
-const { raiseNotificationThatOrganisationHasChanged } = require('./notifications');
+const { raiseNotificationThatOrganisationHasChanged } = require('./../notifications');
 const uuid = require('uuid/v4');
 
 const mapOrg = (req) => {
