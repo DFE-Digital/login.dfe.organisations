@@ -19,6 +19,27 @@ const getLastStatusSentToApplicationForOrganisation = async (organisationId, app
 
   return lastStatus ? 'UPDATE' : 'CREATE';
 };
+const setLastStatusSendToApplicationForOrganisation = async (organisationId, applicationId, status) => {
+  const result = await webServiceStatus.update({
+    last_action: status,
+  }, {
+    where: {
+      organisation_id: {
+        [Op.eq]: organisationId,
+      },
+      application_id: {
+        [Op.eq]: applicationId,
+      },
+    },
+  });
+  if (!result || result[0] === 0) {
+    await webServiceStatus.create({
+      organisation_id: organisationId,
+      application_id: applicationId,
+      last_action: status,
+    });
+  }
+};
 
 const organisationChangedHandler = async (id, data) => {
   const correlationId = `sendorganisationsync-${id}`;
@@ -37,6 +58,8 @@ const organisationChangedHandler = async (id, data) => {
     logger.info(`Sending sync (${action}) to ${application.id} for organisation ${organisationId}`);
     await wsClient.provisionOrganisation(action, establishmentNumber, organisation.urn, laCode,
       typeId, organisation.legacyId, organisation.name, organisation.category.id, organisation.status.id);
+
+    await setLastStatusSendToApplicationForOrganisation(organisationId, application.id, action);
 
     logger.info(`Finished processing sendorganisationsync event (id: ${id})`, { correlationId });
   } catch (e) {

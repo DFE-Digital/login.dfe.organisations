@@ -9,14 +9,17 @@ class SoapHttpClient {
   }
 
   request(rurl, data, callback, exheaders, exoptions) {
-    const headers = {};
-    Object.keys(exheaders).forEach((name) => {
-      let value = exheaders[name];
-      if (name.toLowerCase() === 'content-type' && value === 'text/xml; charset=utf-8') {
-        value = 'application/soap+xml; charset=utf-8';
-      }
-      headers[name] = value;
-    });
+    let headers;
+    if (exheaders) {
+      headers = {};
+      Object.keys(exheaders).forEach((name) => {
+        let value = exheaders[name];
+        if (name.toLowerCase() === 'content-type' && value === 'text/xml; charset=utf-8') {
+          value = 'application/soap+xml; charset=utf-8';
+        }
+        headers[name] = value;
+      });
+    }
 
     const body = data ? data.replace('>__to__<', `>${rurl}<`) : undefined;
 
@@ -59,14 +62,14 @@ class SecureAccessWebServiceClient {
     const args = {
       por: {
         action,
-        establishmentDfeNumber,
-        establishmentUrn,
-        localAuthorityCode,
-        orgEdubaseTypeCode,
-        organisationId,
-        organisationName,
-        organisationTypeCode,
-        wsOrganisationStatusCode,
+        establishmentDfeNumber: establishmentDfeNumber || '',
+        establishmentUrn: establishmentUrn || '',
+        localAuthorityCode: localAuthorityCode || '',
+        orgEdubaseTypeCode: orgEdubaseTypeCode || '',
+        organisationId: organisationId || '',
+        organisationName: organisationName || '',
+        organisationTypeCode: organisationTypeCode || '',
+        wsOrganisationStatusCode: wsOrganisationStatusCode || '',
       },
     };
 
