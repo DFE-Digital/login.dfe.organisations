@@ -2,6 +2,7 @@ const logger = require('./../../../infrastructure/logger');
 const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, invitationOrganisations, users, organisationUserStatus, regionCodes, phasesOfEducation, counters } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 const uniq = require('lodash/uniq');
+const { mapAsync } = require('./../../../utils');
 
 const Op = Sequelize.Op;
 
@@ -373,7 +374,8 @@ const removeAssociationsOfType = async (organisationId, linkType) => {
   });
 };
 
-const getOrganisationsForUser = async (userId) => {
+// Deprecated
+const getOrganisationsForUserIncludingServices = async (userId) => {
   const userOrgs = await userOrganisations.findAll({
     where: {
       user_id: {
@@ -436,6 +438,45 @@ const getOrganisationsForUser = async (userId) => {
       textIdentifier: userOrg.text_identifier || undefined,
     };
   }));
+};
+
+const getOrganisationsAssociatedToUser = async (userId) => {
+  const userOrgs = await userOrganisations.findAll({
+    where: {
+      user_id: {
+        [Op.eq]: userId,
+      },
+    },
+    // include: ['Organisation'],
+    include: [
+      {
+        model: organisations,
+        as: 'Organisation',
+        include: 'associations'
+      },
+    ],
+    order: [
+      ['Organisation', 'name', 'ASC'],
+    ],
+  });
+  if (!userOrgs || userOrgs.length === 0) {
+    return [];
+  }
+
+  return mapAsync(userOrgs, async (userOrg) => {
+    const role = await userOrg.getRole();
+    const approvers = await userOrg.getApprovers().map(user => user.user_id);
+    const organisation = await mapOrganisationFromEntity(userOrg.Organisation);
+    await updateOrganisationsWithLocalAuthorityDetails([organisation]);
+
+    return {
+      organisation,
+      role,
+      approvers,
+      numericIdentifier: userOrg.numeric_identifier || undefined,
+      textIdentifier: userOrg.text_identifier || undefined,
+    };
+  });
 };
 
 const setUserAccessToOrganisation = async (organisationId, userId, roleId, status, reason, numericIdentifier, textIdentifier) => userOrganisations.upsert({
@@ -834,7 +875,8 @@ module.exports = {
   getOrgByEstablishmentNumber,
   getOrgByUkprn,
   getOrgByLegacyId,
-  getOrganisationsForUser,
+  getOrganisationsForUserIncludingServices,
+  getOrganisationsAssociatedToUser,
   setUserAccessToOrganisation,
   deleteUserOrganisation,
   getOrganisationCategories,
