@@ -3,13 +3,13 @@ jest.mock('./../../../src/infrastructure/logger', () => ({
 }));
 jest.mock('./../../../src/app/organisations/data/organisationsStorage', () => {
   return {
-    getOrganisationsForUser: jest.fn(),
+    getOrganisationsForUserIncludingServices: jest.fn(),
   };
 });
 
 const httpMocks = require('node-mocks-http');
 const logger = require('./../../../src/infrastructure/logger');
-const { getOrganisationsForUser } = require('./../../../src/app/organisations/data/organisationsStorage');
+const { getOrganisationsForUserIncludingServices } = require('./../../../src/app/organisations/data/organisationsStorage');
 const getOrganisationsAssociatedWithUser = require('./../../../src/app/organisations/getOrganisationsAssociatedWithUser');
 
 const userOrgMapping = [{
@@ -44,14 +44,14 @@ describe('when getting organisations associated with a user', () => {
 
     logger.error.mockReset();
 
-    getOrganisationsForUser.mockReset().mockReturnValue(userOrgMapping);
+    getOrganisationsForUserIncludingServices.mockReset().mockReturnValue(userOrgMapping);
   });
 
   it('then it should get user org mapping from storage', async () => {
     await getOrganisationsAssociatedWithUser(req, res);
 
-    expect(getOrganisationsForUser.mock.calls).toHaveLength(1);
-    expect(getOrganisationsForUser.mock.calls[0][0]).toBe('user1');
+    expect(getOrganisationsForUserIncludingServices.mock.calls).toHaveLength(1);
+    expect(getOrganisationsForUserIncludingServices.mock.calls[0][0]).toBe('user1');
   });
 
   it('then it should return user mapping from storage as json', async () => {
@@ -63,7 +63,7 @@ describe('when getting organisations associated with a user', () => {
   });
 
   it('then it should log errors and return 500 result', async () => {
-    getOrganisationsForUser.mockReset().mockImplementation(() => {
+    getOrganisationsForUserIncludingServices.mockReset().mockImplementation(() => {
       throw new Error('test');
     });
 
