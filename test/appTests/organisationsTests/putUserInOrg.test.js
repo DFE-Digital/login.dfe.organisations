@@ -12,9 +12,13 @@ jest.mock('./../../../src/app/organisations/data/organisationsStorage', () => {
 jest.mock('./../../../src/utils', () => ({
   encodeNumberToString: jest.fn(),
 }));
+jest.mock('./../../../src/app/organisations/notifications', () => ({
+  raiseNotificationThatUserHasChanged: jest.fn(),
+}));
 
 const httpMocks = require('node-mocks-http');
 const config = require('./../../../src/infrastructure/config')();
+const { raiseNotificationThatUserHasChanged } = require('./../../../src/app/organisations/notifications');
 const { setUserAccessToOrganisation, getUserOrganisationByTextIdentifier, getNextUserOrgNumericIdentifier } = require('./../../../src/app/organisations/data/organisationsStorage');
 const { encodeNumberToString } = require('./../../../src/utils');
 const putUserInOrg = require('./../../../src/app/organisations/putUserInOrg');
@@ -52,6 +56,8 @@ describe('when setting a users access within an organisation', () => {
       option4: 'opt4',
       option5: 'opt5',
     });
+
+    raiseNotificationThatUserHasChanged.mockReset();
   });
 
   it('then it should set users access in storage', async () => {
@@ -168,4 +174,11 @@ describe('when setting a users access within an organisation', () => {
 
     expect(setUserAccessToOrganisation.mock.calls[0][6]).toBe(undefined);
   });
+
+  it('then it should raise notification of user update', async () => {
+    await putUserInOrg(req, res);
+
+    expect(raiseNotificationThatUserHasChanged).toHaveBeenCalledTimes(1);
+    expect(raiseNotificationThatUserHasChanged).toHaveBeenCalledWith('user1');
+  })
 });
