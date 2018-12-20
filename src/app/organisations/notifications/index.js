@@ -9,6 +9,11 @@ const raiseNotificationThatOrganisationHasChanged = async (organisationId) => {
   await serviceNotificationsClient.notifyOrganisationUpdated(organisation);
 };
 
+const raiseNotificationThatUserHasChanged = async (userId) => {
+  await serviceNotificationsClient.notifyUserUpdated({ sub: userId });
+};
+
 module.exports = {
   raiseNotificationThatOrganisationHasChanged,
+  raiseNotificationThatUserHasChanged,
 };
