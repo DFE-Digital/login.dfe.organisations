@@ -1,5 +1,6 @@
 const config = require('./../../infrastructure/config')();
 const { setUserAccessToOrganisation, getUserOrganisationByTextIdentifier, getNextUserOrgNumericIdentifier } = require('./data/organisationsStorage');
+const { raiseNotificationThatUserHasChanged } = require('./notifications');
 const { encodeNumberToString } = require('./../../utils');
 
 const putUserInOrg = async (req, res) => {
@@ -33,6 +34,8 @@ const putUserInOrg = async (req, res) => {
   }
 
   const created = await setUserAccessToOrganisation(organisationId, userId, roleId, status, reason, numericIdentifier, textIdentifier);
+
+  await raiseNotificationThatUserHasChanged(userId);
 
   return res.status(created ? 201 : 202).send();
 };
