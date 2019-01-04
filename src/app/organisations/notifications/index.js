@@ -5,12 +5,18 @@ const ServiceNotificationsClient = require('login.dfe.service-notifications.jobs
 const serviceNotificationsClient = new ServiceNotificationsClient(config.notifications);
 
 const raiseNotificationThatOrganisationHasChanged = async (organisationId) => {
-  const organisation = await getOrgById(organisationId);
-  await serviceNotificationsClient.notifyOrganisationUpdated(organisation);
+  const notificationsEnabled = config.toggles && config.toggles.notificationsEnabled === true;
+  if (notificationsEnabled) {
+    const organisation = await getOrgById(organisationId);
+    await serviceNotificationsClient.notifyOrganisationUpdated(organisation);
+  }
 };
 
 const raiseNotificationThatUserHasChanged = async (userId) => {
-  await serviceNotificationsClient.notifyUserUpdated({ sub: userId });
+  const notificationsEnabled = config.toggles && config.toggles.notificationsEnabled === true;
+  if (notificationsEnabled) {
+    await serviceNotificationsClient.notifyUserUpdated({ sub: userId });
+  }
 };
 
 module.exports = {
