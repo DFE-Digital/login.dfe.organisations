@@ -84,6 +84,10 @@ const togglesSchema = new SimpleSchema({
     type: Boolean,
     optional: true,
   },
+  notificationsEnabled: {
+    type: Boolean,
+    optional: true,
+  },
 });
 
 const schema = new SimpleSchema({
