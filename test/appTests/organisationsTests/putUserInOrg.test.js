@@ -141,17 +141,21 @@ describe('when setting a users access within an organisation', () => {
     expect(setUserAccessToOrganisation.mock.calls[0][6]).toBe('opt3');
   });
 
-  it('then it should return 500 when textIdentifier not set and generateUserOrgIdentifiers is true and not text identifier options are available', async () => {
+  it('then it should throw error when textIdentifier not set and generateUserOrgIdentifiers is true and not text identifier options are available', async () => {
     config.toggles = {
       generateUserOrgIdentifiers: true,
     };
     req.body.textIdentifier = undefined;
     getUserOrganisationByTextIdentifier.mockReturnValue({ user_id: 'user2', organisation_id: 'org1' });
 
-    await putUserInOrg(req, res);
+    try {
+      await putUserInOrg(req, res);
+      throw new Error('Expected error, but none thrown');
+    } catch (e) {
+      expect(e.message).toBe('No textIdentifier options for numeric identifier 123456 are unused');
+    }
 
     expect(getUserOrganisationByTextIdentifier).toHaveBeenCalledTimes(5);
-    expect(res.statusCode).toBe(500);
   });
 
   it('then it should use encoded numericIdentifier for textIdentifier when textIdentifier not set and generateUserOrgIdentifiers is true and option in use, but by same user and org', async () => {
