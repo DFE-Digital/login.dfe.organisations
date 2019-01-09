@@ -414,6 +414,8 @@ const getOrganisationsForUserIncludingServices = async (userId) => {
         uid: userOrg.Organisation.getDataValue('UID') || undefined,
         ukprn: userOrg.Organisation.getDataValue('UKPRN') || undefined,
         address: userOrg.Organisation.getDataValue('Address') || undefined,
+        legacyUserId: userOrg.numeric_identifier || undefined,
+        legacyUserName: userOrg.text_identifier || undefined,
         category: organisationCategory.find(c => c.id === userOrg.Organisation.getDataValue('Category')),
         type: establishmentTypes.find(t => t.id === userOrg.Organisation.getDataValue('Type')),
       },
