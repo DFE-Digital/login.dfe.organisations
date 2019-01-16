@@ -63,7 +63,7 @@ const addEstablishment = async (importing) => {
     const organisation = mapImportRecordForStorage(importing);
     await add(organisation);
     logger.info(`Added establishment ${importing.urn}`);
-    await raiseNotificationThatOrganisationHasChanged(update.id);
+    await raiseNotificationThatOrganisationHasChanged(importing.id);
     logger.info(`Notified addition of establishment ${organisation.urn}`);
     return organisation.id;
   } catch (e) {
