@@ -1,6 +1,7 @@
 const logger = require('./../../infrastructure/logger');
+const config = require('./../../infrastructure/config')();
 const { parse } = require('./establishmentCsvReader');
-const { list, add, update, pagedListOfCategory, addAssociation, removeAssociationsOfType } = require('./../organisations/data/organisationsStorage');
+const { getNextOrganisationLegacyId, list, add, update, pagedListOfCategory, addAssociation, removeAssociationsOfType } = require('./../organisations/data/organisationsStorage');
 const { raiseNotificationThatOrganisationHasChanged } = require('./../organisations/notifications');
 const { getEstablishmentsFile } = require('./../../infrastructure/gias');
 const uuid = require('uuid/v4');
@@ -20,7 +21,7 @@ const isEstablishmentImportable = (importing) => {
 
   return true;
 };
-const mapImportRecordForStorage = (importing) => {
+const mapImportRecordForStorage = async (importing) => {
   const address = [
     importing.address1,
     importing.address2,
@@ -56,11 +57,19 @@ const mapImportRecordForStorage = (importing) => {
     },
     statutoryLowAge: importing.statutoryLowAge,
     statutoryHighAge: importing.statutoryHighAge,
+    legacyId: importing.legacyId,
   };
 };
+const generateLegacyId = async () => {
+  if (!config.toggles || !config.toggles.generateOrganisationLegacyId) {
+    return undefined;
+  }
+  return await getNextOrganisationLegacyId();
+};
+
 const addEstablishment = async (importing) => {
   try {
-    const organisation = mapImportRecordForStorage(importing);
+    const organisation = await mapImportRecordForStorage(importing);
     await add(organisation);
     logger.info(`Added establishment ${importing.urn}`);
     await raiseNotificationThatOrganisationHasChanged(importing.id);
@@ -88,7 +97,7 @@ const hasBeenUpdated = (updated, existing) => {
   return updated !== existing;
 };
 const updateEstablishment = async (importing, existing) => {
-  const updated = mapImportRecordForStorage(importing);
+  const updated = await mapImportRecordForStorage(importing);
   updated.id = existing.id;
 
   if (hasBeenUpdated(updated.name, existing.name) || hasBeenUpdated(updated.category, existing.category)
@@ -120,6 +129,7 @@ const addOrUpdateEstablishments = async (importingEstablishments, existingEstabl
       if (existing) {
         organisationId = await updateEstablishment(importing, existing);
       } else {
+        importing.legacyId = await generateLegacyId()
         organisationId = await addEstablishment(importing);
       }
 
