@@ -5,6 +5,9 @@ const ServiceNotificationsClient = require('login.dfe.service-notifications.jobs
 const serviceNotificationsClient = new ServiceNotificationsClient(config.notifications);
 
 const raiseNotificationThatOrganisationHasChanged = async (organisationId) => {
+  if (!organisationId) {
+    throw new Error(`raiseNotificationThatOrganisationHasChanged requires organisationId, which is ${organisationId === null ? 'null' : 'undefined'}`);
+  }
   const notificationsEnabled = config.toggles && config.toggles.notificationsEnabled === true;
   if (notificationsEnabled) {
     const organisation = await getOrgById(organisationId);
@@ -13,6 +16,9 @@ const raiseNotificationThatOrganisationHasChanged = async (organisationId) => {
 };
 
 const raiseNotificationThatUserHasChanged = async (userId) => {
+  if (!userId) {
+    throw new Error(`raiseNotificationThatUserHasChanged requires userId, which is ${userId === null ? 'null' : 'undefined'}`);
+  }
   const notificationsEnabled = config.toggles && config.toggles.notificationsEnabled === true;
   if (notificationsEnabled) {
     await serviceNotificationsClient.notifyUserUpdated({ sub: userId });
