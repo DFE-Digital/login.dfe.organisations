@@ -71,8 +71,8 @@ const addEstablishment = async (importing) => {
   try {
     const organisation = await mapImportRecordForStorage(importing);
     await add(organisation);
-    logger.info(`Added establishment ${importing.urn}`);
-    await raiseNotificationThatOrganisationHasChanged(importing.id);
+    logger.info(`Added establishment ${organisation.urn}`);
+    await raiseNotificationThatOrganisationHasChanged(organisation.id);
     logger.info(`Notified addition of establishment ${organisation.urn}`);
     return organisation.id;
   } catch (e) {
@@ -108,7 +108,7 @@ const updateEstablishment = async (importing, existing) => {
     try {
       await update(updated);
       logger.info(`Updated establishment ${importing.urn}`);
-      await raiseNotificationThatOrganisationHasChanged(update.id);
+      await raiseNotificationThatOrganisationHasChanged(updated.id);
       logger.info(`Notified update of establishment ${importing.urn}`);
     } catch (e) {
       logger.info(`Error updating establishment ${importing.urn} - ${e.message}`);
