@@ -1,5 +1,5 @@
 const logger = require('./../../../infrastructure/logger');
-const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, invitationOrganisations, users, organisationUserStatus, regionCodes, phasesOfEducation, counters } = require('./../../../infrastructure/repository');
+const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, invitationOrganisations, users, organisationUserStatus, regionCodes, phasesOfEducation, counters, organisationAnnouncements } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 const uniq = require('lodash/uniq');
 const { mapAsync } = require('./../../../utils');
@@ -73,6 +73,20 @@ const mapOrganisationFromEntity = (entity) => {
     statutoryHighAge: entity.statutoryHighAge,
     legacyId: entity.legacyId,
     companyRegistrationNumber: entity.companyRegistrationNumber,
+  };
+};
+const mapAnnouncementFromEntity = (entity) => {
+  return {
+    id: entity.announcement_id,
+    originId: entity.origin_id,
+    organisationId: entity.organisation_id,
+    type: entity.type,
+    title: entity.title,
+    summary: entity.summary,
+    body: entity.body,
+    publishedAt: entity.publishedAt,
+    expiresAt: entity.expiresAt,
+    published: entity.published,
   };
 };
 
@@ -862,6 +876,31 @@ const getNextOrganisationLegacyId = async () => {
   return next;
 };
 
+const listAnnouncements = async (organisationId, onlyPublishedAnnouncements = true, pageNumber = 1, pageSize = 25) => {
+  let where;
+  if (onlyPublishedAnnouncements) {
+    where = {
+      published: {
+        [Op.eq]: true,
+      },
+    };
+  }
+  const recordset = await organisationAnnouncements.findAndCountAll({
+    where,
+    limit: pageSize,
+    offset: (pageNumber - 1) * pageSize,
+  });
+
+  const totalNumberOfRecords = recordset.count;
+  const numberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
+  return {
+    announcements: recordset.rows.map(mapAnnouncementFromEntity),
+    page: pageNumber,
+    numberOfPages,
+    totalNumberOfRecords,
+  };
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -892,4 +931,5 @@ module.exports = {
   getUserOrganisationByTextIdentifier,
   getNextUserOrgNumericIdentifier,
   getNextOrganisationLegacyId,
+  listAnnouncements
 };
