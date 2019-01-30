@@ -3,6 +3,7 @@ const { organisations, organisationStatus, organisationCategory, establishmentTy
 const Sequelize = require('sequelize');
 const uniq = require('lodash/uniq');
 const { mapAsync } = require('./../../../utils');
+const uuid = require('uuid/v4');
 
 const Op = Sequelize.Op;
 
@@ -901,6 +902,42 @@ const listAnnouncements = async (organisationId, onlyPublishedAnnouncements = tr
   };
 };
 
+const upsertAnnouncement = async (originId, organisationId, type, title, summary, body, publishedAt, expiresAt, published) => {
+  let entity = await organisationAnnouncements.find({
+    where: {
+      origin_id: {
+        [Op.eq]: originId,
+      },
+    },
+  });
+  if (entity) {
+    entity.type = type;
+    entity.title = title;
+    entity.summary = summary;
+    entity.body = body;
+    entity.publishedAt = publishedAt;
+    entity.expiresAt = expiresAt;
+    entity.published = published;
+    await entity.save();
+    return mapAnnouncementFromEntity(entity);
+  }
+
+  entity = {
+    announcement_id: uuid(),
+    origin_id: originId,
+    organisation_id: organisationId,
+    type,
+    title,
+    summary,
+    body,
+    publishedAt,
+    expiresAt,
+    published,
+  };
+  await organisationAnnouncements.create(entity);
+  return mapAnnouncementFromEntity(entity);
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -931,5 +968,6 @@ module.exports = {
   getUserOrganisationByTextIdentifier,
   getNextUserOrgNumericIdentifier,
   getNextOrganisationLegacyId,
-  listAnnouncements
+  listAnnouncements,
+  upsertAnnouncement,
 };
