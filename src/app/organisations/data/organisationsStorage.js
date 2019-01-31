@@ -877,13 +877,21 @@ const getNextOrganisationLegacyId = async () => {
   return next;
 };
 
-const listAnnouncements = async (organisationId, onlyPublishedAnnouncements = true, pageNumber = 1, pageSize = 25) => {
-  let where;
+const listAnnouncements = async (organisationId = undefined, originId = undefined, onlyPublishedAnnouncements = true, pageNumber = 1, pageSize = 25) => {
+  const where = {};
   if (onlyPublishedAnnouncements) {
-    where = {
-      published: {
-        [Op.eq]: true,
-      },
+    where.published = {
+      [Op.eq]: true,
+    };
+  }
+  if (organisationId) {
+    where.organisation_id = {
+      [Op.eq]: organisationId,
+    };
+  }
+  if (originId) {
+    where.origin_id = {
+      [Op.eq]: originId,
     };
   }
   const recordset = await organisationAnnouncements.findAndCountAll({
