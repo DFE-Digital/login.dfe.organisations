@@ -61,7 +61,7 @@ describe('when listing announcements for organisation', () => {
     await listOrganisationAnnouncements(req, res);
 
     expect(listAnnouncements).toHaveBeenCalledTimes(1);
-    expect(listAnnouncements).toHaveBeenCalledWith('org-1', true, 1, 25);
+    expect(listAnnouncements).toHaveBeenCalledWith('org-1', undefined, true, 1, 25);
   });
 
   it('then it should get page of announcements from repository using provided options', async () => {
@@ -74,7 +74,7 @@ describe('when listing announcements for organisation', () => {
     await listOrganisationAnnouncements(req, res);
 
     expect(listAnnouncements).toHaveBeenCalledTimes(1);
-    expect(listAnnouncements).toHaveBeenCalledWith('org-1', false, 2, 10);
+    expect(listAnnouncements).toHaveBeenCalledWith('org-1', undefined, false, 2, 10);
   });
 
   it('then it should return bad request if onlyPublished specified but invalid', async () => {

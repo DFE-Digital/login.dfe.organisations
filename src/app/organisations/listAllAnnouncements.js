@@ -47,10 +47,10 @@ const getOnlyPublished = (req) => {
 };
 
 const listOrganisationAnnouncements = async (req, res) => {
-  const organisationId = req.params.id;
   let onlyPublishedAnnouncements;
   let pageNumber;
   let pageSize;
+  const messageId = getQueryStringValue(req, 'messageId');
 
   try {
     onlyPublishedAnnouncements = getOnlyPublished(req);
@@ -60,7 +60,7 @@ const listOrganisationAnnouncements = async (req, res) => {
     return res.status(400).send({ reason: e.message });
   }
 
-  const pageOfAnnouncements = await listAnnouncements(organisationId, undefined, onlyPublishedAnnouncements, pageNumber, pageSize);
+  const pageOfAnnouncements = await listAnnouncements(undefined, messageId, onlyPublishedAnnouncements, pageNumber, pageSize);
   return res.json(pageOfAnnouncements);
 };
 module.exports = listOrganisationAnnouncements;
