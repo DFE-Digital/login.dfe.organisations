@@ -20,6 +20,7 @@ const deleteUserOrganisation = require('./deleteUserOrganisation');
 const getUsersForOrganisation = require('./getUsersForOrganisation');
 const listOrganisationAnnouncements = require('./listOrganisationAnnouncements');
 const upsertOrganisationAnnouncement = require('./upsertOrganisationAnnouncement');
+const listAllAnnouncements = require('./listAllAnnouncements');
 
 const router = express.Router();
 
@@ -36,19 +37,20 @@ const routes = () => {
   router.get('/users', asyncWrapper(listUserOrganisations));
   router.get('/invitations', asyncWrapper(listInvitationOrganisations));
   router.post('/', asyncWrapper(createOrganisation));
+  router.get('/announcements', asyncWrapper(listAllAnnouncements));
 
   router.get('/by-external-id/:type/:id', asyncWrapper(getOrganisationByExternalId));
   router.get('/associated-with-user/:uid', asyncWrapper(getOrganisationsAssociatedWithUser));
   router.get('/v2/associated-with-user/:uid', asyncWrapper(getOrganisationsAssociatedWithUserV2));
   router.get('/users-for-approval/:uid?', asyncWrapper(getUsersAssocatedWithOrganisationsForApproval));
   router.get('/:id/users', asyncWrapper(getUsersForOrganisation));
+  router.get('/:id/announcements', asyncWrapper(listOrganisationAnnouncements));
+  router.post('/:id/announcements', asyncWrapper(upsertOrganisationAnnouncement));
   router.get('/:id', asyncWrapper(getOrganisation));
   router.get('/v2/:id', asyncWrapper(getOrganisationV2));
   router.put('/:id/users/:uid', asyncWrapper(putUserInOrg));
   router.delete('/:id/users/:uid', asyncWrapper(deleteUserOrganisation));
 
-  router.get('/:id/announcements', asyncWrapper(listOrganisationAnnouncements));
-  router.post('/:id/announcements', asyncWrapper(upsertOrganisationAnnouncement));
 
   return router;
 };
