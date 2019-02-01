@@ -1,6 +1,7 @@
 const { upsertAnnouncement } = require('./data/organisationsStorage');
 
 const getAndValidateModel = (req) => {
+  const validTypes = [1, 2, 4, 5];
   const model = {
     announcement: {
       originId: req.body.originId,
@@ -20,6 +21,8 @@ const getAndValidateModel = (req) => {
   }
   if (!model.announcement.type) {
     model.errors.push('type must be specified');
+  } else if (!validTypes.find(vt => vt === model.announcement.type)) {
+    model.errors.push(`type must be one of 1, 2, 4, 5. Received ${model.announcement.type}`);
   }
   if (!model.announcement.title) {
     model.errors.push('title must be specified');

@@ -111,6 +111,21 @@ describe('when listing announcements for organisation', () => {
     });
   });
 
+  it('then it should return bad request response if type is invalid', async () => {
+    req.body.type = 3;
+
+    await upsertOrganisationAnnouncement(req, res);
+
+    expect(res.status).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledTimes(1);
+    expect(res.json).toHaveBeenCalledWith({
+      reasons: [
+        'type must be one of 1, 2, 4, 5. Received 3',
+      ],
+    });
+  });
+
   it('then it should return bad request response if title missing', async () => {
     req.body.title = undefined;
 
