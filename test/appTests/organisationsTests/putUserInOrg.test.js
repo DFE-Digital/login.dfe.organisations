@@ -7,6 +7,7 @@ jest.mock('./../../../src/app/organisations/data/organisationsStorage', () => {
     setUserAccessToOrganisation: jest.fn(),
     getUserOrganisationByTextIdentifier: jest.fn(),
     getNextUserOrgNumericIdentifier: jest.fn(),
+    getOrganisationsAssociatedToUser: jest.fn(),
   };
 });
 jest.mock('./../../../src/utils', () => ({
@@ -19,7 +20,7 @@ jest.mock('./../../../src/app/organisations/notifications', () => ({
 const httpMocks = require('node-mocks-http');
 const config = require('./../../../src/infrastructure/config')();
 const { raiseNotificationThatUserHasChanged } = require('./../../../src/app/organisations/notifications');
-const { setUserAccessToOrganisation, getUserOrganisationByTextIdentifier, getNextUserOrgNumericIdentifier } = require('./../../../src/app/organisations/data/organisationsStorage');
+const { setUserAccessToOrganisation, getUserOrganisationByTextIdentifier, getNextUserOrgNumericIdentifier, getOrganisationsAssociatedToUser } = require('./../../../src/app/organisations/data/organisationsStorage');
 const { encodeNumberToString } = require('./../../../src/utils');
 const putUserInOrg = require('./../../../src/app/organisations/putUserInOrg');
 
@@ -48,6 +49,7 @@ describe('when setting a users access within an organisation', () => {
     setUserAccessToOrganisation.mockReset();
     getUserOrganisationByTextIdentifier.mockReset();
     getNextUserOrgNumericIdentifier.mockReset().mockReturnValue(789456);
+    getOrganisationsAssociatedToUser.mockReset().mockReturnValue([]);
 
     encodeNumberToString.mockReset().mockReturnValue({
       option1: 'opt1',
@@ -95,6 +97,22 @@ describe('when setting a users access within an organisation', () => {
     expect(res.statusCode).toBe(202);
   });
 
+  it('then it should get existing user identifier when numericIdentifier not set and user already has access to org', async () => {
+    req.body.numericIdentifier = undefined;
+    getOrganisationsAssociatedToUser.mockReturnValue([
+      {
+        organisation: { id: 'org1' },
+        numericIdentifier: 951236,
+      },
+    ]);
+
+    await putUserInOrg(req, res);
+
+    expect(getOrganisationsAssociatedToUser).toHaveBeenCalledTimes(1);
+    expect(getNextUserOrgNumericIdentifier).toHaveBeenCalledTimes(0);
+    expect(setUserAccessToOrganisation.mock.calls[0][5]).toBe(951236);
+  });
+
   it('then it should get next user identifier when numericIdentifier not set and generateUserOrgIdentifiers is true', async () => {
     config.toggles = {
       generateUserOrgIdentifiers: true,
@@ -113,6 +131,22 @@ describe('when setting a users access within an organisation', () => {
     await putUserInOrg(req, res);
 
     expect(setUserAccessToOrganisation.mock.calls[0][5]).toBe(undefined);
+  });
+
+  it('then it should get existing user text identifier when textIdentifier not set and user already has access to org', async () => {
+    req.body.textIdentifier = undefined;
+    getOrganisationsAssociatedToUser.mockReturnValue([
+      {
+        organisation: { id: 'org1' },
+        textIdentifier: 'sdofkpdf',
+      },
+    ]);
+
+    await putUserInOrg(req, res);
+
+    expect(getOrganisationsAssociatedToUser).toHaveBeenCalledTimes(1);
+    expect(getUserOrganisationByTextIdentifier).toHaveBeenCalledTimes(0);
+    expect(setUserAccessToOrganisation.mock.calls[0][6]).toBe('sdofkpdf');
   });
 
   it('then it should use encoded numericIdentifier for textIdentifier when textIdentifier not set and generateUserOrgIdentifiers is true', async () => {
