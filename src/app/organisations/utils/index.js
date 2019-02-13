@@ -1,15 +1,23 @@
 const config = require('./../../../infrastructure/config')();
-const { getUserOrganisationByTextIdentifier, getNextUserOrgNumericIdentifier } = require('./../data/organisationsStorage');
+const { getUserOrganisationByTextIdentifier, getNextUserOrgNumericIdentifier, getOrganisationsAssociatedToUser } = require('./../data/organisationsStorage');
 const { encodeNumberToString } = require('./../../../utils');
 
 const getUserOrganisationIdentifiers = async (userId, organisationId, definedNumericIdentifier, definedTextIdentifier) => {
   let numericIdentifier = definedNumericIdentifier;
   let textIdentifier = definedTextIdentifier;
+  const userOrgs = (!numericIdentifier || !textIdentifier ? await getOrganisationsAssociatedToUser(userId) : []) || [];
+  const existingUserOrg = userOrgs.find(uo => uo.organisation.id.toLowerCase() === organisationId.toLowerCase());
 
+  if (!numericIdentifier && existingUserOrg) {
+    numericIdentifier = existingUserOrg.numericIdentifier;
+  }
   if (!numericIdentifier && config.toggles && config.toggles.generateUserOrgIdentifiers) {
     numericIdentifier = await getNextUserOrgNumericIdentifier();
   }
 
+  if (!textIdentifier && existingUserOrg) {
+    textIdentifier = existingUserOrg.textIdentifier;
+  }
   if (!textIdentifier && config.toggles && config.toggles.generateUserOrgIdentifiers) {
     const options = encodeNumberToString(numericIdentifier);
     let current;
