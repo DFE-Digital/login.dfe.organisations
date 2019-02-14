@@ -123,13 +123,13 @@ const addOrUpdateEstablishments = async (importingEstablishments, existingEstabl
   for (let i = 0; i < importingEstablishments.length; i += 1) {
     const importing = importingEstablishments[i];
     if (isEstablishmentImportable(importing)) {
-      const existing = existingEstablishments.find(e => e.urn === importing.urn);
+      const existing = existingEstablishments.find(e => e.urn.toString().toLowerCase().trim() === importing.urn.toString().toLowerCase().trim());
 
       let organisationId;
       if (existing) {
         organisationId = await updateEstablishment(importing, existing);
       } else {
-        importing.legacyId = await generateLegacyId()
+        importing.legacyId = await generateLegacyId();
         organisationId = await addEstablishment(importing);
       }
 
@@ -232,12 +232,17 @@ const listOfCategory = async (category, includeAssociations = false) => {
   const allOrgs = [];
   let pageNumber = 1;
   let hasMorePages = true;
+  let expected = 0;
   while (hasMorePages) {
     const page = await pagedListOfCategory(category, includeAssociations, pageNumber, 500);
     allOrgs.push(...page.organisations);
 
+    expected = page.totalNumberOfRecords;
     hasMorePages = pageNumber < page.totalNumberOfPages;
     pageNumber += 1;
+  }
+  if (allOrgs.length !== expected) {
+    throw new Error(`Expected ${expected} organisations of category ${category} but only received ${allOrgs.length}`);
   }
   return allOrgs;
 };
