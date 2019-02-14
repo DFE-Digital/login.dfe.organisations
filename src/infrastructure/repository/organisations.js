@@ -77,7 +77,7 @@ const define = (db, schema) => {
       allowNull: true,
     },
   }, {
-    timestamps: false,
+    timestamps: true,
     tableName: 'organisation',
     schema,
   });
