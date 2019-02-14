@@ -317,6 +317,7 @@ const pagedListOfCategory = async (category, includeAssociations = false, pageNu
     },
     order: [
       ['name', 'ASC'],
+      ['id', 'ASC'],
     ],
     limit: pageSize,
     offset,
