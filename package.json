@@ -59,6 +59,6 @@
     "web": "settings=login.dfe.organisation.dev.json node src/web.js "
   },
   "engines": {
-    "node": "8.x.x"
+    "node": "10.x.x"
   }
 }
