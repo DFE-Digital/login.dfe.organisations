@@ -143,7 +143,9 @@ const getOrgById = async (id) => {
     include: ['associations'],
   });
   const org = mapOrganisationFromEntity(entity);
-  await updateOrganisationsWithLocalAuthorityDetails([org]);
+  if (org) {
+    await updateOrganisationsWithLocalAuthorityDetails([org]);
+  }
   return org;
 };
 
