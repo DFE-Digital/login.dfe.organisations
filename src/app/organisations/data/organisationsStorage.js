@@ -799,6 +799,8 @@ const pagedListOfUsers = async (pageNumber = 1, pageSize = 25) => {
       organisation,
       role,
       status: entity.status,
+      numericIdentifier: entity.numeric_identifier || undefined,
+      textIdentifier: entity.text_identifier || undefined,
     });
   }
 
