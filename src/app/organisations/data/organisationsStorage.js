@@ -143,7 +143,9 @@ const getOrgById = async (id) => {
     include: ['associations'],
   });
   const org = mapOrganisationFromEntity(entity);
-  await updateOrganisationsWithLocalAuthorityDetails([org]);
+  if (org) {
+    await updateOrganisationsWithLocalAuthorityDetails([org]);
+  }
   return org;
 };
 
@@ -797,6 +799,8 @@ const pagedListOfUsers = async (pageNumber = 1, pageSize = 25) => {
       organisation,
       role,
       status: entity.status,
+      numericIdentifier: entity.numeric_identifier || undefined,
+      textIdentifier: entity.text_identifier || undefined,
     });
   }
 
