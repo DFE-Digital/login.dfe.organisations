@@ -1,5 +1,5 @@
 const logger = require('./../../../infrastructure/logger');
-const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, invitationOrganisations, users, organisationUserStatus, regionCodes, phasesOfEducation, counters, organisationAnnouncements } = require('./../../../infrastructure/repository');
+const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, invitationOrganisations, users, organisationUserStatus, regionCodes, phasesOfEducation, counters, organisationAnnouncements, userOrganisationRequests } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 const uniq = require('lodash/uniq');
 const { mapAsync } = require('./../../../utils');
@@ -952,6 +952,45 @@ const upsertAnnouncement = async (originId, organisationId, type, title, summary
   return mapAnnouncementFromEntity(entity);
 };
 
+const getApproversForOrg = async (organisationId) => {
+  const entites = await userOrganisations.findAll({
+    where: {
+      organisation_id: {
+        [Op.eq]: organisationId,
+      },
+      role_id: {
+        [Op.eq]: 10000,
+      },
+    },
+  });
+  return await Promise.all(entites.map(async approver => (
+    approver.getDataValue('user_id')
+  )));
+};
+
+const createUserOrgRequest = async (request) => {
+  const id = uuid();
+  const entity = {
+    id,
+    user_id: request.userId.toUpperCase(),
+    organisation_id: request.organisationId,
+    reason: request.reason,
+  };
+  await userOrganisationRequests.create(entity);
+  return id;
+};
+
+const getUserOrgRequestById = async (rid) => {
+  const entity = await userOrganisationRequests.find({
+    where: {
+      id: {
+        [Op.eq]: rid,
+      },
+    },
+  });
+  return entity;
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -984,4 +1023,7 @@ module.exports = {
   getNextOrganisationLegacyId,
   listAnnouncements,
   upsertAnnouncement,
+  createUserOrgRequest,
+  getUserOrgRequestById,
+  getApproversForOrg,
 };
