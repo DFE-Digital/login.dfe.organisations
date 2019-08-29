@@ -987,8 +987,20 @@ const getUserOrgRequestById = async (rid) => {
         [Op.eq]: rid,
       },
     },
+    include: ['Organisation'],
   });
-  return entity;
+  return {
+    id: entity.get('id'),
+    org_id: entity.Organisation.getDataValue('id'),
+    org_name: entity.Organisation.getDataValue('name'),
+    user_id: entity.getDataValue('user_id'),
+    created_date: entity.getDataValue('createdAt'),
+    actioned_date: entity.getDataValue('actioned_at'),
+    actioned_by: entity.getDataValue('actioned_by'),
+    actioned_reason: entity.getDataValue('actioned_reason'),
+    reason: entity.getDataValue('reason'),
+    status: organisationRequestStatus.find(c => c.id === entity.getDataValue('status')),
+  };
 };
 
 const getAllRequestsForUser = async (userId) => {
