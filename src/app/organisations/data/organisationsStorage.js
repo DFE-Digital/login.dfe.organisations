@@ -1,5 +1,5 @@
 const logger = require('./../../../infrastructure/logger');
-const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, invitationOrganisations, users, organisationUserStatus, regionCodes, phasesOfEducation, counters, organisationAnnouncements, userOrganisationRequests } = require('./../../../infrastructure/repository');
+const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, invitationOrganisations, users, organisationUserStatus, regionCodes, phasesOfEducation, counters, organisationAnnouncements, userOrganisationRequests, organisationRequestStatus } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 const uniq = require('lodash/uniq');
 const { mapAsync } = require('./../../../utils');
@@ -987,8 +987,86 @@ const getUserOrgRequestById = async (rid) => {
         [Op.eq]: rid,
       },
     },
+    include: ['Organisation'],
   });
-  return entity;
+  return {
+    id: entity.get('id'),
+    org_id: entity.Organisation.getDataValue('id'),
+    org_name: entity.Organisation.getDataValue('name'),
+    user_id: entity.getDataValue('user_id'),
+    created_date: entity.getDataValue('createdAt'),
+    actioned_date: entity.getDataValue('actioned_at'),
+    actioned_by: entity.getDataValue('actioned_by'),
+    actioned_reason: entity.getDataValue('actioned_reason'),
+    reason: entity.getDataValue('reason'),
+    status: organisationRequestStatus.find(c => c.id === entity.getDataValue('status')),
+  };
+};
+
+const getAllRequestsForUser = async (userId) => {
+  const userApproverOrgs = await userOrganisations.findAll({
+    where: {
+      user_id: {
+        [Op.eq]: userId,
+      },
+      role_id: {
+        [Op.eq]: 10000,
+      },
+    },
+  });
+  if (!userApproverOrgs || userApproverOrgs.length === 0) {
+    return [];
+  }
+
+  const requestsForUsersOrgs = await userOrganisationRequests.findAll({
+    where: {
+      organisation_id: {
+        [Op.in]: userApproverOrgs.map(c => c.organisation_id),
+      },
+      status: {
+        [Op.or]: [0, 2],
+      },
+    },
+    include: ['Organisation'],
+  });
+
+  if (!requestsForUsersOrgs || requestsForUsersOrgs.length === 0) {
+    return [];
+  }
+  return requestsForUsersOrgs.map(entity => ({
+    id: entity.get('id'),
+    org_id: entity.Organisation.getDataValue('id'),
+    org_name: entity.Organisation.getDataValue('name'),
+    user_id: entity.getDataValue('user_id'),
+    created_date: entity.getDataValue('createdAt'),
+    status: organisationRequestStatus.find(c => c.id === entity.getDataValue('status')),
+  }));
+};
+
+const getRequestsAssociatedWithOrganisation = async (orgId) => {
+  const userOrgRequests = await userOrganisationRequests.findAll({
+    where: {
+      organisation_id: {
+        [Op.eq]: orgId,
+      },
+      status: {
+        [Op.or]: [0, 2],
+      },
+    },
+    include: ['Organisation'],
+  });
+  if (!userOrgRequests || userOrgRequests.length === 0) {
+    return [];
+  }
+
+  return userOrgRequests.map(entity => ({
+    id: entity.get('id'),
+    org_id: entity.Organisation.getDataValue('id'),
+    org_name: entity.Organisation.getDataValue('name'),
+    user_id: entity.getDataValue('user_id'),
+    created_date: entity.getDataValue('createdAt'),
+    status: organisationRequestStatus.find(c => c.id === entity.getDataValue('status')),
+  }));
 };
 
 module.exports = {
@@ -1026,4 +1104,6 @@ module.exports = {
   createUserOrgRequest,
   getUserOrgRequestById,
   getApproversForOrg,
+  getAllRequestsForUser,
+  getRequestsAssociatedWithOrganisation,
 };
