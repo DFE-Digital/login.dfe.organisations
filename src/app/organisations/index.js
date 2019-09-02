@@ -24,6 +24,8 @@ const listAllAnnouncements = require('./listAllAnnouncements');
 const createUserOrganisationRequest = require('./createUserOrganisationRequest');
 const getUserOrganisationRequest = require('./getUserOrganisationRequest');
 const getApproversForOrganisation = require('./getApproversForOrganisation');
+const getRequestsForUser = require('./getRequestsForUser');
+const getRequestsForOrganisation = require('./getRequestsForOrganisation');
 
 const router = express.Router();
 
@@ -55,8 +57,10 @@ const routes = () => {
   router.delete('/:id/users/:uid', asyncWrapper(deleteUserOrganisation));
   router.get('/:id/approvers', asyncWrapper(getApproversForOrganisation));
   router.post('/:id/users/:uid/requests', asyncWrapper(createUserOrganisationRequest));
+  router.get('/:id/requests', asyncWrapper(getRequestsForOrganisation));
 
   router.get('/requests/:rid', asyncWrapper(getUserOrganisationRequest));
+  router.get('/requests-for-approval/:uid', asyncWrapper(getRequestsForUser));
 
   return router;
 };
