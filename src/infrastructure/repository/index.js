@@ -14,6 +14,7 @@ const servicesModel = require('./services');
 const usersModel = require('./users');
 const userOrganisationsModel = require('./userOrganisations');
 const countersModel = require('./counters');
+const userOrganisationRequestsModel = require('./userOrganisationRequests');
 
 const db = makeConnection();
 
@@ -27,6 +28,13 @@ const defineStatic = (model) => {
     { id: -1, name: 'Rejected' },
     { id: 0, name: 'Pending' },
     { id: 1, name: 'Approved' },
+  ];
+
+  model.organisationRequestStatus = [
+    { id: -1, name: 'Rejected' },
+    { id: 0, name: 'Pending' },
+    { id: 1, name: 'Approved' },
+    { id: 2, name: 'Escalated' },
   ];
 
   model.organisationStatus = [
@@ -47,6 +55,8 @@ const defineStatic = (model) => {
     { id: '011', name: 'Government' },
     { id: '012', name: 'Other GIAS Stakeholder' },
     { id: '013', name: 'Single-Academy Trust' },
+    { id: '050', name: 'Software Suppliers' },
+    { id: '051', name: 'Further Education' },
   ];
 
   model.establishmentTypes = [
@@ -137,6 +147,7 @@ buildDataModel(dataModel, db, [
   usersModel,
   userOrganisationsModel,
   countersModel,
+  userOrganisationRequestsModel,
 ]);
 
 

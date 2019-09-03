@@ -21,6 +21,12 @@ const getUsersForOrganisation = require('./getUsersForOrganisation');
 const listOrganisationAnnouncements = require('./listOrganisationAnnouncements');
 const upsertOrganisationAnnouncement = require('./upsertOrganisationAnnouncement');
 const listAllAnnouncements = require('./listAllAnnouncements');
+const createUserOrganisationRequest = require('./createUserOrganisationRequest');
+const getUserOrganisationRequest = require('./getUserOrganisationRequest');
+const getApproversForOrganisation = require('./getApproversForOrganisation');
+const getRequestsForUser = require('./getRequestsForUser');
+const getRequestsForOrganisation = require('./getRequestsForOrganisation');
+const updateUserOrganisationRequest = require('./updateUserOrganisationRequest');
 
 const router = express.Router();
 
@@ -50,7 +56,13 @@ const routes = () => {
   router.get('/v2/:id', asyncWrapper(getOrganisationV2));
   router.put('/:id/users/:uid', asyncWrapper(putUserInOrg));
   router.delete('/:id/users/:uid', asyncWrapper(deleteUserOrganisation));
+  router.get('/:id/approvers', asyncWrapper(getApproversForOrganisation));
+  router.post('/:id/users/:uid/requests', asyncWrapper(createUserOrganisationRequest));
+  router.get('/:id/requests', asyncWrapper(getRequestsForOrganisation));
 
+  router.get('/requests/:rid', asyncWrapper(getUserOrganisationRequest));
+  router.patch('/requests/:rid', asyncWrapper(updateUserOrganisationRequest));
+  router.get('/requests-for-approval/:uid', asyncWrapper(getRequestsForUser));
 
   return router;
 };
