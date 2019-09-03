@@ -1,5 +1,5 @@
 const logger = require('./../../../infrastructure/logger');
-const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, invitationOrganisations, users, organisationUserStatus, regionCodes, phasesOfEducation, counters, organisationAnnouncements } = require('./../../../infrastructure/repository');
+const { organisations, organisationStatus, organisationCategory, establishmentTypes, organisationAssociations, userOrganisations, invitationOrganisations, users, organisationUserStatus, regionCodes, phasesOfEducation, counters, organisationAnnouncements, userOrganisationRequests, organisationRequestStatus } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 const uniq = require('lodash/uniq');
 const { mapAsync } = require('./../../../utils');
@@ -143,7 +143,9 @@ const getOrgById = async (id) => {
     include: ['associations'],
   });
   const org = mapOrganisationFromEntity(entity);
-  await updateOrganisationsWithLocalAuthorityDetails([org]);
+  if (org) {
+    await updateOrganisationsWithLocalAuthorityDetails([org]);
+  }
   return org;
 };
 
@@ -430,6 +432,7 @@ const getOrganisationsForUserIncludingServices = async (userId) => {
         uid: userOrg.Organisation.getDataValue('UID') || undefined,
         ukprn: userOrg.Organisation.getDataValue('UKPRN') || undefined,
         address: userOrg.Organisation.getDataValue('Address') || undefined,
+        status: organisationStatus.find(c => c.id === userOrg.Organisation.getDataValue('Status')) || undefined,
         legacyUserId: userOrg.numeric_identifier || undefined,
         legacyUserName: userOrg.text_identifier || undefined,
         category: organisationCategory.find(c => c.id === userOrg.Organisation.getDataValue('Category')),
@@ -796,6 +799,8 @@ const pagedListOfUsers = async (pageNumber = 1, pageSize = 25) => {
       organisation,
       role,
       status: entity.status,
+      numericIdentifier: entity.numeric_identifier || undefined,
+      textIdentifier: entity.text_identifier || undefined,
     });
   }
 
@@ -947,6 +952,146 @@ const upsertAnnouncement = async (originId, organisationId, type, title, summary
   return mapAnnouncementFromEntity(entity);
 };
 
+const getApproversForOrg = async (organisationId) => {
+  const entites = await userOrganisations.findAll({
+    where: {
+      organisation_id: {
+        [Op.eq]: organisationId,
+      },
+      role_id: {
+        [Op.eq]: 10000,
+      },
+    },
+  });
+  return await Promise.all(entites.map(async approver => (
+    approver.getDataValue('user_id')
+  )));
+};
+
+const createUserOrgRequest = async (request) => {
+  const id = uuid();
+  const entity = {
+    id,
+    user_id: request.userId.toUpperCase(),
+    organisation_id: request.organisationId,
+    reason: request.reason,
+  };
+  await userOrganisationRequests.create(entity);
+  return id;
+};
+
+const getUserOrgRequestById = async (rid) => {
+  const entity = await userOrganisationRequests.find({
+    where: {
+      id: {
+        [Op.eq]: rid,
+      },
+    },
+    include: ['Organisation'],
+  });
+  return {
+    id: entity.get('id'),
+    org_id: entity.Organisation.getDataValue('id'),
+    org_name: entity.Organisation.getDataValue('name'),
+    user_id: entity.getDataValue('user_id'),
+    created_date: entity.getDataValue('createdAt'),
+    actioned_date: entity.getDataValue('actioned_at'),
+    actioned_by: entity.getDataValue('actioned_by'),
+    actioned_reason: entity.getDataValue('actioned_reason'),
+    reason: entity.getDataValue('reason'),
+    status: organisationRequestStatus.find(c => c.id === entity.getDataValue('status')),
+  };
+};
+
+const getAllRequestsForUser = async (userId) => {
+  const userApproverOrgs = await userOrganisations.findAll({
+    where: {
+      user_id: {
+        [Op.eq]: userId,
+      },
+      role_id: {
+        [Op.eq]: 10000,
+      },
+    },
+  });
+  if (!userApproverOrgs || userApproverOrgs.length === 0) {
+    return [];
+  }
+
+  const requestsForUsersOrgs = await userOrganisationRequests.findAll({
+    where: {
+      organisation_id: {
+        [Op.in]: userApproverOrgs.map(c => c.organisation_id),
+      },
+      status: {
+        [Op.or]: [0, 2],
+      },
+    },
+    include: ['Organisation'],
+  });
+
+  if (!requestsForUsersOrgs || requestsForUsersOrgs.length === 0) {
+    return [];
+  }
+  return requestsForUsersOrgs.map(entity => ({
+    id: entity.get('id'),
+    org_id: entity.Organisation.getDataValue('id'),
+    org_name: entity.Organisation.getDataValue('name'),
+    user_id: entity.getDataValue('user_id'),
+    created_date: entity.getDataValue('createdAt'),
+    status: organisationRequestStatus.find(c => c.id === entity.getDataValue('status')),
+  }));
+};
+
+const getRequestsAssociatedWithOrganisation = async (orgId) => {
+  const userOrgRequests = await userOrganisationRequests.findAll({
+    where: {
+      organisation_id: {
+        [Op.eq]: orgId,
+      },
+      status: {
+        [Op.or]: [0, 2],
+      },
+    },
+    include: ['Organisation'],
+  });
+  if (!userOrgRequests || userOrgRequests.length === 0) {
+    return [];
+  }
+
+  return userOrgRequests.map(entity => ({
+    id: entity.get('id'),
+    org_id: entity.Organisation.getDataValue('id'),
+    org_name: entity.Organisation.getDataValue('name'),
+    user_id: entity.getDataValue('user_id'),
+    created_date: entity.getDataValue('createdAt'),
+    status: organisationRequestStatus.find(c => c.id === entity.getDataValue('status')),
+  }));
+};
+
+const updateUserOrgRequest = async (requestId, request) => {
+  const existingRequest = await userOrganisationRequests.find({
+    where: {
+      id: {
+        [Op.eq]: requestId,
+      },
+    },
+  });
+
+  if (!existingRequest) {
+    return null;
+  }
+
+  const updatedRequest = Object.assign(existingRequest, request);
+
+  await existingRequest.updateAttributes({
+    status: updatedRequest.status,
+    actioned_by: updatedRequest.actioned_by,
+    actioned_reason: updatedRequest.actioned_reason,
+    actioned_at: updatedRequest.actioned_at,
+  });
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -979,4 +1124,10 @@ module.exports = {
   getNextOrganisationLegacyId,
   listAnnouncements,
   upsertAnnouncement,
+  createUserOrgRequest,
+  getUserOrgRequestById,
+  getApproversForOrg,
+  getAllRequestsForUser,
+  getRequestsAssociatedWithOrganisation,
+  updateUserOrgRequest,
 };
