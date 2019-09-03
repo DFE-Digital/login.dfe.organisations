@@ -26,6 +26,7 @@ const getUserOrganisationRequest = require('./getUserOrganisationRequest');
 const getApproversForOrganisation = require('./getApproversForOrganisation');
 const getRequestsForUser = require('./getRequestsForUser');
 const getRequestsForOrganisation = require('./getRequestsForOrganisation');
+const updateUserOrganisationRequest = require('./updateUserOrganisationRequest');
 
 const router = express.Router();
 
@@ -60,6 +61,7 @@ const routes = () => {
   router.get('/:id/requests', asyncWrapper(getRequestsForOrganisation));
 
   router.get('/requests/:rid', asyncWrapper(getUserOrganisationRequest));
+  router.patch('/requests/:rid', asyncWrapper(updateUserOrganisationRequest));
   router.get('/requests-for-approval/:uid', asyncWrapper(getRequestsForUser));
 
   return router;

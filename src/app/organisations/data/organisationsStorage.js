@@ -1069,6 +1069,29 @@ const getRequestsAssociatedWithOrganisation = async (orgId) => {
   }));
 };
 
+const updateUserOrgRequest = async (requestId, request) => {
+  const existingRequest = await userOrganisationRequests.find({
+    where: {
+      id: {
+        [Op.eq]: requestId,
+      },
+    },
+  });
+
+  if (!existingRequest) {
+    return null;
+  }
+
+  const updatedRequest = Object.assign(existingRequest, request);
+
+  await existingRequest.updateAttributes({
+    status: updatedRequest.status,
+    actioned_by: updatedRequest.actioned_by,
+    actioned_reason: updatedRequest.actioned_reason,
+    actioned_at: updatedRequest.actioned_at,
+  });
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -1106,4 +1129,5 @@ module.exports = {
   getApproversForOrg,
   getAllRequestsForUser,
   getRequestsAssociatedWithOrganisation,
+  updateUserOrgRequest,
 };
