@@ -20,6 +20,7 @@ const putSingleServiceIdentifier = require('./putSingleServiceIdentifier');
 const postServiceUser = require('./postServiceUser');
 const putUserService = require('./putUserService');
 const deleteUserAccess = require('./deleteUserService');
+const getAllServiceUsers = require('./getAllServiceUsers');
 
 const router = express.Router();
 
@@ -36,6 +37,7 @@ const servicesRouteExport = () => {
   router.get('/:sid/identifiers/:id_key/:id_value', asyncWrapper(getSingleServiceIdentifier));
   router.get('/associated-with-user/:uid', asyncWrapper(getUserAssociatedServices));
   router.get('/unassociated-with-user/:uid', asyncWrapper(getUnassociatedWithUserServices));
+  router.get('/:sid/users', asyncWrapper(getAllServiceUsers));
 
   return router;
 };
