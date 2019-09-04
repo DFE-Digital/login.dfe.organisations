@@ -193,6 +193,50 @@ const getUsersOfService = async (organisationId, id, correlationId) => {
   }
 };
 
+const getAllUsersOfService = async (id, page, pageSize, correlationId) => {
+  try {
+    logger.info(`Calling getAllUsersOfService for services storage for request ${correlationId}`, { correlationId });
+    const userServiceEntities = await users.findAndCountAll(
+      {
+        order: [
+          ['user_id', 'ASC'],
+          ['organisation_id', 'ASC'],
+        ],
+        limit: pageSize,
+        offset: page !== 1 ? pageSize * (page - 1) : 0,
+        where: {
+          service_id: {
+            [Op.eq]: id,
+          },
+        },
+        include: ['Organisation'],
+      });
+
+    const mappedUsers = await Promise.all(userServiceEntities.rows.map(async (userServiceEntity) => {
+      const role = await userServiceEntity.getRole();
+      return {
+        id: userServiceEntity.getDataValue('user_id'),
+        status: userServiceEntity.getDataValue('status'),
+        role,
+        createdAt: userServiceEntity.getDataValue('createdAt'),
+        updatedAt: userServiceEntity.getDataValue('updatedAt'),
+        organisation: {
+          ...(userServiceEntity.Organisation.dataValues),
+        },
+      };
+    }));
+    return {
+      users: mappedUsers,
+      page,
+      totalNumberOfPages: Math.ceil(userServiceEntities.count / pageSize),
+      totalNumberOfRecords: userServiceEntities.count,
+    };
+  } catch (e) {
+    logger.error(`error getting users of service ${id} - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
+    throw e;
+  }
+};
+
 const getApproversOfServiceUserIds = async (organisationId, id, correlationId) => {
   try {
     logger.info(`Calling getApproversOfServiceUserIds for services storage for request ${correlationId}`, { correlationId });
@@ -677,5 +721,6 @@ module.exports = {
   upsertExternalIdentifier,
   upsertUserService,
   deleteUserService,
+  getAllUsersOfService,
 };
 
