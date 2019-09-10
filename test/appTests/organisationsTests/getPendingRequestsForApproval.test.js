@@ -3,7 +3,7 @@ jest.mock('./../../../src/infrastructure/logger', () => ({
 }));
 jest.mock('./../../../src/app/organisations/data/organisationsStorage', () => {
   return {
-    getAllRequestsForUser: jest.fn(),
+    getAllPendingRequestsForApprover: jest.fn(),
   };
 });
 
@@ -18,11 +18,11 @@ const res = {
   },
 };
 const logger = require('./../../../src/infrastructure/logger');
-const { getAllRequestsForUser } = require('./../../../src/app/organisations/data/organisationsStorage');
-const getRequestsForUser = require('./../../../src/app/organisations/getRequestsForUser');
+const { getAllPendingRequestsForApprover } = require('./../../../src/app/organisations/data/organisationsStorage');
+const getRequestsForUser = require('../../../src/app/organisations/getPendingRequestsForApproval');
 
 
-describe('when getting requests for a user', () => {
+describe('when getting requests pending approval for an approver', () => {
   let req;
   const expectedRequestCorrelationId = '392f0e46-787b-41bc-9e77-4c3cb94824bb';
 
@@ -40,9 +40,9 @@ describe('when getting requests for a user', () => {
       },
     };
 
-    getAllRequestsForUser.mockReset();
+    getAllPendingRequestsForApprover.mockReset();
 
-    getAllRequestsForUser.mockReturnValue(
+    getAllPendingRequestsForApprover.mockReturnValue(
       [{
         id: 'requestId',
         org_id: 'org1',
@@ -63,7 +63,7 @@ describe('when getting requests for a user', () => {
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
-  it('then it should send requests for user in response if organisation found', async () => {
+  it('then it should send requests for approval in response if organisation found', async () => {
     await getRequestsForUser(req, res);
     expect(res.send).toHaveBeenCalledTimes(1);
     expect(res.send).toHaveBeenCalledWith(
@@ -82,7 +82,7 @@ describe('when getting requests for a user', () => {
   });
 
   it('then it should log errors and return 500 result', async () => {
-    getAllRequestsForUser.mockReset().mockImplementation(() => {
+    getAllPendingRequestsForApprover.mockReset().mockImplementation(() => {
       throw new Error('test');
     });
 

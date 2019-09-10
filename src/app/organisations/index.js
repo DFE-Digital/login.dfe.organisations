@@ -24,9 +24,10 @@ const listAllAnnouncements = require('./listAllAnnouncements');
 const createUserOrganisationRequest = require('./createUserOrganisationRequest');
 const getUserOrganisationRequest = require('./getUserOrganisationRequest');
 const getApproversForOrganisation = require('./getApproversForOrganisation');
-const getRequestsForUser = require('./getRequestsForUser');
+const getPendingRequestsForApproval = require('./getPendingRequestsForApproval');
 const getRequestsForOrganisation = require('./getRequestsForOrganisation');
 const updateUserOrganisationRequest = require('./updateUserOrganisationRequest');
+const getPendingRequestsAssociatedWithUser = require('./getPendingRequestsAssociatedWithUser');
 
 const router = express.Router();
 
@@ -62,7 +63,8 @@ const routes = () => {
 
   router.get('/requests/:rid', asyncWrapper(getUserOrganisationRequest));
   router.patch('/requests/:rid', asyncWrapper(updateUserOrganisationRequest));
-  router.get('/requests-for-approval/:uid', asyncWrapper(getRequestsForUser));
+  router.get('/requests-for-approval/:uid', asyncWrapper(getPendingRequestsForApproval));
+  router.get('/requests-for-user/:uid', asyncWrapper(getPendingRequestsAssociatedWithUser));
 
   return router;
 };
