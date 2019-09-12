@@ -1069,6 +1069,30 @@ const getRequestsAssociatedWithOrganisation = async (orgId) => {
   }));
 };
 
+
+const getAllRequestsEscalatedToSupport = async () => {
+  const userOrgRequests = await userOrganisationRequests.findAll({
+    where: {
+      status: {
+        [Op.eq]: [2],
+      },
+    },
+    include: ['Organisation'],
+  });
+  if (!userOrgRequests || userOrgRequests.length === 0) {
+    return [];
+  }
+
+  return userOrgRequests.map(entity => ({
+    id: entity.get('id'),
+    org_id: entity.Organisation.getDataValue('id'),
+    org_name: entity.Organisation.getDataValue('name'),
+    user_id: entity.getDataValue('user_id'),
+    created_date: entity.getDataValue('createdAt'),
+    status: organisationRequestStatus.find(c => c.id === entity.getDataValue('status')),
+  }));
+};
+
 const updateUserOrgRequest = async (requestId, request) => {
   const existingRequest = await userOrganisationRequests.find({
     where: {
@@ -1158,6 +1182,7 @@ module.exports = {
   getApproversForOrg,
   getAllPendingRequestsForApprover,
   getRequestsAssociatedWithOrganisation,
+  getAllRequestsEscalatedToSupport,
   updateUserOrgRequest,
   getRequestsAssociatedWithUser,
 };
