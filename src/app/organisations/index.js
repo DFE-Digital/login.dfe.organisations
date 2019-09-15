@@ -26,6 +26,7 @@ const getUserOrganisationRequest = require('./getUserOrganisationRequest');
 const getApproversForOrganisation = require('./getApproversForOrganisation');
 const getPendingRequestsForApproval = require('./getPendingRequestsForApproval');
 const getRequestsForOrganisation = require('./getRequestsForOrganisation');
+const getRequestsForSupport = require('./getRequestsForSupport');
 const updateUserOrganisationRequest = require('./updateUserOrganisationRequest');
 const getPendingRequestsAssociatedWithUser = require('./getPendingRequestsAssociatedWithUser');
 
@@ -45,6 +46,7 @@ const routes = () => {
   router.get('/invitations', asyncWrapper(listInvitationOrganisations));
   router.post('/', asyncWrapper(createOrganisation));
   router.get('/announcements', asyncWrapper(listAllAnnouncements));
+  router.get('/requests-for-support', asyncWrapper(getRequestsForSupport));  
 
   router.get('/by-external-id/:type/:id', asyncWrapper(getOrganisationByExternalId));
   router.get('/associated-with-user/:uid', asyncWrapper(getOrganisationsAssociatedWithUser));
