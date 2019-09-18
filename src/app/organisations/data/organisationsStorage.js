@@ -1074,7 +1074,7 @@ const getAllRequestsEscalatedToSupport = async () => {
   const userOrgRequests = await userOrganisationRequests.findAll({
     where: {
       status: {
-        [Op.eq]: [0, 2],
+        [Op.or]: [0, 2],
       },
     },
     include: ['Organisation'],
