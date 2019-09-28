@@ -975,6 +975,7 @@ const createUserOrgRequest = async (request) => {
     user_id: request.userId.toUpperCase(),
     organisation_id: request.organisationId,
     reason: request.reason,
+    status: request.status || 0
   };
   await userOrganisationRequests.create(entity);
   return id;
@@ -1024,7 +1025,7 @@ const getAllPendingRequestsForApprover = async (userId) => {
         [Op.in]: userApproverOrgs.map(c => c.organisation_id),
       },
       status: {
-        [Op.or]: [0, 2],
+        [Op.or]: [0, 2, 3],
       },
     },
     include: ['Organisation'],
@@ -1050,7 +1051,7 @@ const getRequestsAssociatedWithOrganisation = async (orgId) => {
         [Op.eq]: orgId,
       },
       status: {
-        [Op.or]: [0, 2],
+        [Op.or]: [0, 2, 3],
       },
     },
     include: ['Organisation'],
@@ -1074,7 +1075,7 @@ const getAllRequestsEscalatedToSupport = async () => {
   const userOrgRequests = await userOrganisationRequests.findAll({
     where: {
       status: {
-        [Op.or]: [0, 2],
+        [Op.in]: [0, 2, 3],
       },
     },
     include: ['Organisation'],
