@@ -1,13 +1,13 @@
 const { createUserOrgRequest, getApproversForOrg } = require('./data/organisationsStorage');
 
 const createUserOrganisationRequest = async (req, res) => {
-  const approvers = [];
+  let approvers = [];
 
   if (!req.params.uid || !req.params.id) {
     return res.status(400).send();
   }
 
-  approvers = getApproversForOrg(req.params.id);
+  approvers = await getApproversForOrg(req.params.id);
 
   const organisationRequest = {
     userId: req.params.uid,
