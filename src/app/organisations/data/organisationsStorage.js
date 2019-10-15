@@ -437,7 +437,7 @@ const getOrganisationsForUserIncludingServices = async (userId) => {
         legacyUserName: userOrg.text_identifier || undefined,
         category: organisationCategory.find(c => c.id === userOrg.Organisation.getDataValue('Category')),
         type: establishmentTypes.find(t => t.id === userOrg.Organisation.getDataValue('Type')),
-        companyRegistrationNumber: userOrg.companyRegistrationNumber,
+        companyRegistrationNumber: userOrg.Organisation.companyRegistrationNumber,
       },
       role,
       approvers,
