@@ -28,6 +28,7 @@ const getPendingRequestsForApproval = require('./getPendingRequestsForApproval')
 const getRequestsForOrganisation = require('./getRequestsForOrganisation');
 const updateUserOrganisationRequest = require('./updateUserOrganisationRequest');
 const getPendingRequestsAssociatedWithUser = require('./getPendingRequestsAssociatedWithUser');
+const listUserOrganisationsV2 = require ('./listUserOrganisationsV2');
 
 const router = express.Router();
 
@@ -42,6 +43,7 @@ const routes = () => {
   router.get('/categories', asyncWrapper(listCategories));
   router.get('/states', asyncWrapper(listStates));
   router.get('/users', asyncWrapper(listUserOrganisations));
+  router.get('/v2/users', asyncWrapper(listUserOrganisationsV2));
   router.get('/invitations', asyncWrapper(listInvitationOrganisations));
   router.post('/', asyncWrapper(createOrganisation));
   router.get('/announcements', asyncWrapper(listAllAnnouncements));
