@@ -814,6 +814,60 @@ const pagedListOfUsers = async (pageNumber = 1, pageSize = 25) => {
   };
 };
 
+
+const getPagedListOfUsersV2 = async (pageNumber = 1, pageSize = 25, roleId = undefined, filterTypes = undefined, filterStatus = undefined) => {
+  const query = {
+    where: {},
+    limit: pageSize,
+    offset: (pageNumber - 1) * pageSize,
+    include: ['Organisation'],
+  };
+
+  if (roleId !== undefined) {
+    query.where.role_id = {
+      [Op.eq]: roleId,
+    };
+  }
+  if (filterTypes && filterTypes.length > 0) {
+    query.where['$Organisation.type$'] = {
+      [Op.in]: filterTypes,
+    };
+  }
+
+  if (filterStatus && filterStatus.length > 0) {
+    query.where['$Organisation.status$'] = {
+      [Op.in]: filterStatus,
+    };
+  }
+
+  const recordset = await userOrganisations.findAndCountAll(query);
+  const mappings = [];
+  for (let i = 0; i < recordset.rows.length; i += 1) {
+    const entity = recordset.rows[i];
+    const role = await entity.getRole();
+    const organisation = mapOrganisationFromEntity(entity.Organisation);
+    await updateOrganisationsWithLocalAuthorityDetails([organisation]);
+
+    mappings.push({
+      userId: entity.user_id,
+      organisation,
+      role,
+      status: entity.status,
+      numericIdentifier: entity.numeric_identifier || undefined,
+      textIdentifier: entity.text_identifier || undefined,
+    });
+  }
+
+  const totalNumberOfRecords = recordset.count;
+  const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
+  return {
+    users: mappings,
+    page: pageNumber,
+    totalNumberOfRecords,
+    totalNumberOfPages,
+  };
+};
+
 const pagedListOfInvitations = async (pageNumber = 1, pageSize = 25) => {
   const recordset = await invitationOrganisations.findAndCountAll({
     limit: pageSize,
@@ -1161,4 +1215,5 @@ module.exports = {
   getRequestsAssociatedWithOrganisation,
   updateUserOrgRequest,
   getRequestsAssociatedWithUser,
+  getPagedListOfUsersV2,
 };
