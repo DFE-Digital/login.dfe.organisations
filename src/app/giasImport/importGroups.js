@@ -1,8 +1,9 @@
 const logger = require('./../../infrastructure/logger');
+const config = require('./../../infrastructure/config')();
 const { getGroupsFile } = require('./../../infrastructure/gias');
 const { parse: parseGroups } = require('./groupCsvReader');
 const { parse: parseGroupLinks } = require('./groupLinksCsvReader');
-const { add, update, pagedListOfCategory, addAssociation, removeAssociationsOfType } = require('./../organisations/data/organisationsStorage');
+const { add, update, pagedListOfCategory, addAssociation, removeAssociationsOfType, getNextOrganisationLegacyId } = require('./../organisations/data/organisationsStorage');
 const uuid = require('uuid/v4');
 
 const isGroupImportable = (group) => {
@@ -66,8 +67,17 @@ const mapImportRecordForStorage = (importing) => {
     closedOn: importing.closedOn,
     address,
     companyRegistrationNumber: importing.companyRegistrationNumber,
+    legacyId: importing.legacyId,
   };
 };
+
+const generateLegacyId = async () => {
+  if (!config.toggles || !config.toggles.generateOrganisationLegacyId) {
+    return undefined;
+  }
+  return await getNextOrganisationLegacyId();
+};
+
 const addGroup = async (importing) => {
   const organisation = mapImportRecordForStorage(importing);
   await add(organisation);
@@ -134,6 +144,7 @@ const addOrUpdateGroups = async (importingGroups, importingGroupLinks, existingG
       if (existing) {
         organisationId = await updateGroup(importing, existing);
       } else {
+        importing.legacyId = await generateLegacyId();
         organisationId = await addGroup(importing);
       }
 

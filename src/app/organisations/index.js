@@ -21,6 +21,14 @@ const getUsersForOrganisation = require('./getUsersForOrganisation');
 const listOrganisationAnnouncements = require('./listOrganisationAnnouncements');
 const upsertOrganisationAnnouncement = require('./upsertOrganisationAnnouncement');
 const listAllAnnouncements = require('./listAllAnnouncements');
+const createUserOrganisationRequest = require('./createUserOrganisationRequest');
+const getUserOrganisationRequest = require('./getUserOrganisationRequest');
+const getApproversForOrganisation = require('./getApproversForOrganisation');
+const getPendingRequestsForApproval = require('./getPendingRequestsForApproval');
+const getRequestsForOrganisation = require('./getRequestsForOrganisation');
+const updateUserOrganisationRequest = require('./updateUserOrganisationRequest');
+const getPendingRequestsAssociatedWithUser = require('./getPendingRequestsAssociatedWithUser');
+const listUserOrganisationsV2 = require ('./listUserOrganisationsV2');
 
 const router = express.Router();
 
@@ -35,6 +43,7 @@ const routes = () => {
   router.get('/categories', asyncWrapper(listCategories));
   router.get('/states', asyncWrapper(listStates));
   router.get('/users', asyncWrapper(listUserOrganisations));
+  router.get('/v2/users', asyncWrapper(listUserOrganisationsV2));
   router.get('/invitations', asyncWrapper(listInvitationOrganisations));
   router.post('/', asyncWrapper(createOrganisation));
   router.get('/announcements', asyncWrapper(listAllAnnouncements));
@@ -50,7 +59,14 @@ const routes = () => {
   router.get('/v2/:id', asyncWrapper(getOrganisationV2));
   router.put('/:id/users/:uid', asyncWrapper(putUserInOrg));
   router.delete('/:id/users/:uid', asyncWrapper(deleteUserOrganisation));
+  router.get('/:id/approvers', asyncWrapper(getApproversForOrganisation));
+  router.post('/:id/users/:uid/requests', asyncWrapper(createUserOrganisationRequest));
+  router.get('/:id/requests', asyncWrapper(getRequestsForOrganisation));
 
+  router.get('/requests/:rid', asyncWrapper(getUserOrganisationRequest));
+  router.patch('/requests/:rid', asyncWrapper(updateUserOrganisationRequest));
+  router.get('/requests-for-approval/:uid', asyncWrapper(getPendingRequestsForApproval));
+  router.get('/requests-for-user/:uid', asyncWrapper(getPendingRequestsAssociatedWithUser));
 
   return router;
 };
