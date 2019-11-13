@@ -5,6 +5,7 @@ jest.mock('./../../../src/infrastructure/config', () => {
 jest.mock('./../../../src/app/organisations/data/organisationsStorage', () => {
   return {
     createUserOrgRequest: jest.fn(),
+    getApproversForOrg: jest.fn(),
   };
 });
 
@@ -19,10 +20,10 @@ const res = {
   },
 };
 
-const { createUserOrgRequest } = require('./../../../src/app/organisations/data/organisationsStorage');
+const { createUserOrgRequest, getApproversForOrg } = require('./../../../src/app/organisations/data/organisationsStorage');
 const createUserOrganisationRequest = require('./../../../src/app/organisations/createUserOrganisationRequest');
 
-describe('when creating a user organisation request ', () => {
+describe('when creating a user organisation request for an organisation with approvers', () => {
   let req;
 
   beforeEach(() => {
@@ -33,11 +34,24 @@ describe('when creating a user organisation request ', () => {
       },
       body: {
         reason: 'Test',
+        status: 0
       },
     };
+
     res.mockResetAll();
     createUserOrgRequest.mockReset().mockReturnValue('some-new-id');
+    getApproversForOrg.mockReset().mockImplementation((org) => {
+      return [{
+        'user_id': 'user2' ,      
+        'organisation_id': org
+      },
+      {
+        'user_id': 'user3' ,      
+        'organisation_id': org
+      }]
+    });
   });
+
   it('then it should create user org request in storage', async () => {
     await createUserOrganisationRequest(req, res);
 
@@ -45,6 +59,7 @@ describe('when creating a user organisation request ', () => {
     expect(createUserOrgRequest.mock.calls[0][0]).toEqual({
       organisationId: 'org1',
       reason: 'Test',
+      status: 0,
       userId: 'user1',
     });
   });
