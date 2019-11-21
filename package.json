@@ -25,7 +25,7 @@
     "pg": "^7.4.0",
     "pg-hstore": "^2.3.2",
     "request-promise": "^4.2.2",
-    "sequelize": "^4.44.3",
+    "sequelize": "^5.15.1",
     "simpl-schema": "^1.5.6",
     "tedious": "^2.6.4",
     "unzipper": "^0.10.5",
