@@ -3,7 +3,7 @@ jest.mock('./../../../src/infrastructure/logger', () => ({
 }));
 jest.mock('./../../../src/app/organisations/data/organisationsStorage', () => {
   return {
-    getAllRequestsEscalatedToSupport: jest.fn(),
+    pagedListOfRequests: jest.fn(),
   };
 });
 
@@ -11,15 +11,16 @@ const res = {
   json: jest.fn(),
   status: jest.fn(),
   send: jest.fn(),
+  contentType: jest.fn(),
   mockResetAll: function () {
     this.json.mockReset().mockReturnValue(this);
     this.status.mockReset().mockReturnValue(this);
     this.send.mockReset().mockReturnValue(this);
+    this.contentType.mockReset().mockReturnValue(this);
   },
 };
-const logger = require('./../../../src/infrastructure/logger');
-const { getAllRequestsEscalatedToSupport } = require('./../../../src/app/organisations/data/organisationsStorage');
-const getRequestsForSupport = require('./../../../src/app/organisations/getRequestsForSupport');
+const { pagedListOfRequests } = require('./../../../src/app/organisations/data/organisationsStorage');
+const getRequestsForSupport = require('../../../src/app/organisations/listRequests');
 
 
 describe('when getting requests that have been escalated to support', () => {
@@ -32,6 +33,8 @@ describe('when getting requests that have been escalated to support', () => {
       params: {
         id: '1d672383-cf21-49b4-86d2-7cea955ad422',
       },
+      query: {
+      },
       headers: {
         'x-correlation-id': expectedRequestCorrelationId,
       },
@@ -40,10 +43,10 @@ describe('when getting requests that have been escalated to support', () => {
       },
     };
 
-    getAllRequestsEscalatedToSupport.mockReset();
+    pagedListOfRequests.mockReset();
 
-    getAllRequestsEscalatedToSupport.mockReturnValue(
-      [{
+    pagedListOfRequests.mockReturnValue({
+      requests: [{
         id: 'requestId',
         org_id: 'org1',
         org_name: 'org name',
@@ -54,20 +57,17 @@ describe('when getting requests that have been escalated to support', () => {
           name: 'escalated',
         },
       }],
-    );
+      page: 1,
+      totalNumberOfPages: 2,
+      totalNumberOfRecords: 30,
+    });
   });
 
-  it('then it should send 200 if escalated requests are found', async () => {
-    await getRequestsForSupport(req, res);
-
-    expect(res.status).toHaveBeenCalledWith(200);
-  });
-
-  it('then it should send requests for org in response if escalated requests are found', async () => {
+  it('then it should return first page of requests if no page specified', async () => {
     await getRequestsForSupport(req, res);
     expect(res.send).toHaveBeenCalledTimes(1);
-    expect(res.send).toHaveBeenCalledWith(
-      [{
+    expect(res.send).toHaveBeenCalledWith({
+      requests: [{
         id: 'requestId',
         org_id: 'org1',
         org_name: 'org name',
@@ -78,17 +78,31 @@ describe('when getting requests that have been escalated to support', () => {
           name: 'escalated',
         },
       }],
-    );
+      page: 1,
+      totalNumberOfPages: 2,
+      totalNumberOfRecords: 30,
+    });
   });
 
-  it('then it should log errors and return 500 result', async () => {
-    getAllRequestsEscalatedToSupport.mockReset().mockImplementation(() => {
-      throw new Error('test');
-    });
+  it('then it should filter by status if specified in query', async () => {
+    req.query.filterstatus = '2';
 
     await getRequestsForSupport(req, res);
 
-    expect(logger.error.mock.calls).toHaveLength(1);
-    expect(res.status).toHaveBeenCalledWith(500);
+    expect(pagedListOfRequests.mock.calls).toHaveLength(1);
+    expect(pagedListOfRequests.mock.calls[0][0]).toBe(1);
+    expect(pagedListOfRequests.mock.calls[0][1]).toBe(25);
+    expect(pagedListOfRequests.mock.calls[0][2]).toEqual(['2']);
+  });
+
+  it('then it should get page specified in query', async () => {
+    req.query.page = '2';
+
+    await getRequestsForSupport(req, res);
+
+    expect(pagedListOfRequests.mock.calls).toHaveLength(1);
+    expect(pagedListOfRequests.mock.calls[0][0]).toBe(2);
+    expect(pagedListOfRequests.mock.calls[0][1]).toBe(25);
+    expect(pagedListOfRequests.mock.calls[0][2]).toEqual([]);
   });
 });
