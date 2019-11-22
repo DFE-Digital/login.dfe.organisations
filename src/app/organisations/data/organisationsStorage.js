@@ -1149,6 +1149,46 @@ const getAllRequestsEscalatedToSupport = async () => {
   }));
 };
 
+const pagedListOfRequests = async (pageNumber = 1, pageSize = 25, filterStates = undefined) => {
+  const offset = (pageNumber - 1) * pageSize;
+  const query = {
+    where: {},
+    limit: pageSize,
+    offset,
+    order: [
+      ['createdAt', 'ASC'],
+    ],
+    include: ['Organisation'],
+  };
+
+  if (filterStates && filterStates.length > 0) {
+    query.where.status = {
+      [Op.in]: filterStates,
+    };
+  }
+  const userOrgRequests = await userOrganisationRequests.findAndCountAll(query);
+  if (!userOrgRequests || userOrgRequests.length === 0) {
+    return [];
+  }
+  const totalNumberOfRecords = userOrgRequests.count;
+  const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
+
+  const requests = userOrgRequests.rows.map(entity => ({
+    id: entity.get('id'),
+    org_id: entity.Organisation.getDataValue('id'),
+    org_name: entity.Organisation.getDataValue('name'),
+    user_id: entity.getDataValue('user_id'),
+    created_date: entity.getDataValue('createdAt'),
+    status: organisationRequestStatus.find(c => c.id === entity.getDataValue('status')),
+  }));
+
+  return {
+    requests,
+    totalNumberOfRecords,
+    totalNumberOfPages,
+  };
+};
+
 const updateUserOrgRequest = async (requestId, request) => {
   const existingRequest = await userOrganisationRequests.find({
     where: {
@@ -1242,4 +1282,5 @@ module.exports = {
   updateUserOrgRequest,
   getRequestsAssociatedWithUser,
   getPagedListOfUsersV2,
+  pagedListOfRequests,
 };
