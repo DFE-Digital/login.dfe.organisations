@@ -34,7 +34,8 @@ const defineStatic = (model) => {
     { id: -1, name: 'Rejected' },
     { id: 0, name: 'Pending' },
     { id: 1, name: 'Approved' },
-    { id: 2, name: 'Escalated' },
+    { id: 2, name: 'Overdue' },
+    { id: 3, name: 'No Approvers' },
   ];
 
   model.organisationStatus = [
