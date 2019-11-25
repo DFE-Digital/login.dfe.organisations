@@ -1030,6 +1030,7 @@ const createUserOrgRequest = async (request) => {
     user_id: request.userId.toUpperCase(),
     organisation_id: request.organisationId,
     reason: request.reason,
+    status: request.status || 0
   };
   await userOrganisationRequests.create(entity);
   return id;
@@ -1079,7 +1080,7 @@ const getAllPendingRequestsForApprover = async (userId) => {
         [Op.in]: userApproverOrgs.map(c => c.organisation_id),
       },
       status: {
-        [Op.or]: [0, 2],
+        [Op.or]: [0, 2, 3],
       },
     },
     include: ['Organisation'],
@@ -1105,7 +1106,7 @@ const getRequestsAssociatedWithOrganisation = async (orgId) => {
         [Op.eq]: orgId,
       },
       status: {
-        [Op.or]: [0, 2],
+        [Op.or]: [0, 2, 3],
       },
     },
     include: ['Organisation'],
@@ -1122,6 +1123,46 @@ const getRequestsAssociatedWithOrganisation = async (orgId) => {
     created_date: entity.getDataValue('createdAt'),
     status: organisationRequestStatus.find(c => c.id === entity.getDataValue('status')),
   }));
+};
+
+const pagedListOfRequests = async (pageNumber = 1, pageSize = 25, filterStates = undefined) => {
+  const offset = (pageNumber - 1) * pageSize;
+  const query = {
+    where: {},
+    limit: pageSize,
+    offset,
+    order: [
+      ['createdAt', 'ASC'],
+    ],
+    include: ['Organisation'],
+  };
+
+  if (filterStates && filterStates.length > 0) {
+    query.where.status = {
+      [Op.in]: filterStates,
+    };
+  }
+  const userOrgRequests = await userOrganisationRequests.findAndCountAll(query);
+  if (!userOrgRequests || userOrgRequests.length === 0) {
+    return [];
+  }
+  const totalNumberOfRecords = userOrgRequests.count;
+  const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
+
+  const requests = userOrgRequests.rows.map(entity => ({
+    id: entity.get('id'),
+    org_id: entity.Organisation.getDataValue('id'),
+    org_name: entity.Organisation.getDataValue('name'),
+    user_id: entity.getDataValue('user_id'),
+    created_date: entity.getDataValue('createdAt'),
+    status: organisationRequestStatus.find(c => c.id === entity.getDataValue('status')),
+  }));
+
+  return {
+    requests,
+    totalNumberOfRecords,
+    totalNumberOfPages,
+  };
 };
 
 const updateUserOrgRequest = async (requestId, request) => {
@@ -1216,4 +1257,5 @@ module.exports = {
   updateUserOrgRequest,
   getRequestsAssociatedWithUser,
   getPagedListOfUsersV2,
+  pagedListOfRequests,
 };
