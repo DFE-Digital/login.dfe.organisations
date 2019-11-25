@@ -1125,30 +1125,6 @@ const getRequestsAssociatedWithOrganisation = async (orgId) => {
   }));
 };
 
-
-const getAllRequestsEscalatedToSupport = async () => {
-  const userOrgRequests = await userOrganisationRequests.findAll({
-    where: {
-      status: {
-        [Op.in]: [0, 2, 3],
-      },
-    },
-    include: ['Organisation'],
-  });
-  if (!userOrgRequests || userOrgRequests.length === 0) {
-    return [];
-  }
-
-  return userOrgRequests.map(entity => ({
-    id: entity.get('id'),
-    org_id: entity.Organisation.getDataValue('id'),
-    org_name: entity.Organisation.getDataValue('name'),
-    user_id: entity.getDataValue('user_id'),
-    created_date: entity.getDataValue('createdAt'),
-    status: organisationRequestStatus.find(c => c.id === entity.getDataValue('status')),
-  }));
-};
-
 const pagedListOfRequests = async (pageNumber = 1, pageSize = 25, filterStates = undefined) => {
   const offset = (pageNumber - 1) * pageSize;
   const query = {
@@ -1278,7 +1254,6 @@ module.exports = {
   getApproversForOrg,
   getAllPendingRequestsForApprover,
   getRequestsAssociatedWithOrganisation,
-  getAllRequestsEscalatedToSupport,
   updateUserOrgRequest,
   getRequestsAssociatedWithUser,
   getPagedListOfUsersV2,
