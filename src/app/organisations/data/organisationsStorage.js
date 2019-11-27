@@ -149,10 +149,20 @@ const getOrgById = async (id) => {
   return org;
 };
 
-const search = async (criteria, pageNumber = 1, pageSize = 25, filterCategories = undefined, filterStates = undefined) => {
+const pagedSearch = async (criteria, pageNumber = 1, pageSize = 25, filterCategories = undefined, filterStates = undefined) => {
   const offset = (pageNumber - 1) * pageSize;
   const query = {
-    where: {
+    where: {},
+    order: [
+      ['name', 'ASC'],
+    ],
+    include: ['associations'],
+    limit: pageSize,
+    offset,
+  };
+
+  if(criteria && criteria !== undefined) {
+    query.where = {
       [Op.or]: {
         name: {
           [Op.like]: `%${criteria}%`,
@@ -167,15 +177,8 @@ const search = async (criteria, pageNumber = 1, pageSize = 25, filterCategories 
           [Op.like]: `%${criteria}%`,
         },
       },
-    },
-    order: [
-      ['name', 'ASC'],
-    ],
-    include: ['associations'],
-    limit: pageSize,
-    offset,
-  };
-
+    };
+  }
   if (filterCategories && filterCategories.length > 0) {
     query.where.Category = {
       [Op.in]: filterCategories,
@@ -191,55 +194,6 @@ const search = async (criteria, pageNumber = 1, pageSize = 25, filterCategories 
   const result = await organisations.findAndCountAll(query);
   const orgEntities = result.rows;
   const orgs = orgEntities.map(mapOrganisationFromEntity);
-  await updateOrganisationsWithLocalAuthorityDetails(orgs);
-
-  const totalNumberOfRecords = result.count;
-  const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
-  return {
-    organisations: orgs,
-    totalNumberOfPages,
-    totalNumberOfRecords,
-  };
-};
-
-const pagedList = async (pageNumber = 1, pageSize = 25) => {
-  const offset = (pageNumber - 1) * pageSize;
-  const result = await organisations.findAndCountAll({
-    order: [
-      ['name', 'ASC'],
-    ],
-    include: ['associations'],
-    limit: pageSize,
-    offset,
-  });
-  const orgEntities = result.rows;
-  const orgs = orgEntities.map((entity) => {
-    const laAssociation = entity.associations.find(a => a.link_type === 'LA');
-
-    return {
-      id: entity.id,
-      name: entity.name,
-      category: organisationCategory.find(c => c.id === entity.Category),
-      type: establishmentTypes.find(c => c.id === entity.Type),
-      urn: entity.URN,
-      uid: entity.UID,
-      ukprn: entity.UKPRN,
-      establishmentNumber: entity.EstablishmentNumber,
-      status: organisationStatus.find(c => c.id === entity.Status),
-      closedOn: entity.ClosedOn,
-      address: entity.Address,
-      telephone: entity.telephone,
-      region: regionCodes.find(c => c.id === entity.regionCode),
-      localAuthority: laAssociation ? {
-        id: laAssociation.associated_organisation_id,
-      } : undefined,
-      phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
-      statutoryLowAge: entity.statutoryLowAge,
-      statutoryHighAge: entity.statutoryHighAge,
-      legacyId: entity.legacyId,
-      companyRegistrationNumber: entity.companyRegistrationNumber,
-    };
-  });
   await updateOrganisationsWithLocalAuthorityDetails(orgs);
 
   const totalNumberOfRecords = result.count;
@@ -1220,8 +1174,7 @@ const getRequestsAssociatedWithUser = async (userId) => {
 module.exports = {
   list,
   getOrgById,
-  search,
-  pagedList,
+  pagedSearch,
   add,
   update,
   listOfCategory,
