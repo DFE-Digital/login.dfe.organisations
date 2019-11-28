@@ -157,6 +157,7 @@ const pagedSearch = async (criteria, pageNumber = 1, pageSize = 25, filterCatego
       ['name', 'ASC'],
     ],
     include: ['associations'],
+    distinct: true,
     limit: pageSize,
     offset,
   };
