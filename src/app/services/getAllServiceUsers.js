@@ -45,7 +45,7 @@ const getServiceUsers = async (req, res) => {
     if (pageSize < 1) {
       res.status(400).send('pageSize must be greater than 0');
       return;
-    } else if (pageSize > 100) {
+    } else if (pageSize > 1000) {
       res.status(400).send('pageSize must not be greater than 100');
       return;
     }
