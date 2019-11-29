@@ -2,24 +2,20 @@ jest.mock('./../../../src/app/organisations/data/organisationsStorage', () => {
   return {
     pagedList: jest.fn(),
     search: jest.fn(),
+    pagedSearch: jest.fn(),
   }
 });
 
 const httpMocks = require('node-mocks-http');
-const { pagedList, search } = require('./../../../src/app/organisations/data/organisationsStorage');
+const { pagedSearch } = require('./../../../src/app/organisations/data/organisationsStorage');
 const listOrganisations = require('./../../../src/app/organisations/listOrganisations');
-
-const allPage = [
-  { id: 'orgA' },
-];
-const allNumberOfPages = 10;
-const allNumberOfRecords = 249;
 
 const searchPage = [
   { id: 'org1' },
 ];
 const searchNumberOfPages = 3;
 const searchNumberOfRecords = 74;
+
 
 describe('when listing or searching', () => {
   let req;
@@ -34,13 +30,7 @@ describe('when listing or searching', () => {
 
     res = httpMocks.createResponse();
 
-    pagedList.mockReset().mockReturnValue({
-      organisations: allPage,
-      totalNumberOfPages: allNumberOfPages,
-      totalNumberOfRecords: allNumberOfRecords,
-    });
-
-    search.mockReset().mockReturnValue({
+    pagedSearch.mockReset().mockReturnValue({
       organisations: searchPage,
       totalNumberOfPages: searchNumberOfPages,
       totalNumberOfRecords: searchNumberOfRecords,
@@ -53,14 +43,15 @@ describe('when listing or searching', () => {
     expect(res._isJSON());
     expect(res._isEndCalled());
     expect(res._getData()).toEqual({
-      organisations: allPage,
+      organisations: searchPage,
       page: req.query.page,
-      totalNumberOfPages: allNumberOfPages,
-      totalNumberOfRecords: allNumberOfRecords,
+      totalNumberOfPages: searchNumberOfPages,
+      totalNumberOfRecords: searchNumberOfRecords,
     });
-    expect(pagedList.mock.calls).toHaveLength(1);
-    expect(pagedList.mock.calls[0][0]).toBe(3);
-    expect(pagedList.mock.calls[0][1]).toBe(25);
+    expect(pagedSearch.mock.calls).toHaveLength(1);
+    expect(pagedSearch.mock.calls[0][0]).toBe(undefined);
+    expect(pagedSearch.mock.calls[0][1]).toBe(3);
+    expect(pagedSearch.mock.calls[0][2]).toBe(25);
   });
 
   it('then it should return first page of unfiltered organisations if no search or page specified', async () => {
@@ -71,14 +62,15 @@ describe('when listing or searching', () => {
     expect(res._isJSON());
     expect(res._isEndCalled());
     expect(res._getData()).toEqual({
-      organisations: allPage,
+      organisations: searchPage,
       page: 1,
-      totalNumberOfPages: allNumberOfPages,
-      totalNumberOfRecords: allNumberOfRecords,
+      totalNumberOfPages: searchNumberOfPages,
+      totalNumberOfRecords: searchNumberOfRecords,
     });
-    expect(pagedList.mock.calls).toHaveLength(1);
-    expect(pagedList.mock.calls[0][0]).toBe(1);
-    expect(pagedList.mock.calls[0][1]).toBe(25);
+    expect(pagedSearch.mock.calls).toHaveLength(1);
+    expect(pagedSearch.mock.calls[0][0]).toBe(undefined);
+    expect(pagedSearch.mock.calls[0][1]).toBe(1);
+    expect(pagedSearch.mock.calls[0][2]).toBe(25);
   });
 
   it('then it should return specified page of filtered organisations if search specified', async () => {
@@ -94,10 +86,10 @@ describe('when listing or searching', () => {
       totalNumberOfPages: searchNumberOfPages,
       totalNumberOfRecords: searchNumberOfRecords,
     });
-    expect(search.mock.calls).toHaveLength(1);
-    expect(search.mock.calls[0][0]).toBe(req.query.search);
-    expect(search.mock.calls[0][1]).toBe(3);
-    expect(search.mock.calls[0][2]).toBe(25);
+    expect(pagedSearch.mock.calls).toHaveLength(1);
+    expect(pagedSearch.mock.calls[0][0]).toBe(req.query.search);
+    expect(pagedSearch.mock.calls[0][1]).toBe(3);
+    expect(pagedSearch.mock.calls[0][2]).toBe(25);
   });
 
   it('then it should return first page of filtered organisations if search but no page specified', async () => {
@@ -114,10 +106,10 @@ describe('when listing or searching', () => {
       totalNumberOfPages: searchNumberOfPages,
       totalNumberOfRecords: searchNumberOfRecords,
     });
-    expect(search.mock.calls).toHaveLength(1);
-    expect(search.mock.calls[0][0]).toBe(req.query.search);
-    expect(search.mock.calls[0][1]).toBe(1);
-    expect(search.mock.calls[0][2]).toBe(25);
+    expect(pagedSearch.mock.calls).toHaveLength(1);
+    expect(pagedSearch.mock.calls[0][0]).toBe(req.query.search);
+    expect(pagedSearch.mock.calls[0][1]).toBe(1);
+    expect(pagedSearch.mock.calls[0][2]).toBe(25);
   });
 
   it('then it should search if search param provided but blank and filtercategory specified', async () => {
@@ -126,12 +118,12 @@ describe('when listing or searching', () => {
 
     await listOrganisations(req, res);
 
-    expect(search.mock.calls).toHaveLength(1);
-    expect(search.mock.calls[0][0]).toBe(req.query.search);
-    expect(search.mock.calls[0][1]).toBe(3);
-    expect(search.mock.calls[0][2]).toBe(25);
-    expect(search.mock.calls[0][3]).toEqual(['001']);
-    expect(search.mock.calls[0][4]).toEqual([]);
+    expect(pagedSearch.mock.calls).toHaveLength(1);
+    expect(pagedSearch.mock.calls[0][0]).toBe(req.query.search);
+    expect(pagedSearch.mock.calls[0][1]).toBe(3);
+    expect(pagedSearch.mock.calls[0][2]).toBe(25);
+    expect(pagedSearch.mock.calls[0][3]).toEqual(['001']);
+    expect(pagedSearch.mock.calls[0][4]).toEqual([]);
   });
 
   it('then it should search if search param provided but blank and filterstatus specified', async () => {
@@ -140,12 +132,12 @@ describe('when listing or searching', () => {
 
     await listOrganisations(req, res);
 
-    expect(search.mock.calls).toHaveLength(1);
-    expect(search.mock.calls[0][0]).toBe(req.query.search);
-    expect(search.mock.calls[0][1]).toBe(3);
-    expect(search.mock.calls[0][2]).toBe(25);
-    expect(search.mock.calls[0][3]).toEqual([]);
-    expect(search.mock.calls[0][4]).toEqual(['1']);
+    expect(pagedSearch.mock.calls).toHaveLength(1);
+    expect(pagedSearch.mock.calls[0][0]).toBe(req.query.search);
+    expect(pagedSearch.mock.calls[0][1]).toBe(3);
+    expect(pagedSearch.mock.calls[0][2]).toBe(25);
+    expect(pagedSearch.mock.calls[0][3]).toEqual([]);
+    expect(pagedSearch.mock.calls[0][4]).toEqual(['1']);
   });
 
   it('then it should not search if search param not provided and filtercategory specified', async () => {
@@ -154,8 +146,8 @@ describe('when listing or searching', () => {
 
     await listOrganisations(req, res);
 
-    expect(search.mock.calls).toHaveLength(0);
-    expect(pagedList.mock.calls).toHaveLength(1);
+    // expect(pagedSearch.mock.calls).toHaveLength(0);
+    expect(pagedSearch.mock.calls).toHaveLength(1);
   });
 
   it('then it should not search if search param not provided and filterstatus specified', async () => {
@@ -164,7 +156,7 @@ describe('when listing or searching', () => {
 
     await listOrganisations(req, res);
 
-    expect(search.mock.calls).toHaveLength(0);
-    expect(pagedList.mock.calls).toHaveLength(1);
+    // expect(pagedSearch.mock.calls).toHaveLength(0);
+    expect(pagedSearch.mock.calls).toHaveLength(1);
   });
 });
