@@ -34,7 +34,8 @@ const overdueOrganisationRequests = async () => {
     const request = allOutstandingRequests[i];
     const date = moment();
     const differenceInDays = date.diff(request.created_date, 'days') + 1;
-    if (differenceInDays >= config.organisationRequests.numberOfDaysUntilOverdue) {
+    const numberOfDaysUntilOverdue = config.organisationRequests.numberOfDaysUntilOverdue || 5;
+    if (differenceInDays >= numberOfDaysUntilOverdue) {
       // update request as overdue
       const updatedRequest = {
         status: 2,
