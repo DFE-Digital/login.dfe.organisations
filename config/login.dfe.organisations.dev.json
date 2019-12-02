@@ -40,8 +40,12 @@
   "notifications": {
     "connectionString": "redis://localhost:6379"
   },
+  "directories": {
+    "type": "static"
+  },
   "schedules": {
     "establishmentImport": "5 * * * *",
-    "groupImport": "7 * * *"
+    "groupImport": "7 * * *",
+    "numberOfDaysUntilOverdue": "0 0 * * *"
   }
 }
