@@ -46,6 +46,6 @@
   "schedules": {
     "establishmentImport": "5 * * * *",
     "groupImport": "7 * * *",
-    "numberOfDaysUntilOverdue": "0 0 * * *"
+    "overdueRequests": "0 0 * * *"
   }
 }
