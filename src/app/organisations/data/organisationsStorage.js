@@ -985,7 +985,7 @@ const createUserOrgRequest = async (request) => {
     user_id: request.userId.toUpperCase(),
     organisation_id: request.organisationId,
     reason: request.reason,
-    status: request.status || 0
+    status: request.status || 0,
   };
   await userOrganisationRequests.create(entity);
   return id;
@@ -1111,6 +1111,7 @@ const pagedListOfRequests = async (pageNumber = 1, pageSize = 25, filterStates =
     user_id: entity.getDataValue('user_id'),
     created_date: entity.getDataValue('createdAt'),
     status: organisationRequestStatus.find(c => c.id === entity.getDataValue('status')),
+    reason: entity.getDataValue('reason'),
   }));
 
   return {
@@ -1121,7 +1122,7 @@ const pagedListOfRequests = async (pageNumber = 1, pageSize = 25, filterStates =
 };
 
 const updateUserOrgRequest = async (requestId, request) => {
-  const existingRequest = await userOrganisationRequests.find({
+  const existingRequest = await userOrganisationRequests.findOne({
     where: {
       id: {
         [Op.eq]: requestId,
@@ -1135,7 +1136,7 @@ const updateUserOrgRequest = async (requestId, request) => {
 
   const updatedRequest = Object.assign(existingRequest, request);
 
-  await existingRequest.updateAttributes({
+  await existingRequest.update({
     status: updatedRequest.status,
     actioned_by: updatedRequest.actioned_by,
     actioned_reason: updatedRequest.actioned_reason,
