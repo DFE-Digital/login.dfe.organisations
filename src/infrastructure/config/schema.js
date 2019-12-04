@@ -6,6 +6,7 @@ const logger = require('./../logger');
 const schedulesSchema = new SimpleSchema({
   establishmentImport: String,
   groupImport: String,
+  overdueRequests: String,
 });
 
 const giasSchema = new SimpleSchema({
@@ -90,16 +91,28 @@ const togglesSchema = new SimpleSchema({
   },
 });
 
+const organisationRequestsSchema = new SimpleSchema({
+  numberOfDaysUntilOverdue: {
+    type: SimpleSchema.Integer,
+    optional: true,
+  },
+});
+
 const schema = new SimpleSchema({
   loggerSettings: schemas.loggerSettings,
   hostingEnvironment: schemas.hostingEnvironment,
   auth: schemas.apiServerAuth,
   schedules: schedulesSchema,
   database: schemas.sequelizeConnection,
+  directories: schemas.apiClient,
   gias: giasSchema,
   notifications: notificationsSchema,
   toggles: {
     type: togglesSchema,
+    optional: true,
+  },
+  organisationRequests: {
+    type: organisationRequestsSchema,
     optional: true,
   },
 });
