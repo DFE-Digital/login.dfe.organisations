@@ -1151,7 +1151,7 @@ const getRequestsAssociatedWithUser = async (userId) => {
         [Op.eq]: userId,
       },
       status: {
-        [Op.or]: [0, 2],
+        [Op.or]: [0, 2, 3],
       },
     },
     include: ['Organisation'],
