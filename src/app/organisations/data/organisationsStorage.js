@@ -1173,6 +1173,36 @@ const getRequestsAssociatedWithUser = async (userId) => {
   }));
 };
 
+const getUserLatestRequestAssociated = async (userId) => {
+  const entity = await userOrganisationRequests.findOne({
+    where: {
+      user_id: {
+        [Op.eq]: userId,
+      },
+      status: {
+        [Op.or]: [-1, 0, 2, 3],
+      },
+    },
+    order: [ [ 'actioned_at', 'DESC' ]],
+    include: ['Organisation'],
+  });
+  if(!entity){
+    return {};
+  }
+  return {
+    id: entity.get('id'),
+    org_id: entity.Organisation.getDataValue('id'),
+    org_name: entity.Organisation.getDataValue('name'),
+    urn: entity.Organisation.getDataValue('URN'),
+    uid: entity.Organisation.getDataValue('UID'),
+    ukprn: entity.Organisation.getDataValue('UKPRN'),
+    org_status: organisationStatus.find(c => c.id === entity.Organisation.getDataValue('Status')) || undefined,
+    user_id: entity.getDataValue('user_id'),
+    created_date: entity.getDataValue('createdAt'),
+    status: organisationRequestStatus.find(c => c.id === entity.getDataValue('status')),
+  };
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -1213,4 +1243,5 @@ module.exports = {
   getRequestsAssociatedWithUser,
   getPagedListOfUsersV2,
   pagedListOfRequests,
+  getUserLatestRequestAssociated,
 };
