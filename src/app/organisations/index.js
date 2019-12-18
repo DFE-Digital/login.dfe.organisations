@@ -30,6 +30,7 @@ const listRequests = require('./listRequests');
 const updateUserOrganisationRequest = require('./updateUserOrganisationRequest');
 const getPendingRequestsAssociatedWithUser = require('./getPendingRequestsAssociatedWithUser');
 const listUserOrganisationsV2 = require('./listUserOrganisationsV2');
+const getLatestActionedRequestAssociatedWithUser = require('./getLatestActionedRequestAssociatedWithUser');
 
 const router = express.Router();
 
@@ -69,6 +70,7 @@ const routes = () => {
   router.patch('/requests/:rid', asyncWrapper(updateUserOrganisationRequest));
   router.get('/requests-for-approval/:uid', asyncWrapper(getPendingRequestsForApproval));
   router.get('/requests-for-user/:uid', asyncWrapper(getPendingRequestsAssociatedWithUser));
+  router.get('/latest-request-for-user/:uid', asyncWrapper(getLatestActionedRequestAssociatedWithUser));
 
   return router;
 };
