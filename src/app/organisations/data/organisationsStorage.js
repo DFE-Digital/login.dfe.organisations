@@ -1173,7 +1173,7 @@ const getRequestsAssociatedWithUser = async (userId) => {
   }));
 };
 
-const getUserLatestRequestAssociated = async (userId) => {
+const getLatestActionedRequestAssociated = async (userId) => {
   const entity = await userOrganisationRequests.findOne({
     where: {
       user_id: {
@@ -1243,5 +1243,5 @@ module.exports = {
   getRequestsAssociatedWithUser,
   getPagedListOfUsersV2,
   pagedListOfRequests,
-  getUserLatestRequestAssociated,
+  getLatestActionedRequestAssociated,
 };

@@ -3,7 +3,7 @@ jest.mock('./../../../src/infrastructure/logger', () => ({
 }));
 jest.mock('./../../../src/app/organisations/data/organisationsStorage', () => {
     return {
-        getUserLatestRequestAssociated: jest.fn(),
+        getLatestActionedRequestAssociated: jest.fn(),
     };
 });
 
@@ -18,8 +18,8 @@ const res = {
     },
 };
 const logger = require('./../../../src/infrastructure/logger');
-const { getUserLatestRequestAssociated } = require('./../../../src/app/organisations/data/organisationsStorage');
-const getLatestRequestAssociatedWithUser = require('../../../src/app/organisations/getLatestRequestAssociatedWithUser');
+const { getLatestActionedRequestAssociated } = require('./../../../src/app/organisations/data/organisationsStorage');
+const getLatestRequestAssociatedWithUser = require('../../../src/app/organisations/getLatestActionedRequestAssociatedWithUser');
 
 
 describe('when getting latest request for a user', () => {
@@ -40,9 +40,9 @@ describe('when getting latest request for a user', () => {
             },
         };
 
-        getUserLatestRequestAssociated.mockReset();
+        getLatestActionedRequestAssociated.mockReset();
 
-        getUserLatestRequestAssociated.mockReturnValue(
+        getLatestActionedRequestAssociated.mockReturnValue(
             [{
                 id: 'requestId',
                 org_id: 'org1',
@@ -96,7 +96,7 @@ describe('when getting latest request for a user', () => {
     });
 
     it('then it should log errors and return 500 result', async () => {
-        getUserLatestRequestAssociated.mockReset().mockImplementation(() => {
+        getLatestActionedRequestAssociated.mockReset().mockImplementation(() => {
             throw new Error('test');
         });
 
