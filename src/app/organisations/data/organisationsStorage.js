@@ -1187,7 +1187,7 @@ const getLatestActionedRequestAssociated = async (userId) => {
     include: ['Organisation'],
   });
   if(!entity){
-    return {};
+    return null;
   }
   return {
     id: entity.get('id'),
