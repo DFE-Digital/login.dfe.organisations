@@ -134,7 +134,7 @@ const list = async (includeAssociations = false) => {
 };
 
 const getOrgById = async (id) => {
-  const entity = await organisations.find({
+  const entity = await organisations.findOne({
     where: {
       id: {
         [Op.eq]: id,
@@ -162,7 +162,7 @@ const pagedSearch = async (criteria, pageNumber = 1, pageSize = 25, filterCatego
     offset,
   };
 
-  if(criteria && criteria !== undefined) {
+  if (criteria && criteria !== undefined) {
     query.where = {
       [Op.or]: {
         name: {
@@ -175,6 +175,12 @@ const pagedSearch = async (criteria, pageNumber = 1, pageSize = 25, filterCatego
           [Op.like]: `%${criteria}%`,
         },
         ukprn: {
+          [Op.like]: `%${criteria}%`,
+        },
+        establishmentNumber: {
+          [Op.like]: `%${criteria}%`,
+        },
+        legacyId: {
           [Op.like]: `%${criteria}%`,
         },
       },
