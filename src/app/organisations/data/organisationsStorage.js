@@ -1186,7 +1186,7 @@ const getLatestActionedRequestAssociated = async (userId) => {
         [Op.eq]: userId,
       },
       status: {
-        [Op.or]: [-1, 0, 2, 3],
+        [Op.or]: [-1, 0, 2, 3, 1],
       },
     },
     order: [ [ 'actioned_at', 'DESC' ]],
