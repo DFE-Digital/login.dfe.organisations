@@ -1,10 +1,10 @@
 const NotificationClient = require('login.dfe.notifications.client');
 const logger = require('./../../infrastructure/logger');
 const config = require('./../../infrastructure/config')();
-const { getUserById } = require('./../../infrastructure/directories');
+const { getUserById, getUsersByIds } = require('./../../infrastructure/directories');
 
 const moment = require('moment');
-const { pagedListOfRequests, updateUserOrgRequest } = require('./../organisations/data/organisationsStorage');
+const { pagedListOfRequests, updateUserOrgRequest, getApproversForOrg } = require('./../organisations/data/organisationsStorage');
 
 const notificationClient = new NotificationClient({
   connectionString: config.notifications.connectionString,
@@ -29,7 +29,7 @@ const overdueOrganisationRequests = async () => {
   // get all outstanding requests
   logger.debug('Getting outstanding organisation request data');
   const allOutstandingRequests = await listRequests(500, [0, 3]);
-
+  const orgIdsByRequestCount = new Map();
   for (let i = 0; i < allOutstandingRequests.length; i += 1) {
     const request = allOutstandingRequests[i];
     const date = moment();
@@ -44,6 +44,22 @@ const overdueOrganisationRequests = async () => {
 
       const userDetails = await getUserById(request.user_id);
       await notificationClient.sendSupportRequest(`${userDetails.given_name} ${userDetails.family_name}`, userDetails.email, null, null, 'Access to an organisation', `Organisation request for ${request.org_name}, no approvers exist. Request reason: ${request.reason}`, request.org_name, null);
+    } else if ( differenceInDays === ( numberOfDaysUntilOverdue - 1 ) ) {
+      logger.debug('Request comes in here, if request overdue in following day [if overdue day limit is 5 then it should come here on 4th day]');
+      if (orgIdsByRequestCount && orgIdsByRequestCount.get(request.org_id)) {
+        orgIdsByRequestCount.set(request.org_id, orgIdsByRequestCount.get(request.org_id) + 1);
+      } else {
+        orgIdsByRequestCount.set(request.org_id, 1);
+      }
+    }
+  }
+  if(orgIdsByRequestCount && orgIdsByRequestCount.size > 0){
+    for(let [orgId, count] of orgIdsByRequestCount) {
+      const approvers = await getApproversForOrg(orgId);
+      const approversDetails = await getUsersByIds(approvers.join(','));
+      for(const approver of approversDetails){
+        await notificationClient.sendSupportOverdueRequest(`${approver.given_name} ${approver.family_name}`, count, approver.email);
+      }
     }
   }
 };
