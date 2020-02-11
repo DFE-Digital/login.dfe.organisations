@@ -149,7 +149,7 @@ const getOrgById = async (id) => {
   return org;
 };
 
-const pagedSearch = async (criteria, pageNumber = 1, pageSize = 25, filterCategories = undefined, filterStates = undefined) => {
+const pagedSearch = async (criteria, pageNumber = 1, pageSize = 25, filterCategories = [], filterStates = [], filterOutOrgNames = []) => {
   const offset = (pageNumber - 1) * pageSize;
   const query = {
     where: {},
@@ -186,13 +186,21 @@ const pagedSearch = async (criteria, pageNumber = 1, pageSize = 25, filterCatego
       },
     };
   }
-  if (filterCategories && filterCategories.length > 0) {
+  
+  if (filterOutOrgNames.length > 0) {
+      query.where.name = {
+          [Op.notIn]: filterOutOrgNames
+      };
+  }
+  
+
+  if (filterCategories.length > 0) {
     query.where.Category = {
       [Op.in]: filterCategories,
     };
   }
 
-  if (filterStates && filterStates.length > 0) {
+  if (filterStates.length > 0) {
     query.where.Status = {
       [Op.in]: filterStates,
     };
