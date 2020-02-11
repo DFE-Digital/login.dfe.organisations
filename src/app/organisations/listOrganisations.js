@@ -28,10 +28,11 @@ const getPageNumber = (req) => {
 const listOrganisations = async (req, res) => {
   const pageNumber = getPageNumber(req);
   const criteria = req.query.search;
+  const filterOutOrgNames = fixMultiSelect(req.query.filterOutOrgNames);
   const filterCategories = fixMultiSelect(req.query.filtercategory);
   const filterStates = fixMultiSelect(req.query.filterstatus);
 
-  const page = await pagedSearch(criteria, pageNumber, pageSize, filterCategories, filterStates);
+  const page = await pagedSearch(criteria, pageNumber, pageSize, filterCategories, filterStates, filterOutOrgNames);
 
   return res.contentType('json').send({
     organisations: page.organisations,
