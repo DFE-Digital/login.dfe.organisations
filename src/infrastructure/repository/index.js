@@ -18,16 +18,16 @@ const userOrganisationRequestsModel = require('./userOrganisationRequests');
 
 const db = makeConnection();
 
-const defineStatic = (model) => {
+const defineStatic = model => {
   model.roles = [
     { id: 0, name: 'End user' },
-    { id: 10000, name: 'Approver' },
+    { id: 10000, name: 'Approver' }
   ];
 
   model.organisationUserStatus = [
     { id: -1, name: 'Rejected' },
     { id: 0, name: 'Pending' },
-    { id: 1, name: 'Approved' },
+    { id: 1, name: 'Approved' }
   ];
 
   model.organisationRequestStatus = [
@@ -35,14 +35,14 @@ const defineStatic = (model) => {
     { id: 0, name: 'Pending' },
     { id: 1, name: 'Approved' },
     { id: 2, name: 'Overdue' },
-    { id: 3, name: 'No Approvers' },
+    { id: 3, name: 'No Approvers' }
   ];
 
   model.organisationStatus = [
     { id: 1, name: 'Open' },
     { id: 2, name: 'Closed' },
     { id: 3, name: 'Proposed to close' },
-    { id: 4, name: 'Proposed to open' },
+    { id: 4, name: 'Proposed to open' }
   ];
 
   model.organisationCategory = [
@@ -57,7 +57,7 @@ const defineStatic = (model) => {
     { id: '012', name: 'Other GIAS Stakeholder' },
     { id: '013', name: 'Single-Academy Trust' },
     { id: '050', name: 'Software Suppliers' },
-    { id: '051', name: 'Further Education' },
+    { id: '051', name: 'Further Education' }
   ];
 
   model.establishmentTypes = [
@@ -93,7 +93,7 @@ const defineStatic = (model) => {
     { id: '43', name: 'Academy Alternative Provision Sponsor Led' },
     { id: '44', name: 'Academy Special Converter' },
     { id: '45', name: 'Academy 16-19 Converter' },
-    { id: '46', name: 'Academy 16-19 Sponsor Led' },
+    { id: '46', name: 'Academy 16-19 Sponsor Led' }
   ];
 
   model.phasesOfEducation = [
@@ -104,7 +104,7 @@ const defineStatic = (model) => {
     { id: 4, name: 'Secondary' },
     { id: 5, name: 'Middle deemed secondary' },
     { id: 6, name: '16 plus' },
-    { id: 7, name: 'All through' },
+    { id: 7, name: 'All through' }
   ];
 
   model.regionCodes = [
@@ -118,24 +118,37 @@ const defineStatic = (model) => {
     { id: 'J', name: 'South East' },
     { id: 'K', name: 'South West' },
     { id: 'W', name: 'Wales (pseudo)' },
-    { id: 'Z', name: 'Not Applicable' },
+    { id: 'Z', name: 'Not Applicable' }
   ];
 };
 const buildDataModel = (model, connection, entityModels) => {
   const dbSchema = config.database.schema || 'services';
 
   // Define
-  entityModels.forEach((entityModel) => {
+  entityModels.forEach(entityModel => {
     model[entityModel.name] = entityModel.define(db, dbSchema);
   });
   defineStatic(model);
 
   // Extend
-  entityModels.filter(m => m.extend !== undefined).forEach((entityModel) => {
-    entityModel.extend(model);
-  });
+  entityModels
+    .filter(m => m.extend !== undefined)
+    .forEach(entityModel => {
+      entityModel.extend(model);
+    });
 };
-const dataModel = {};
+const dataModel = {
+  getNextNumericId: async () => {
+    let result = await db.query(
+      'SELECT NEXT VALUE FOR numeric_id_sequence AS numId;',
+      {
+        type: 'SELECT'
+      }
+    );
+
+    return result[0].numId;
+  }
+};
 buildDataModel(dataModel, db, [
   externalIdentifiersModel,
   invitationExternalIdentifiersModel,
@@ -148,8 +161,7 @@ buildDataModel(dataModel, db, [
   usersModel,
   userOrganisationsModel,
   countersModel,
-  userOrganisationRequestsModel,
+  userOrganisationRequestsModel
 ]);
-
 
 module.exports = dataModel;
