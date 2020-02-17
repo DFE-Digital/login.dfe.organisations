@@ -59,6 +59,7 @@ typings/
 
 # dev env
 .idea
+.vscode
 
 #config
 /config/
