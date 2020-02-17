@@ -15,7 +15,6 @@ const usersModel = require('./users');
 const userOrganisationsModel = require('./userOrganisations');
 const countersModel = require('./counters');
 const userOrganisationRequestsModel = require('./userOrganisationRequests');
-const { QueryTypes } = require('Sequelize');
 
 const db = makeConnection();
 
@@ -143,7 +142,7 @@ const dataModel = {
     let result = await db.query(
       'SELECT NEXT VALUE FOR numeric_id_sequence AS numId;',
       {
-        type: QueryTypes.SELECT
+        type: 'SELECT'
       }
     );
 
