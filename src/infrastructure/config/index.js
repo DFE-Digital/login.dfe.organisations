@@ -3,7 +3,7 @@
 const fs = require('fs');
 const Path = require('path');
 
-const getSettingsObject = (settings) => {
+const getSettingsObject = settings => {
   try {
     return JSON.parse(settings);
   } catch (e) {
@@ -11,7 +11,7 @@ const getSettingsObject = (settings) => {
   }
 };
 
-const getSettingsFromFile = (settingsPath) => {
+const getSettingsFromFile = settingsPath => {
   if (fs.existsSync(settingsPath)) {
     const file = fs.readFileSync(settingsPath, 'utf8');
     try {
