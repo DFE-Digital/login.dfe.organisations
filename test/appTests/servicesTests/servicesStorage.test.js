@@ -16,12 +16,13 @@ describe('When using servicesStorage Data for a user', () => {
 
       assertion = false;
       assert = require('assert');
-      assert.mockImplementation((paramVal) => {
+      assert.mockImplementation(paramVal => {
         if (paramVal === '') {
           assertion = true;
         }
       });
     });
+
     it('then if the username in config is not supplied the assert is called', () => {
       config = require('./../../../src/infrastructure/config/index');
       configStub = jest.fn().mockImplementation(() => ({
@@ -29,13 +30,12 @@ describe('When using servicesStorage Data for a user', () => {
           username: '',
           password: '123ABVF',
           host: 'hostname',
-          dialect: 'postgres',
-        },
+          dialect: 'postgres'
+        }
       }));
       config.mockImplementation(configStub);
 
       require('./../../../src/app/services/data/servicesStorage');
-
 
       expect(assertion).toBe(true);
     });
@@ -46,13 +46,12 @@ describe('When using servicesStorage Data for a user', () => {
           username: 'username',
           password: '',
           host: 'hostname',
-          dialect: 'postgres',
-        },
+          dialect: 'postgres'
+        }
       }));
       config.mockImplementation(configStub);
 
       require('./../../../src/app/services/data/servicesStorage');
-
 
       expect(assertion).toBe(true);
     });
@@ -63,13 +62,12 @@ describe('When using servicesStorage Data for a user', () => {
           username: 'username',
           password: '123ABVF',
           host: '',
-          dialect: 'postgres',
-        },
+          dialect: 'postgres'
+        }
       }));
       config.mockImplementation(configStub);
 
       require('./../../../src/app/services/data/servicesStorage');
-
 
       expect(assertion).toBe(true);
     });
