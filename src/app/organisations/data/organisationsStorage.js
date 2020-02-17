@@ -224,13 +224,21 @@ const pagedSearch = async (
       }
     };
   }
-  if (filterCategories && filterCategories.length > 0) {
+  
+  if (filterOutOrgNames.length > 0) {
+      query.where.name = {
+          [Op.notIn]: filterOutOrgNames
+      };
+  }
+  
+
+  if (filterCategories.length > 0) {
     query.where.Category = {
       [Op.in]: filterCategories
     };
   }
 
-  if (filterStates && filterStates.length > 0) {
+  if (filterStates.length > 0) {
     query.where.Status = {
       [Op.in]: filterStates
     };
