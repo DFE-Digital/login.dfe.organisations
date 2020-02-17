@@ -224,13 +224,12 @@ const pagedSearch = async (
       }
     };
   }
-  
+
   if (filterOutOrgNames.length > 0) {
-      query.where.name = {
-          [Op.notIn]: filterOutOrgNames
-      };
+    query.where.name = {
+      [Op.notIn]: filterOutOrgNames
+    };
   }
-  
 
   if (filterCategories.length > 0) {
     query.where.Category = {
@@ -974,8 +973,8 @@ const getUserOrganisationByTextIdentifier = async textIdentifier => {
 };
 
 const getNextUserOrgNumericIdentifier = async () => {
-  let i = await getNextNumericId();
-  return i;
+  const NUMERIC_ID = await getNextNumericId();
+  return NUMERIC_ID;
 };
 
 const getNextOrganisationLegacyId = async () => {
