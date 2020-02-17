@@ -187,8 +187,9 @@ const pagedSearch = async (
   criteria,
   pageNumber = 1,
   pageSize = 25,
-  filterCategories = undefined,
-  filterStates = undefined
+  filterCategories = [],
+  filterStates = [],
+  filterOutOrgNames = []
 ) => {
   const offset = (pageNumber - 1) * pageSize;
   const query = {
