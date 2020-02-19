@@ -41,10 +41,6 @@ const overdueOrganisationRequests = async () => {
         status: 2,
       };
       await updateUserOrgRequest(request.id, updatedRequest);
-      // NSA-2795 - Stop ServiceNow emails for escalations after the SLA is exceeded
-      // Keeping this code for referance, if support wants to enable service-now emails back
-      // const userDetails = await getUserById(request.user_id);
-      // await notificationClient.sendSupportRequest(`${userDetails.given_name} ${userDetails.family_name}`, userDetails.email, null, null, 'Access to an organisation', `Organisation request for ${request.org_name}, no approvers exist. Request reason: ${request.reason}`, request.org_name, null);
     } else if ( differenceInDays === ( numberOfDaysUntilOverdue - 1 ) ) {
       logger.debug('Request comes in here, if request overdue in following day [if overdue day limit is 5 then it should come here on 4th day]');
       if (orgIdsByRequestCount && orgIdsByRequestCount.get(request.org_id)) {
