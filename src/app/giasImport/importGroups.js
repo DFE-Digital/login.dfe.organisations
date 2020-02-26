@@ -61,7 +61,7 @@ const mapImportRecordForStorage = (importing) => {
     type: null,
     urn: null,
     uid: importing.uid,
-    ukprn: importing.ukprn || importing.UKPRN,
+    ukprn: importing.ukprn,
     establishmentNumber: null,
     status,
     closedOn: importing.closedOn,
