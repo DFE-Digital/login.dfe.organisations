@@ -1,15 +1,7 @@
 const config = require('./../../config')();
 const SoapMessage = require('./SoapMessage');
 const MultipartMessage = require('./MultipartMessage');
-const KeepAliveAgent = require('agentkeepalive').HttpsAgent;
-const rp = require('request-promise').defaults({
-  agent: new KeepAliveAgent({
-    maxSockets: config.hostingEnvironment.agentKeepAlive.maxSockets,
-    maxFreeSockets: config.hostingEnvironment.agentKeepAlive.maxFreeSockets,
-    timeout: config.hostingEnvironment.agentKeepAlive.timeout,
-    keepAliveTimeout: config.hostingEnvironment.agentKeepAlive.keepAliveTimeout,
-  }),
-});
+const rp = require('request-promise');
 const { parseString, processors } = require('xml2js');
 const { promisify } = require('util');
 
