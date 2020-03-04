@@ -32,6 +32,7 @@ const getColumnIndices = (headerRow) => {
     { name: 'town', label: 'Group Contact Town', required: false, index: -1 },
     { name: 'county', label: 'Group Contact County', required: false, index: -1 },
     { name: 'postCode', label: 'Group Contact Postcode', required: false, index: -1 },
+    { name: 'ukprn', label: 'UKPRN', required: false, index: -1 },
   ];
   const columnIndices = {};
 
@@ -71,6 +72,7 @@ const mapRow = (row, columnIndices) => {
       row[columnIndices.county] || null,
       row[columnIndices.postCode] || null,
     ],
+    ukprn: row[columnIndices.ukprn] || null,
   };
 };
 

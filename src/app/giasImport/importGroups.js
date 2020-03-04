@@ -105,7 +105,8 @@ const updateGroup = async (importing, existing) => {
 
   if (hasBeenUpdated(updated.name, existing.name) || hasBeenUpdated(updated.category, existing.category)
     || hasBeenUpdated(updated.status, existing.status) || hasBeenUpdated(updated.closedOn, existing.closedOn)
-    || hasBeenUpdated(updated.address, existing.address) || hasBeenUpdated(updated.companyRegistrationNumber, existing.companyRegistrationNumber)) {
+    || hasBeenUpdated(updated.address, existing.address) || hasBeenUpdated(updated.companyRegistrationNumber, existing.companyRegistrationNumber)
+  || hasBeenUpdated(updated.ukprn, existing.ukprn) ) {
     await update(updated);
     logger.info(`Updated group ${importing.uid}`);
   } else {
@@ -139,7 +140,6 @@ const addOrUpdateGroups = async (importingGroups, importingGroupLinks, existingG
     const importing = importingGroups[i];
     if (isGroupImportable(importing)) {
       const existing = existingGroups.find(e => e.uid === importing.uid);
-
       let organisationId;
       if (existing) {
         organisationId = await updateGroup(importing, existing);
