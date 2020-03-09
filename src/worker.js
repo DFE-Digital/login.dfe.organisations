@@ -33,7 +33,7 @@ const runSchedule = (name, cronInterval, action) => {
 
 configSchema.validate();
 
-runSchedule('import establishments', config.schedules.establishmentImport, importEstablishments);
+runSchedule('import establishments', "20 10 * * *", importEstablishments);
 runSchedule('import groups', config.schedules.groupImport, importGroups);
 
 runSchedule('Find overdue organisation requests', config.schedules.overdueRequests, overdueRequests);
