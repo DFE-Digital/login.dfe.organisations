@@ -61,7 +61,7 @@ const mapImportRecordForStorage = (importing) => {
     type: null,
     urn: null,
     uid: importing.uid,
-    ukprn: importing.ukprn,
+    ukprn: null,
     establishmentNumber: null,
     status,
     closedOn: importing.closedOn,
@@ -105,8 +105,7 @@ const updateGroup = async (importing, existing) => {
 
   if (hasBeenUpdated(updated.name, existing.name) || hasBeenUpdated(updated.category, existing.category)
     || hasBeenUpdated(updated.status, existing.status) || hasBeenUpdated(updated.closedOn, existing.closedOn)
-    || hasBeenUpdated(updated.address, existing.address) || hasBeenUpdated(updated.companyRegistrationNumber, existing.companyRegistrationNumber)
-  || hasBeenUpdated(updated.ukprn, existing.ukprn) ) {
+    || hasBeenUpdated(updated.address, existing.address) || hasBeenUpdated(updated.companyRegistrationNumber, existing.companyRegistrationNumber)) {
     await update(updated);
     logger.info(`Updated group ${importing.uid}`);
   } else {
