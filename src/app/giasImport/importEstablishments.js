@@ -169,7 +169,7 @@ const mapImportLocalAuthorityForStorage = (importing) => {
     type: null,
     urn: null,
     uid: null,
-    ukprn: importing.ukprn,
+    ukprn: null,
     establishmentNumber: importing.code,
     status: {
       id: 1,
