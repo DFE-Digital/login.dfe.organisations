@@ -139,7 +139,6 @@ const addOrUpdateGroups = async (importingGroups, importingGroupLinks, existingG
     const importing = importingGroups[i];
     if (isGroupImportable(importing)) {
       const existing = existingGroups.find(e => e.uid === importing.uid);
-
       let organisationId;
       if (existing) {
         organisationId = await updateGroup(importing, existing);
