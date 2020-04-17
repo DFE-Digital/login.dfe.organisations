@@ -138,6 +138,16 @@ const buildDataModel = (model, connection, entityModels) => {
     });
 };
 const dataModel = {
+  getNextLegacyId: async () => {
+    let result = await db.query(
+      'SELECT NEXT VALUE FOR org_legacy_id_sequence AS numId;',
+      {
+        type: 'SELECT'
+      }
+    );
+
+    return result[0].numId;
+  },
   getNextNumericId: async () => {
     let result = await db.query(
       'SELECT NEXT VALUE FOR numeric_id_sequence AS numId;',
