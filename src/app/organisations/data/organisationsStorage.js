@@ -93,8 +93,8 @@ const mapOrganisationFromEntity = entity => {
     region: regionCodes.find(c => c.id === entity.regionCode),
     localAuthority: laAssociation
       ? {
-          id: laAssociation.associated_organisation_id
-        }
+        id: laAssociation.associated_organisation_id
+      }
       : undefined,
     phaseOfEducation: phasesOfEducation.find(
       c => c.id === entity.phaseOfEducation
@@ -979,18 +979,8 @@ const getNextUserOrgNumericIdentifier = async () => {
 };
 
 const getNextOrganisationLegacyId = async () => {
-  const entity = await counters.find({
-    where: {
-      counter_name: {
-        [Op.eq]: 'organisation_legacyid'
-      }
-    }
-  });
-  const next = parseInt(entity.next_value);
-  await entity.update({
-    next_value: next + 1
-  });
-  return next;
+  const LEGACY_ID = await getNextLegacyId();
+  return LEGACY_ID;
 };
 
 const listAnnouncements = async (
