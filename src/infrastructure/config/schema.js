@@ -14,6 +14,10 @@ const giasSchema = new SimpleSchema({
     type: String,
     allowedValues: ['static', 'azureblob', 'gias'],
   },
+  allGroupsDataUrl: {
+    type: String,
+    regEx: patterns.url
+  },
   params: {
     type: Object,
     optional: true,
