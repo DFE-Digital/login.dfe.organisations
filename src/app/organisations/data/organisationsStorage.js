@@ -30,7 +30,7 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.Type = organisation.type ? organisation.type.id : null;
   entity.URN = organisation.urn;
   entity.UID = organisation.uid;
-  entity.UKPRN = organisation.ukprn;
+  entity.UKPRN = entity.UKPRN || organisation.ukprn;
   entity.EstablishmentNumber = organisation.establishmentNumber;
   entity.Status = organisation.status.id;
   entity.ClosedOn = organisation.closedOn;

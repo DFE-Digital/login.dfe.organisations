@@ -3,7 +3,11 @@ const config = require('./../../infrastructure/config')();
 const { getGroupsFile } = require('./../../infrastructure/gias');
 const { parse: parseGroups } = require('./groupCsvReader');
 const { parse: parseGroupLinks } = require('./groupLinksCsvReader');
-const { add, update, pagedListOfCategory, addAssociation, removeAssociationsOfType, getNextOrganisationLegacyId } = require('./../organisations/data/organisationsStorage');
+const {
+  add, update, pagedListOfCategory, addAssociation,
+  removeAssociationsOfType,
+  getNextOrganisationLegacyId
+ } = require('./../organisations/data/organisationsStorage');
 const uuid = require('uuid/v4');
 const rp = require('request-promise');
 
@@ -194,7 +198,6 @@ const importAllGroupsData = async () => {
 
   logger.debug('Getting existing establishments');
   const existingEstablishments = await listOfCategory('001', true);
-
   await addOrUpdateGroups(importingGroups, importingGroupLinks, existingGroups, existingEstablishments);
 };
 
