@@ -18,19 +18,24 @@ const {
   getNextNumericId
 } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
-const uniq = require('lodash/uniq');
+const { uniq, trim } = require('lodash');
 const { mapAsync } = require('./../../../utils');
 const uuid = require('uuid/v4');
 
 const Op = Sequelize.Op;
 
+const updateIfValid = (oldValue, newValue) => {
+  const trimmedNewValue = trim(newValue);
+  return trimmedNewValue || oldValue;
+}
+
 const updateEntityFromOrganisation = (entity, organisation) => {
   entity.name = organisation.name;
   entity.Category = organisation.category.id;
   entity.Type = organisation.type ? organisation.type.id : null;
-  entity.URN = organisation.urn;
+  entity.URN = updateIfValid(entity.URN, organisation.urn);
   entity.UID = organisation.uid;
-  entity.UKPRN = entity.UKPRN || organisation.ukprn;
+  entity.UKPRN = updateIfValid(entity.UKPRN, organisation.ukprn);
   entity.EstablishmentNumber = organisation.establishmentNumber;
   entity.Status = organisation.status.id;
   entity.ClosedOn = organisation.closedOn;
