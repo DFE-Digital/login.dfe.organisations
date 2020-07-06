@@ -15,7 +15,8 @@ const {
   organisationAnnouncements,
   userOrganisationRequests,
   organisationRequestStatus,
-  getNextNumericId
+  getNextNumericId,
+  getNextLegacyId,
 } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 const { uniq, trim } = require('lodash');
