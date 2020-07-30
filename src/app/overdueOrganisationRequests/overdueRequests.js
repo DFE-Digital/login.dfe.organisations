@@ -54,7 +54,7 @@ const overdueOrganisationRequests = async () => {
     for(let [orgId, count] of orgIdsByRequestCount) {
       const approvers = await getApproversForOrg(orgId);
       const approversDetails = await getUsersByIds(approvers.join(','));
-      if (!Array.isArray(approversDetails)) {
+      if (!approversDetails) {
         continue;
       }
       for(const approver of approversDetails){
