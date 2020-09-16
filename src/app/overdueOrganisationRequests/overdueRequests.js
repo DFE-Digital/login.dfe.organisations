@@ -54,6 +54,9 @@ const overdueOrganisationRequests = async () => {
     for(let [orgId, count] of orgIdsByRequestCount) {
       const approvers = await getApproversForOrg(orgId);
       const approversDetails = await getUsersByIds(approvers.join(','));
+      if (!approversDetails) {
+        continue;
+      }
       for(const approver of approversDetails){
         await notificationClient.sendSupportOverdueRequest(`${approver.given_name} ${approver.family_name}`, count, approver.email);
       }
