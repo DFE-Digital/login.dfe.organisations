@@ -51,8 +51,9 @@ const listUserOrganisationsV2 = async (req, res) => {
   const roleId = getRoleId(req);
   const filterTypes = fixMultiSelect(req.query.filtertype);
   const filterStates = fixMultiSelect(req.query.filterstatus);
+  const filterCategories = fixMultiSelect(req.query.filtercategory);
 
-  const page = await getPagedListOfUsersV2(pageNumber, pageSize, roleId, filterTypes, filterStates);
+  const page = await getPagedListOfUsersV2(pageNumber, pageSize, roleId, filterTypes, filterStates, filterCategories);
   return res.json(page);
 };
 
