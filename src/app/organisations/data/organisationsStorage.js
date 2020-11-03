@@ -885,7 +885,8 @@ const getPagedListOfUsersV2 = async (
   pageSize = 25,
   roleId = undefined,
   filterTypes = undefined,
-  filterStatus = undefined
+  filterStatus = undefined,
+  filterCategories = undefined
 ) => {
   const query = {
     where: {},
@@ -908,6 +909,12 @@ const getPagedListOfUsersV2 = async (
   if (filterStatus && filterStatus.length > 0) {
     query.where['$Organisation.status$'] = {
       [Op.in]: filterStatus
+    };
+  }
+
+  if (filterCategories && filterCategories.length > 0) {
+    query.where['$Organisation.category$'] = {
+      [Op.in]: filterCategories
     };
   }
 
