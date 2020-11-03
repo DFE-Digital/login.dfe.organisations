@@ -20,9 +20,21 @@
       "name": "Launch Orgs",
       "skipFiles": ["<node_internals>/**"],
       "env": {
-        "settings": "${workspaceFolder}/config/local-dev.json"
+        "settings": "${workspaceFolder}/config/login.dfe.organisations.local.json"
       },
-      "program": "${workspaceFolder}/src/web.js"
+      "program": "${workspaceFolder}/src/web.js",
+      "outputCapture": "std"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Orgs Worker",
+      "skipFiles": ["<node_internals>/**"],
+      "env": {
+        "settings": "${workspaceFolder}/config/login.dfe.organisations.local.json"
+      },
+      "program": "${workspaceFolder}/src/worker.js",
+      "outputCapture": "std"
     }
   ]
 }
