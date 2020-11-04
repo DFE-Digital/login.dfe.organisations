@@ -85,8 +85,7 @@ describe('when listing user organisations', () => {
       pageSize: 10,
       role: 10000,
       filtertype: '01',
-      filterstatus: '1',
-      filtercategory: '001'
+      filterstatus: '1'
     };
 
     await listUserOrganisationsV2(req, res);

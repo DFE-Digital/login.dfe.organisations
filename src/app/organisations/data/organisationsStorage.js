@@ -16,7 +16,7 @@ const {
   userOrganisationRequests,
   organisationRequestStatus,
   getNextNumericId,
-  getNextLegacyId,
+  getNextLegacyId
 } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 const { uniq, trim } = require('lodash');
@@ -28,7 +28,7 @@ const Op = Sequelize.Op;
 const updateIfValid = (oldValue, newValue) => {
   const trimmedNewValue = trim(newValue);
   return trimmedNewValue || oldValue;
-}
+};
 
 const updateEntityFromOrganisation = (entity, organisation) => {
   entity.name = organisation.name;
@@ -99,8 +99,8 @@ const mapOrganisationFromEntity = entity => {
     region: regionCodes.find(c => c.id === entity.regionCode),
     localAuthority: laAssociation
       ? {
-        id: laAssociation.associated_organisation_id
-      }
+          id: laAssociation.associated_organisation_id
+        }
       : undefined,
     phaseOfEducation: phasesOfEducation.find(
       c => c.id === entity.phaseOfEducation
@@ -126,7 +126,7 @@ const mapAnnouncementFromEntity = entity => {
   };
 };
 
-const list = async (includeAssociations = false) => {
+const list = async(includeAssociations = false) => {
   try {
     const findOrgsOpts = {};
     if (includeAssociations) {
@@ -189,7 +189,7 @@ const getOrgById = async id => {
   return org;
 };
 
-const pagedSearch = async (
+const pagedSearch = async(
   criteria,
   pageNumber = 1,
   pageSize = 25,
@@ -291,7 +291,7 @@ const update = async organisation => {
   await existing.save();
 };
 
-const listOfCategory = async (category, includeAssociations = false) => {
+const listOfCategory = async(category, includeAssociations = false) => {
   const query = {
     where: {
       Category: {
@@ -321,7 +321,7 @@ const listOfCategory = async (category, includeAssociations = false) => {
   }));
 };
 
-const pagedListOfCategory = async (
+const pagedListOfCategory = async(
   category,
   includeAssociations = false,
   pageNumber = 1,
@@ -389,7 +389,7 @@ const pagedListOfCategory = async (
   };
 };
 
-const addAssociation = async (
+const addAssociation = async(
   organisationId,
   associatedOrganisationId,
   linkType
@@ -402,7 +402,7 @@ const addAssociation = async (
   await organisationAssociations.create(entity);
 };
 
-const removeAssociationsOfType = async (organisationId, linkType) => {
+const removeAssociationsOfType = async(organisationId, linkType) => {
   await organisationAssociations.destroy({
     where: {
       organisation_id: {
@@ -534,7 +534,7 @@ const getOrganisationsAssociatedToUser = async userId => {
   });
 };
 
-const setUserAccessToOrganisation = async (
+const setUserAccessToOrganisation = async(
   organisationId,
   userId,
   roleId,
@@ -553,7 +553,7 @@ const setUserAccessToOrganisation = async (
     text_identifier: textIdentifier
   });
 
-const deleteUserOrganisation = async (
+const deleteUserOrganisation = async(
   organisationId,
   userId,
   correlationId
@@ -582,7 +582,7 @@ const deleteUserOrganisation = async (
   }
 };
 
-const getOrganisationCategories = async () => {
+const getOrganisationCategories = async() => {
   const categories = organisationCategory.sort((x, y) => {
     if (x.name < y.name) {
       return -1;
@@ -595,7 +595,7 @@ const getOrganisationCategories = async () => {
   return Promise.resolve(categories);
 };
 
-const getOrganisationStates = async () => {
+const getOrganisationStates = async() => {
   const categories = organisationStatus.sort((x, y) => {
     if (x.name < y.name) {
       return -1;
@@ -656,7 +656,7 @@ const getUsersPendingApprovalByUser = async userId => {
   }));
 };
 
-const getUsersPendingApproval = async (pageNumber = 1, pageSize = 25) => {
+const getUsersPendingApproval = async(pageNumber = 1, pageSize = 25) => {
   const offset = (pageNumber - 1) * pageSize;
   const associatedUsersForApproval = await userOrganisations.findAndCountAll({
     where: {
@@ -699,7 +699,7 @@ const getUsersPendingApproval = async (pageNumber = 1, pageSize = 25) => {
   };
 };
 
-const getOrgByUrn = async (urn, category) => {
+const getOrgByUrn = async(urn, category) => {
   try {
     const query = {
       where: {
@@ -721,7 +721,7 @@ const getOrgByUrn = async (urn, category) => {
   }
 };
 
-const getOrgByUid = async (uid, category) => {
+const getOrgByUid = async(uid, category) => {
   try {
     const query = {
       where: {
@@ -743,7 +743,7 @@ const getOrgByUid = async (uid, category) => {
   }
 };
 
-const getOrgByEstablishmentNumber = async (establishmentNumber, category) => {
+const getOrgByEstablishmentNumber = async(establishmentNumber, category) => {
   try {
     const query = {
       where: {
@@ -768,7 +768,7 @@ const getOrgByEstablishmentNumber = async (establishmentNumber, category) => {
   }
 };
 
-const getOrgByUkprn = async (ukprn, category) => {
+const getOrgByUkprn = async(ukprn, category) => {
   try {
     const query = {
       where: {
@@ -790,7 +790,7 @@ const getOrgByUkprn = async (ukprn, category) => {
   }
 };
 
-const getOrgByLegacyId = async (legacyId, category) => {
+const getOrgByLegacyId = async(legacyId, category) => {
   try {
     const query = {
       where: {
@@ -812,7 +812,7 @@ const getOrgByLegacyId = async (legacyId, category) => {
   }
 };
 
-const getUsersAssociatedWithOrganisation = async (
+const getUsersAssociatedWithOrganisation = async(
   orgId,
   pageNumber = 1,
   pageSize = 25
@@ -848,7 +848,7 @@ const getUsersAssociatedWithOrganisation = async (
   );
 };
 
-const pagedListOfUsers = async (pageNumber = 1, pageSize = 25) => {
+const pagedListOfUsers = async(pageNumber = 1, pageSize = 25) => {
   const recordset = await userOrganisations.findAndCountAll({
     limit: pageSize,
     offset: (pageNumber - 1) * pageSize,
@@ -880,13 +880,13 @@ const pagedListOfUsers = async (pageNumber = 1, pageSize = 25) => {
   };
 };
 
-const getPagedListOfUsersV2 = async (
+const getPagedListOfUsersV2 = async(
   pageNumber = 1,
   pageSize = 25,
   roleId = undefined,
   filterTypes = undefined,
   filterStatus = undefined
-  ) => {
+) => {
   const query = {
     where: {},
     limit: pageSize,
@@ -939,7 +939,7 @@ const getPagedListOfUsersV2 = async (
   };
 };
 
-const getPagedListOfUsersV3 = async (
+const getPagedListOfUsersV3 = async(
   pageNumber = 1,
   pageSize = 25,
   roleId = undefined,
@@ -952,25 +952,24 @@ const getPagedListOfUsersV3 = async (
     include: ['Organisation']
   };
 
-  if (roleId !== undefined){
+  if (roleId !== undefined) {
     query.where.role_id = {
       [Op.eq]: roleId
     };
   }
 
-  let allPolicyQueries = [];
+  const allPolicyQueries = [];
 
   policies.forEach((policy) => {
-    if(policy.conditions && policy.conditions.length){
-
-      let singlePolicyQueries = [];
+    if (policy.conditions && policy.conditions.length) {
+      const singlePolicyQueries = [];
 
       policy.conditions.forEach((condition) => {
         let fieldForQuery;
         let operator;
 
-        //get the actual field based on the condition
-        switch(condition.field){
+        // get the actual field based on the condition
+        switch (condition.field) {
           case 'organisation.type.id':
             fieldForQuery = '$Organisation.type$';
             break;
@@ -981,8 +980,8 @@ const getPagedListOfUsersV3 = async (
             fieldForQuery = '$Organisation.category$';
             break;
           case 'organisation.phaseOfEducation.id':
-              fieldForQuery = '$Organisation.phaseOfEducation$';
-              break;
+            fieldForQuery = '$Organisation.phaseOfEducation$';
+            break;
           case 'organisation.ukprn':
             fieldForQuery = '$Organisation.ukprn$';
             break;
@@ -993,8 +992,8 @@ const getPagedListOfUsersV3 = async (
             break;
         }
 
-        //get the operator based on the condition
-        switch(condition.operator){
+        // get the operator based on the condition
+        switch (condition.operator) {
           case 'is':
             operator = Op.in;
             break;
@@ -1005,26 +1004,25 @@ const getPagedListOfUsersV3 = async (
             break;
         }
 
-        //build the query for this condition
-        if(fieldForQuery && operator){
-          singlePolicyQueries.push({[fieldForQuery]: { [operator]: condition.value } });
+        // build the query for this condition
+        if (fieldForQuery && operator) {
+          singlePolicyQueries.push({ [fieldForQuery]: { [operator]: condition.value } });
         }
       });
 
-      if(singlePolicyQueries.length){
+      if (singlePolicyQueries.length) {
         allPolicyQueries.push(singlePolicyQueries);
       }
     }
   });
 
-  if(allPolicyQueries.length){
+  if (allPolicyQueries.length) {
     query.where[Op.or] = allPolicyQueries;
   }
 
   const recordset = await userOrganisations.findAndCountAll(query);
   const mappings = [];
-  for (let i = 0; i < recordset.rows.length; i += 1) {
-    const entity = recordset.rows[i];
+  for (const entity of recordset.rows) {
     const role = await entity.getRole();
     const organisation = mapOrganisationFromEntity(entity.Organisation);
     await updateOrganisationsWithLocalAuthorityDetails([organisation]);
@@ -1049,7 +1047,7 @@ const getPagedListOfUsersV3 = async (
   };
 };
 
-const pagedListOfInvitations = async (pageNumber = 1, pageSize = 25) => {
+const pagedListOfInvitations = async(pageNumber = 1, pageSize = 25) => {
   const recordset = await invitationOrganisations.findAndCountAll({
     limit: pageSize,
     offset: (pageNumber - 1) * pageSize,
@@ -1089,17 +1087,17 @@ const getUserOrganisationByTextIdentifier = async textIdentifier => {
   return entity || undefined;
 };
 
-const getNextUserOrgNumericIdentifier = async () => {
+const getNextUserOrgNumericIdentifier = async() => {
   const NUMERIC_ID = await getNextNumericId();
   return NUMERIC_ID;
 };
 
-const getNextOrganisationLegacyId = async () => {
+const getNextOrganisationLegacyId = async() => {
   const LEGACY_ID = await getNextLegacyId();
   return LEGACY_ID;
 };
 
-const listAnnouncements = async (
+const listAnnouncements = async(
   organisationId = undefined,
   originId = undefined,
   onlyPublishedAnnouncements = true,
@@ -1138,7 +1136,7 @@ const listAnnouncements = async (
   };
 };
 
-const upsertAnnouncement = async (
+const upsertAnnouncement = async(
   originId,
   organisationId,
   type,
@@ -1308,7 +1306,7 @@ const getRequestsAssociatedWithOrganisation = async orgId => {
   }));
 };
 
-const pagedListOfRequests = async (
+const pagedListOfRequests = async(
   pageNumber = 1,
   pageSize = 25,
   filterStates = undefined
@@ -1353,7 +1351,7 @@ const pagedListOfRequests = async (
   };
 };
 
-const updateUserOrgRequest = async (requestId, request) => {
+const updateUserOrgRequest = async(requestId, request) => {
   const existingRequest = await userOrganisationRequests.findOne({
     where: {
       id: {
