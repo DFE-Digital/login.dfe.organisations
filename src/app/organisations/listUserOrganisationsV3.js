@@ -12,6 +12,7 @@ const getPageNumber = (req) => {
 
   return page;
 };
+
 const getPageSize = (req) => {
   if (!req.body.pageSize) {
     return 100;
@@ -24,6 +25,7 @@ const getPageSize = (req) => {
 
   return pageSize;
 };
+
 const getRoleId = (req) => {
   if (!req.body.role) {
     return undefined;
@@ -35,16 +37,6 @@ const getRoleId = (req) => {
   return roleId;
 };
 
-const fixMultiSelect = (value) => {
-  if (!value) {
-    return [];
-  }
-  if (value instanceof Array) {
-    return value;
-  }
-  return [value];
-};
-
 const getPolicies = (req) => {
   if (!req.body.policies) {
     return [];
@@ -52,7 +44,7 @@ const getPolicies = (req) => {
   return req.body.policies;
 };
 
-const listUserOrganisationsV3 = async (req, res) => {
+const listUserOrganisationsV3 = async(req, res) => {
   const pageNumber = getPageNumber(req);
   const pageSize = getPageSize(req);
   const roleId = getRoleId(req);
