@@ -969,28 +969,52 @@ const getPagedListOfUsersV3 = async (
 
   policies.forEach((policy) => {
     if(policy.conditions && policy.conditions.length){
-      
-      /**
-       * TODO
-       * ver como controlar los nombres de los fields mejor que con IFs
-       * ver como controlar si es 'is' o 'is not'
-       */
 
       let singlePolicyQueries = [];
 
       policy.conditions.forEach((condition) => {
-        if(condition.operator === 'is'){
-          let fieldForQuery;
-          if(condition.field === 'organisation.type.id'){
+        let fieldForQuery;
+        let operator;
+
+        //get the actual field based on the condition
+        switch(condition.field){
+          case 'organisation.type.id':
             fieldForQuery = '$Organisation.type$';
-          }else if(condition.field === 'organisation.status.id'){
+            break;
+          case 'organisation.status.id':
             fieldForQuery = '$Organisation.status$';
-          }else if(condition.field === 'organisation.category.id'){
+            break;
+          case 'organisation.category.id':
             fieldForQuery = '$Organisation.category$';
-          }
-          if(fieldForQuery){
-            singlePolicyQueries.push({[fieldForQuery]: condition.value})
-          }
+            break;
+          case 'organisation.phaseOfEducation.id':
+              fieldForQuery = '$Organisation.phaseOfEducation$';
+              break;
+          case 'organisation.ukprn':
+            fieldForQuery = '$Organisation.ukprn$';
+            break;
+          case 'id':
+            fieldForQuery = '$user_id$';
+            break;
+          default:
+            break;
+        }
+
+        //get the operator based on the condition
+        switch(condition.operator){
+          case 'is':
+            operator = Op.in;
+            break;
+          case 'is not':
+            operator = Op.notIn;
+            break;
+          default:
+            break;
+        }
+
+        //build the query for this condition
+        if(fieldForQuery && operator){
+          singlePolicyQueries.push({[fieldForQuery]: { [operator]: condition.value } });
         }
       });
 
