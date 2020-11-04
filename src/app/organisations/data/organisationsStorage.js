@@ -946,6 +946,92 @@ const getPagedListOfUsersV2 = async (
   };
 };
 
+const getPagedListOfUsersV3 = async (
+  pageNumber = 1,
+  pageSize = 25,
+  roleId = undefined,
+  policies = undefined
+) => {
+  const query = {
+    where: {},
+    limit: pageSize,
+    offset: (pageNumber - 1) * pageSize,
+    include: ['Organisation']
+  };
+
+  if (roleId !== undefined){
+    query.where.role_id = {
+      [Op.eq]: roleId
+    };
+  }
+
+  let allPolicyQueries = [];
+
+  policies.forEach((policy) => {
+    if(policy.conditions && policy.conditions.length){
+      
+      /**
+       * TODO
+       * ver como controlar los nombres de los fields mejor que con IFs
+       * ver como controlar si es 'is' o 'is not'
+       */
+
+      let singlePolicyQueries = [];
+
+      policy.conditions.forEach((condition) => {
+        if(condition.operator === 'is'){
+          let fieldForQuery;
+          if(condition.field === 'organisation.type.id'){
+            fieldForQuery = '$Organisation.type$';
+          }else if(condition.field === 'organisation.status.id'){
+            fieldForQuery = '$Organisation.status$';
+          }else if(condition.field === 'organisation.category.id'){
+            fieldForQuery = '$Organisation.category$';
+          }
+          if(fieldForQuery){
+            singlePolicyQueries.push({[fieldForQuery]: condition.value})
+          }
+        }
+      });
+
+      if(singlePolicyQueries.length){
+        allPolicyQueries.push(singlePolicyQueries);
+      }
+    }
+  });
+
+  if(allPolicyQueries.length){
+    query.where[Op.or] = allPolicyQueries;
+  }
+
+  const recordset = await userOrganisations.findAndCountAll(query);
+  const mappings = [];
+  for (let i = 0; i < recordset.rows.length; i += 1) {
+    const entity = recordset.rows[i];
+    const role = await entity.getRole();
+    const organisation = mapOrganisationFromEntity(entity.Organisation);
+    await updateOrganisationsWithLocalAuthorityDetails([organisation]);
+
+    mappings.push({
+      userId: entity.user_id,
+      organisation,
+      role,
+      status: entity.status,
+      numericIdentifier: entity.numeric_identifier || undefined,
+      textIdentifier: entity.text_identifier || undefined
+    });
+  }
+
+  const totalNumberOfRecords = recordset.count;
+  const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
+  return {
+    users: mappings,
+    page: pageNumber,
+    totalNumberOfRecords,
+    totalNumberOfPages
+  };
+};
+
 const pagedListOfInvitations = async (pageNumber = 1, pageSize = 25) => {
   const recordset = await invitationOrganisations.findAndCountAll({
     limit: pageSize,
@@ -1381,6 +1467,7 @@ module.exports = {
   updateUserOrgRequest,
   getRequestsAssociatedWithUser,
   getPagedListOfUsersV2,
+  getPagedListOfUsersV3,
   pagedListOfRequests,
   getLatestActionedRequestAssociated
 };
