@@ -76,7 +76,7 @@ describe('when listing user organisations', () => {
     await listUserOrganisationsV2(req, res);
 
     expect(getPagedListOfUsersV2).toHaveBeenCalledTimes(1);
-    expect(getPagedListOfUsersV2).toHaveBeenCalledWith(1, 100, undefined, [], [], []);
+    expect(getPagedListOfUsersV2).toHaveBeenCalledWith(1, 100, undefined, [], []);
   });
 
   it('then it should get page of user organisations from repository using provided options', async () => {
@@ -92,6 +92,6 @@ describe('when listing user organisations', () => {
     await listUserOrganisationsV2(req, res);
 
     expect(getPagedListOfUsersV2).toHaveBeenCalledTimes(1);
-    expect(getPagedListOfUsersV2).toHaveBeenCalledWith(2, 10, 10000, ['01'], ['1'], ['001']);
+    expect(getPagedListOfUsersV2).toHaveBeenCalledWith(2, 10, 10000, ['01'], ['1']);
   });
 });
