@@ -2,6 +2,7 @@ const express = require('express');
 const apiAuth = require('login.dfe.api.auth');
 const config = require('./../../infrastructure/config')();
 const { asyncWrapper } = require('login.dfe.express-error-handling');
+const { deprecate } = require('./../../utils');
 
 const listOrganisations = require('./listOrganisations');
 const listCategories = require('./listCategories');
@@ -30,6 +31,7 @@ const listRequests = require('./listRequests');
 const updateUserOrganisationRequest = require('./updateUserOrganisationRequest');
 const getPendingRequestsAssociatedWithUser = require('./getPendingRequestsAssociatedWithUser');
 const listUserOrganisationsV2 = require('./listUserOrganisationsV2');
+const listUserOrganisationsV3 = require('./listUserOrganisationsV3');
 const getLatestActionedRequestAssociatedWithUser = require('./getLatestActionedRequestAssociatedWithUser');
 
 const router = express.Router();
@@ -45,7 +47,8 @@ const routes = () => {
   router.get('/categories', asyncWrapper(listCategories));
   router.get('/states', asyncWrapper(listStates));
   router.get('/users', asyncWrapper(listUserOrganisations));
-  router.get('/v2/users', asyncWrapper(listUserOrganisationsV2));
+  router.get('/v2/users', deprecate('/v3/users'), asyncWrapper(listUserOrganisationsV2));
+  router.post('/v3/users', asyncWrapper(listUserOrganisationsV3));
   router.get('/invitations', asyncWrapper(listInvitationOrganisations));
   router.post('/', asyncWrapper(createOrganisation));
   router.get('/announcements', asyncWrapper(listAllAnnouncements));
