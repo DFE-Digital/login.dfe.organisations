@@ -30,7 +30,7 @@
     "request-promise": "^4.2.2",
     "sequelize": "^4.44.3",
     "simpl-schema": "^1.5.6",
-    "tedious": "^2.6.4",
+    "tedious": "^8.3.0",
     "unzipper": "^0.10.5",
     "uuid": "^3.1.0",
     "winston": "^2.4.0",
