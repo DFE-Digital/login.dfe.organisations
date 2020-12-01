@@ -24,7 +24,7 @@ const services = [
   },
 ];
 
-describe('when listing services', async () => {
+describe('when listing services', () => {
   let req;
   let res;
 
