@@ -1,3 +1,4 @@
+const moment = require('moment');
 const logger = require('./../../infrastructure/logger');
 const config = require('./../../infrastructure/config')();
 const { getGroupsFile } = require('./../../infrastructure/gias');
@@ -175,7 +176,9 @@ const listOfCategory = async (category, includeAssociations = false) => {
 };
 
 const getAllGroupsDataFile = async () => {
-  const uri = `${config.gias.allGroupsDataUrl}`;
+  const date = moment().format('YYYYMMDD');
+  const uri = `${config.gias.allGroupsDataUrl}`.replace('#date#', date);
+  logger.info(`Reading the allGroupsDataUrl ${uri}`);
   return await rp({
     method: 'GET',
     uri,
