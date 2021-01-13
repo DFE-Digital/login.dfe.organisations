@@ -175,10 +175,23 @@ const listOfCategory = async (category, includeAssociations = false) => {
   return allOrgs;
 };
 
-const getAllGroupsDataFile = async () => {
-  const date = moment().format('YYYYMMDD');
+const getAllGroupsDataFile = async() => {
+  // Try to get today's file if you can't find it then read yesterday's file.
+  const today = moment().format('YYYYMMDD');
+  try {
+    return await getAllGroupsDataFileForDate(today);
+  } catch (e) {
+    logger.info('Could not find today\'s file');
+  }
+
+  const yesterday = moment().subtract(1, 'days').format('YYYYMMDD');
+  return await getAllGroupsDataFileForDate(yesterday);
+};
+
+const getAllGroupsDataFileForDate = async(date) => {
   const uri = `${config.gias.allGroupsDataUrl}`.replace('#date#', date);
   logger.info(`Reading the allGroupsDataUrl ${uri}`);
+
   return await rp({
     method: 'GET',
     uri,
