@@ -57,7 +57,7 @@ const defineStatic = model => {
     { id: '012', name: 'Other GIAS Stakeholder' },
     { id: '013', name: 'Single-Academy Trust' },
     { id: '050', name: 'Software Suppliers' },
-    { id: '051', name: 'Further Education' }
+    { id: '051', name: 'PIMS Training Providers' }
   ];
 
   model.establishmentTypes = [
