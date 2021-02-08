@@ -76,11 +76,12 @@ const addEstablishment = async (importing) => {
     const organisation = await mapImportRecordForStorage(importing);
     await add(organisation);
     logger.info(`Added establishment ${organisation.urn}`);
-    await raiseNotificationThatOrganisationHasChanged(organisation.id);
-    logger.info(`Notified addition of establishment ${organisation.urn}`);
-    return organisation.id;
+    return {
+      organisationId: organisation.id,
+      saved: true
+    };
   } catch (e) {
-    throw new Error(`Error adding establishment ${importing.urn} - ${e.message}`);
+    logger.info(`Error adding establishment ${importing.urn} - ${e.message}`);
   }
 };
 const hasBeenUpdated = (updated, existing) => {
@@ -103,6 +104,7 @@ const hasBeenUpdated = (updated, existing) => {
 const updateEstablishment = async (importing, existing) => {
   const updated = await mapImportRecordForStorage(importing);
   updated.id = existing.id;
+  let orgUpdated = false;
 
   if (hasBeenUpdated(updated.name, existing.name) || hasBeenUpdated(updated.category, existing.category)
     || hasBeenUpdated(updated.type, existing.type) || hasBeenUpdated(updated.ukprn, existing.ukprn) || hasBeenUpdated(updated.establishmentNumber, existing.establishmentNumber)
@@ -111,9 +113,8 @@ const updateEstablishment = async (importing, existing) => {
     || hasBeenUpdated(updated.statutoryLowAge, existing.statutoryLowAge) || hasBeenUpdated(updated.statutoryHighAge, existing.statutoryHighAge)) {
     try {
       await update(updated);
+      orgUpdated = true;
       logger.info(`Updated establishment ${importing.urn}`);
-      await raiseNotificationThatOrganisationHasChanged(updated.id);
-      logger.info(`Notified update of establishment ${importing.urn}`);
     } catch (e) {
       logger.info(`Error updating establishment ${importing.urn} - ${e.message}`);
     }
@@ -121,7 +122,10 @@ const updateEstablishment = async (importing, existing) => {
     logger.info(`Skipped establishment ${importing.urn} as it has not changed`);
   }
 
-  return updated.id;
+  return {
+    organisationId: updated.id,
+    saved: orgUpdated
+  };
 };
 const addOrUpdateEstablishments = async (importingEstablishments, existingEstablishments, localAuthorities) => {
   for (let i = 0; i < importingEstablishments.length; i += 1) {
@@ -129,23 +133,36 @@ const addOrUpdateEstablishments = async (importingEstablishments, existingEstabl
     if (isEstablishmentImportable(importing)) {
       const existing = existingEstablishments.find(e => e.urn && e.urn.toString().toLowerCase().trim() === importing.urn.toString().toLowerCase().trim());
 
-      let organisationId;
+      let result;
       if (existing) {
-        organisationId = await updateEstablishment(importing, existing);
+        result = await updateEstablishment(importing, existing);
       } else {
         importing.legacyId = await generateLegacyId();
-        organisationId = await addEstablishment(importing);
+        result = await addEstablishment(importing);
       }
 
-      const localAuthority = localAuthorities.find(la => la.establishmentNumber === importing.laCode);
-      const existingLAAssociation = existing && existing.associations ? existing.associations.find(a => a.associationType === 'LA') : undefined;
-      if (localAuthority && (!existingLAAssociation || existingLAAssociation.associatedOrganisationId.toLowerCase() !== localAuthority.id.toLowerCase())) {
-        await removeAssociationsOfType(organisationId, 'LA');
-        await addAssociation(organisationId, localAuthority.id, 'LA');
-        logger.info(`Updated LA link for establishment ${importing.urn}`);
-      } else if (!localAuthority && existingLAAssociation) {
-        await removeAssociationsOfType(organisationId, 'LA');
-        logger.info(`Removed LA link for establishment ${importing.urn}`);
+      if (result && result.organisationId) {
+        const organisationId = result.organisationId;
+
+        const localAuthority = localAuthorities.find(la => la.establishmentNumber === importing.laCode);
+        const existingLAAssociation = existing && existing.associations ? existing.associations.find(a => a.associationType === 'LA') : undefined;
+        if (localAuthority && (!existingLAAssociation || existingLAAssociation.associatedOrganisationId.toLowerCase() !== localAuthority.id.toLowerCase())) {
+          await removeAssociationsOfType(organisationId, 'LA');
+          await addAssociation(organisationId, localAuthority.id, 'LA');
+          logger.info(`Updated LA link for establishment ${importing.urn}`);
+        } else if (!localAuthority && existingLAAssociation) {
+          await removeAssociationsOfType(organisationId, 'LA');
+          logger.info(`Removed LA link for establishment ${importing.urn}`);
+        }
+
+        if (result.saved) {
+          await raiseNotificationThatOrganisationHasChanged(organisationId);
+          if (existing) {
+            logger.info(`Notified addition of establishment ${importing.urn}`);
+          } else {
+            logger.info(`Notified update of establishment ${importing.urn}`);
+          }
+        }
       }
     } else {
       logger.info(`Not importing establishment ${importing.urn} as it does meet importable criteria`);
