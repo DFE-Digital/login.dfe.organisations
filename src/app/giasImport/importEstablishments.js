@@ -205,7 +205,7 @@ const addLocalAuthority = async (importing) => {
     const organisation = mapImportLocalAuthorityForStorage(importing);
     await add(organisation);
     logger.info(`Added local authority ${importing.code} - ${importing.name}`);
-    await raiseNotificationThatOrganisationHasChanged(update.id);
+    await raiseNotificationThatOrganisationHasChanged(organisation.id);
     logger.info(`Notified addition of local authority ${importing.code} - ${importing.name}`);
     return organisation.id;
   } catch (e) {
