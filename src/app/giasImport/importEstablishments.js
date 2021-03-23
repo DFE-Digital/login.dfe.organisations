@@ -203,6 +203,7 @@ const mapImportLocalAuthorityForStorage = (importing) => {
 const addLocalAuthority = async (importing) => {
   try {
     const organisation = mapImportLocalAuthorityForStorage(importing);
+    organisation.legacyId = await generateLegacyId();
     await add(organisation);
     logger.info(`Added local authority ${importing.code} - ${importing.name}`);
     await raiseNotificationThatOrganisationHasChanged(organisation.id);
