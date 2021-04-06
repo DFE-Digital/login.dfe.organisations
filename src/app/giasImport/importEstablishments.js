@@ -198,6 +198,7 @@ const mapImportLocalAuthorityForStorage = (importing) => {
     phaseOfEducation: null,
     statutoryLowAge: null,
     statutoryHighAge: null,
+    legacyId: importing.legacyId,
   };
 };
 const addLocalAuthority = async (importing) => {
@@ -237,6 +238,7 @@ const addOrUpdateLocalAuthorities = async (importingEstablishments, localAuthori
       const existing = localAuthorities.find(la => la.establishmentNumber === importing.code);
 
       if (!existing) {
+        importing.legacyId = await generateLegacyId();
         await addLocalAuthority(importing);
         updated = true;
       } else if (importing.name !== existing.name) {
