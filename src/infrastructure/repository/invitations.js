@@ -9,7 +9,7 @@ const define = (db, schema) => {
       allowNull: false,
     },
   }, {
-    timestamps: false,
+    timestamps: true,
     tableName: 'invitation_services',
     schema,
   });
