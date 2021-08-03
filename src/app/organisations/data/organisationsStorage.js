@@ -273,7 +273,7 @@ const add = async organisation => {
 };
 
 const update = async organisation => {
-  const existing = await organisations.find({
+  const existing = await organisations.findOne({
     where: {
       id: {
         [Op.eq]: organisation.id
@@ -1099,7 +1099,7 @@ const pagedListOfInvitations = async(pageNumber = 1, pageSize = 25) => {
 };
 
 const getUserOrganisationByTextIdentifier = async textIdentifier => {
-  const entity = await userOrganisations.find({
+  const entity = await userOrganisations.findOne({
     where: {
       text_identifier: {
         [Op.eq]: textIdentifier
@@ -1169,7 +1169,7 @@ const upsertAnnouncement = async(
   expiresAt,
   published
 ) => {
-  let entity = await organisationAnnouncements.find({
+  let entity = await organisationAnnouncements.findOne({
     where: {
       origin_id: {
         [Op.eq]: originId
@@ -1234,7 +1234,7 @@ const createUserOrgRequest = async request => {
 };
 
 const getUserOrgRequestById = async rid => {
-  const entity = await userOrganisationRequests.find({
+  const entity = await userOrganisationRequests.findOne({
     where: {
       id: {
         [Op.eq]: rid
