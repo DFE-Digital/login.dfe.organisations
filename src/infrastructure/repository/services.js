@@ -25,7 +25,7 @@ const define = (db, schema) => {
 
 const extend = ({ services, externalIdentifiers }) => {
   services.prototype.getExternalIdentifier = function (key, value) {
-    return externalIdentifiers.find({
+    return externalIdentifiers.findOne({
       where:
         {
           service_id:
