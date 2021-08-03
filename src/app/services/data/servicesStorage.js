@@ -13,7 +13,7 @@ const mapOrganisationEntity = async (entity, laCache = undefined) => {
   if (laAssociation) {
     localAuthority = laCache ? laCache.find(x => x.id === laAssociation.associated_organisation_id) : undefined;
     if (!localAuthority) {
-      const localAuthorityEntity = await organisations.find({
+      const localAuthorityEntity = await organisations.findOne({
         where: {
           id: {
             [Op.eq]: laAssociation.associated_organisation_id,
@@ -54,7 +54,7 @@ const mapOrganisationEntity = async (entity, laCache = undefined) => {
 
 
 const getOrganisationById = async (organisationId) => {
-  const entity = await organisations.find({
+  const entity = await organisations.findOne({
     where: {
       id: {
         [Op.eq]: organisationId,
@@ -65,7 +65,7 @@ const getOrganisationById = async (organisationId) => {
   const laAssociation = entity.associations.find(a => a.link_type === 'LA');
   let localAuthority;
   if (laAssociation) {
-    const localAuthorityEntity = await organisations.find({
+    const localAuthorityEntity = await organisations.findOne({
       where: {
         id: {
           [Op.eq]: laAssociation.associated_organisation_id,
@@ -126,7 +126,7 @@ const getServiceDetails = async (organisationId, serviceId, correlationId) => {
   try {
     logger.info(`Calling getServiceDetails for services storage for request ${correlationId}`, { correlationId });
     const service = await getById(serviceId);
-    const organisation = await organisations.findById(organisationId);
+    const organisation = await organisations.findByPk(organisationId);
 
     return { ...service, organisation: organisation.dataValues };
   } catch (e) {
@@ -138,7 +138,7 @@ const getServiceDetails = async (organisationId, serviceId, correlationId) => {
 const getById = async (id, correlationId) => {
   try {
     logger.info(`Calling getById for services storage for request ${correlationId}`, { correlationId });
-    const serviceEntity = await services.find({
+    const serviceEntity = await services.findOne({
       where: {
         id: {
           [Op.eq]: id,
@@ -436,7 +436,7 @@ const create = async (id, name, description, correlationId) => {
 const update = async (id, name, description, correlationId) => {
   try {
     logger.info(`Calling update for services storage for request ${correlationId}`, { correlationId });
-    const serviceEntity = await services.find({
+    const serviceEntity = await services.findOne({
       where: {
         id: {
           [Op.eq]: id,
@@ -444,7 +444,7 @@ const update = async (id, name, description, correlationId) => {
       },
     });
     if (serviceEntity) {
-      serviceEntity.updateAttributes({
+      serviceEntity.update({
         name,
         description,
       });
@@ -484,7 +484,7 @@ const upsertServiceUser = async (options, correlationId) => {
       status,
     });
 
-    const userOrganisation = await userOrganisations.find({
+    const userOrganisation = await userOrganisations.findOne({
       where: {
         user_id: {
           [Op.eq]: userId,
@@ -560,7 +560,7 @@ const getUserService = async (serviceId, organisationId, userId, correlationId) 
 const getExternalIdentifier = async (serviceId, identifierKey, identifierValue, correlationId) => {
   try {
     logger.info(`Calling getExternalIdentifier for services storage for request ${correlationId}`, { correlationId });
-    const serviceEntity = await services.find({
+    const serviceEntity = await services.findOne({
       where: {
         id: {
           [Op.eq]: serviceId,
