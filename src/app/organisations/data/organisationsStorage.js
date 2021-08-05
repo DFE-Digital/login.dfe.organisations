@@ -444,7 +444,7 @@ const getOrganisationsForUserIncludingServices = async userId => {
         include: ['Service']
       });
       const role = await userOrg.getRole();
-      const approvers = await userOrg.getApprovers().map(user => user.user_id);
+      const approvers = (await userOrg.getApprovers()).map(user => user.user_id);
 
       return {
         organisation: {
@@ -520,7 +520,7 @@ const getOrganisationsAssociatedToUser = async userId => {
 
   return mapAsync(userOrgs, async userOrg => {
     const role = await userOrg.getRole();
-    const approvers = await userOrg.getApprovers().map(user => user.user_id);
+    const approvers = (await userOrg.getApprovers()).map(user => user.user_id);
     const organisation = await mapOrganisationFromEntity(userOrg.Organisation);
     await updateOrganisationsWithLocalAuthorityDetails([organisation]);
 
