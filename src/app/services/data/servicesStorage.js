@@ -285,7 +285,7 @@ const listUserAssociatedServices = async (page, pageSize, correlationId) => {
       const userService = userServices[i];
       if (userService) {
         const role = await userService.getRole();
-        const serviceExternalIdentifiers = await userService.getExternalIdentifiers().map(id => ({
+        const serviceExternalIdentifiers = (await userService.getExternalIdentifiers()).map(id => ({
           key: id.identifier_key,
           value: id.identifier_value,
         }));
@@ -295,7 +295,7 @@ const listUserAssociatedServices = async (page, pageSize, correlationId) => {
         if (!orgApprovers) {
           orgApprovers = {
             orgId: organisation.id,
-            approvers: await userService.getApprovers().map(user => user.user_id),
+            approvers: (await userService.getApprovers()).map(user => user.user_id),
           };
           orgApproverCache.push(orgApprovers);
         }
@@ -347,7 +347,7 @@ const getUserAssociatedServices = async (id, correlationId) => {
       if (userService) {
         const role = await userService.getRole();
         const approvers = await userService.getApprovers().map(user => user.user_id);
-        const externalIdentifiers = await userService.getExternalIdentifiers().map(id => ({
+        const externalIdentifiers = (await userService.getExternalIdentifiers()).map(id => ({
           key: id.identifier_key,
           value: id.identifier_value
         }));
