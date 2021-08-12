@@ -473,8 +473,8 @@ const getOrganisationsForUserIncludingServices = async userId => {
         approvers,
         services: await Promise.all(
           services.map(async service => {
-            const externalIdentifiers = await service
-              .getExternalIdentifiers()
+            const externalIdentifiers = (await service
+              .getExternalIdentifiers())
               .map(extId => ({
                 key: extId.identifier_key,
                 value: extId.identifier_value
