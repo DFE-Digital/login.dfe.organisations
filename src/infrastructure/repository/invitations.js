@@ -49,7 +49,7 @@ const extend = ({ invitations, organisations, services, users, invitationExterna
     });
   };
   invitations.prototype.setExternalIdentifier = async function (key, value) {
-    const existing = await invitationExternalIdentifiers.find({
+    const existing = await invitationExternalIdentifiers.findOne({
       where:
         {
           invitation_id: {
@@ -78,7 +78,7 @@ const extend = ({ invitations, organisations, services, users, invitationExterna
     });
   };
   invitations.prototype.getRole = async function () {
-    const invitationOrganisation = await invitationOrganisations.find({
+    const invitationOrganisation = await invitationOrganisations.findOne({
       where: {
         invitation_id: {
           [Op.eq]: this.invitation_id,

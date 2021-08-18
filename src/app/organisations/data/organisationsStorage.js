@@ -273,7 +273,7 @@ const add = async organisation => {
 };
 
 const update = async organisation => {
-  const existing = await organisations.find({
+  const existing = await organisations.findOne({
     where: {
       id: {
         [Op.eq]: organisation.id
@@ -444,7 +444,7 @@ const getOrganisationsForUserIncludingServices = async userId => {
         include: ['Service']
       });
       const role = await userOrg.getRole();
-      const approvers = await userOrg.getApprovers().map(user => user.user_id);
+      const approvers = (await userOrg.getApprovers()).map(user => user.user_id);
 
       return {
         organisation: {
@@ -473,8 +473,8 @@ const getOrganisationsForUserIncludingServices = async userId => {
         approvers,
         services: await Promise.all(
           services.map(async service => {
-            const externalIdentifiers = await service
-              .getExternalIdentifiers()
+            const externalIdentifiers = (await service
+              .getExternalIdentifiers())
               .map(extId => ({
                 key: extId.identifier_key,
                 value: extId.identifier_value
@@ -520,7 +520,7 @@ const getOrganisationsAssociatedToUser = async userId => {
 
   return mapAsync(userOrgs, async userOrg => {
     const role = await userOrg.getRole();
-    const approvers = await userOrg.getApprovers().map(user => user.user_id);
+    const approvers = (await userOrg.getApprovers()).map(user => user.user_id);
     const organisation = await mapOrganisationFromEntity(userOrg.Organisation);
     await updateOrganisationsWithLocalAuthorityDetails([organisation]);
 
@@ -1117,7 +1117,7 @@ const pagedListOfInvitations = async (pageNumber = 1, pageSize = 25) => {
 };
 
 const getUserOrganisationByTextIdentifier = async textIdentifier => {
-  const entity = await userOrganisations.find({
+  const entity = await userOrganisations.findOne({
     where: {
       text_identifier: {
         [Op.eq]: textIdentifier
@@ -1128,7 +1128,7 @@ const getUserOrganisationByTextIdentifier = async textIdentifier => {
 };
 
 const getUserOrganisationByOrgId = async orgId => {
-  const entity = await userOrganisations.find({
+  const entity = await userOrganisations.findOne({
     where: {
       organisation_id: {
         [Op.eq]: orgId
@@ -1198,7 +1198,7 @@ const upsertAnnouncement = async (
   expiresAt,
   published
 ) => {
-  let entity = await organisationAnnouncements.find({
+  let entity = await organisationAnnouncements.findOne({
     where: {
       origin_id: {
         [Op.eq]: originId
@@ -1263,7 +1263,7 @@ const createUserOrgRequest = async request => {
 };
 
 const getUserOrgRequestById = async rid => {
-  const entity = await userOrganisationRequests.find({
+  const entity = await userOrganisationRequests.findOne({
     where: {
       id: {
         [Op.eq]: rid
