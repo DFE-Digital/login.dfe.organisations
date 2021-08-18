@@ -1,7 +1,7 @@
 const logger = require('./../../infrastructure/logger');
 const config = require('./../../infrastructure/config')();
 const { parse } = require('./establishmentCsvReader');
-const { getNextOrganisationLegacyId, list, add, update, pagedListOfCategory, addAssociation, removeAssociationsOfType } = require('./../organisations/data/organisationsStorage');
+const { getNextOrganisationLegacyId, list, add, update, pagedListOfCategory, addAssociation, removeAssociationsOfType, getUserOrganisationByOrgId, deleteOrganisation } = require('./../organisations/data/organisationsStorage');
 const { raiseNotificationThatOrganisationHasChanged } = require('./../organisations/notifications');
 const { getEstablishmentsFile } = require('./../../infrastructure/gias');
 const uuid = require('uuid/v4');
@@ -9,7 +9,7 @@ const uniqBy = require('lodash/uniqBy');
 
 const isEstablishmentImportable = (importing) => {
   const importableTypes = ['01', '02', '03', '05', '06', '07', '08', '10', '11', '12', '14', '15', '18', '24', '25', '26', '28', '29', '30', '32', '33', '34', '35', '36', '38', '39', '40', '41', '42', '43', '44', '45', '46', '9', '17', '22', '23', '27', '31', '37', '47', '48', '56', '98'];
-  const importableStatuses = [1, 2, 3, 4];
+  const importableStatuses = [1, 2, 3, 4, 9];
 
   if (!importing.urn) {
     return false;
@@ -24,6 +24,15 @@ const isEstablishmentImportable = (importing) => {
   }
 
   return true;
+};
+const isRestrictedStatusToCreate = (importing) => {
+  const RestrictedStatuses = [9];
+
+  if (RestrictedStatuses.find(s => s === importing.status)) {
+    return true;
+  }
+
+  return false;
 };
 const mapImportRecordForStorage = async (importing) => {
   const address = [
@@ -78,7 +87,8 @@ const addEstablishment = async (importing) => {
     logger.info(`Added establishment ${organisation.urn}`);
     return {
       organisationId: organisation.id,
-      saved: true
+      saved: true,
+      crud: 'add'
     };
   } catch (e) {
     logger.info(`Error adding establishment ${importing.urn} - ${e.message}`);
@@ -101,6 +111,39 @@ const hasBeenUpdated = (updated, existing) => {
 
   return updated !== existing;
 };
+
+const updateOrDeleteEstablishment = async (importing, existing) => {
+  const userExists = await getUserOrganisationByOrgId(existing.id);
+
+  let result;
+  if (userExists) {
+    result = await updateEstablishment(importing, existing)
+  } else {
+    result = await deleteEstablishment(existing);
+  }
+
+  result["crud"] = userExists ? 'update' : 'delete';
+  return result;
+
+}
+
+const deleteEstablishment = async (existing) => {
+  let orgUpdated = false;
+
+  try {
+    await deleteOrganisation(existing.id)
+    orgUpdated = true;
+    logger.info(`Deleted establishment ${existing.urn}`);
+  } catch (e) {
+    logger.warn(`Error deleting establishment ${existing.urn} - ${e.message}`);
+  }
+
+  return {
+    organisationId: existing.id,
+    saved: orgUpdated,
+  };
+};
+
 const updateEstablishment = async (importing, existing) => {
   const updated = await mapImportRecordForStorage(importing);
   updated.id = existing.id;
@@ -127,21 +170,28 @@ const updateEstablishment = async (importing, existing) => {
     saved: orgUpdated
   };
 };
+
 const addOrUpdateEstablishments = async (importingEstablishments, existingEstablishments, localAuthorities) => {
   for (let i = 0; i < importingEstablishments.length; i += 1) {
     const importing = importingEstablishments[i];
     if (isEstablishmentImportable(importing)) {
       const existing = existingEstablishments.find(e => e.urn && e.urn.toString().toLowerCase().trim() === importing.urn.toString().toLowerCase().trim());
+      const isRestrictedStatus = isRestrictedStatusToCreate(importing);
 
       let result;
       if (existing) {
-        result = await updateEstablishment(importing, existing);
-      } else {
+        result = await updateOrDeleteEstablishment(importing, existing);
+      } else if (!isRestrictedStatus) {
         importing.legacyId = await generateLegacyId();
         result = await addEstablishment(importing);
       }
 
       if (result && result.organisationId) {
+
+        if (result.hasOwnProperty('crud') && result.crud.toLowerCase() == 'delete') {
+          return;
+        }
+
         const organisationId = result.organisationId;
 
         const localAuthority = localAuthorities.find(la => la.establishmentNumber === importing.laCode);
@@ -163,9 +213,11 @@ const addOrUpdateEstablishments = async (importingEstablishments, existingEstabl
             logger.info(`Notified update of establishment ${importing.urn}`);
           }
         }
+      } else {
+        logger.info(`Not importing establishment ${importing.urn} as it doesn't meet importable status`);  
       }
     } else {
-      logger.info(`Not importing establishment ${importing.urn} as it does meet importable criteria`);
+      logger.info(`Not importing establishment ${importing.urn} as it doesn't meet importable criteria`);
     }
   }
 };
