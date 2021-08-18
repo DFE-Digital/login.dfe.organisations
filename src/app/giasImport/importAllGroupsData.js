@@ -21,13 +21,14 @@ const isGroupImportable = (group) => {
     return false;
   }
 
-  const importableStatuses = ['OPEN', 'CLOSED', 'PROPOSED_TO_OPEN'];
+  const importableStatuses = ['OPEN', 'CLOSED', 'PROPOSED_TO_OPEN', 'CREATED_IN_ERROR'];
   if (!importableStatuses.find(x => x === group.status)) {
     return false;
   }
 
   return true;
 };
+
 const mapImportRecordForStorage = (importing) => {
   const address = importing.address.filter(x => x !== null).join(', ');
 
@@ -46,6 +47,11 @@ const mapImportRecordForStorage = (importing) => {
     case 'PROPOSED_TO_OPEN':
       status = {
         id: 4,
+      };
+      break;
+    case "CREATED_IN_ERROR":
+      status = {
+        id: 9,
       };
       break;
     default:
@@ -121,6 +127,7 @@ const updateGroup = async (importing, existing) => {
 
   return updated.id;
 };
+
 const linkAcademies = async (importing, existing, importingGroupLinks, existingEstablishments, organisationId) => {
   const importingLinks = importingGroupLinks.filter(x => x.uid === importing.uid);
   const links = importingLinks.map((link) => {
@@ -141,6 +148,7 @@ const linkAcademies = async (importing, existing, importingGroupLinks, existingE
     await addAssociation(importingLink.organisationId, importingLink.associatedOrganisationId, importingLink.linkType);
   }
 };
+
 const addOrUpdateGroups = async (importingGroups, importingGroupLinks, existingGroups, existingEstablishments) => {
   for (let i = 0; i < importingGroups.length; i += 1) {
     const importing = importingGroups[i];
@@ -175,7 +183,7 @@ const listOfCategory = async (category, includeAssociations = false) => {
   return allOrgs;
 };
 
-const getAllGroupsDataFile = async() => {
+const getAllGroupsDataFile = async () => {
   // Try to get today's file if you can't find it then read yesterday's file.
   const today = moment().format('YYYYMMDD');
   try {
@@ -188,7 +196,7 @@ const getAllGroupsDataFile = async() => {
   return await getAllGroupsDataFileForDate(yesterday);
 };
 
-const getAllGroupsDataFileForDate = async(date) => {
+const getAllGroupsDataFileForDate = async (date) => {
   const uri = `${config.gias.allGroupsDataUrl}`.replace('#date#', date);
   logger.info(`Reading the allGroupsDataUrl ${uri}`);
 
