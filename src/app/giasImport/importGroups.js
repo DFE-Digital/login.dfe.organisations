@@ -15,7 +15,7 @@ const isGroupImportable = (group) => {
     return false;
   }
 
-  const importableStatuses = ['OPEN', 'CLOSED', 'PROPOSED_TO_OPEN'];
+  const importableStatuses = ['OPEN', 'CLOSED', 'PROPOSED_TO_OPEN', 'CREATED_IN_ERROR'];
   if (!importableStatuses.find(x => x === group.status)) {
     return false;
   }
@@ -40,6 +40,11 @@ const mapImportRecordForStorage = (importing) => {
     case 'PROPOSED_TO_OPEN':
       status = {
         id: 4,
+      };
+      break;
+    case 'CREATED_IN_ERROR':
+      status = {
+        id: 9,
       };
       break;
     default:
