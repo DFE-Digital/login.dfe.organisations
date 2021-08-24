@@ -339,7 +339,8 @@ const pagedListOfCategory = async(
       ['id', 'ASC']
     ],
     limit: pageSize,
-    offset
+    offset,
+    distinct: true
   };
   if (includeAssociations) {
     query.include = ['associations'];
