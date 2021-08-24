@@ -90,9 +90,14 @@ const hasBeenUpdated = (updated, existing) => {
   }
 
   if (updated instanceof Date) {
-    const utime = updated.getTime();
-    const etime = existing.getTime();
-    return utime !== etime;
+    if (existing instanceof Date) {
+      const utime = updated.getTime();
+      const etime = existing.getTime();
+      return utime !== etime;
+    } else if (typeof existing === 'string') {
+      const updatedDate = updated.toISOString().split('T')[0];
+      return existing !== updatedDate;
+    }
   }
 
   if (updated instanceof Object && Object.keys(updated).find(x => x === 'id')) {
