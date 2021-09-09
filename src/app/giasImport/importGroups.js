@@ -95,7 +95,14 @@ const hasBeenUpdated = (newValue, oldValue) => {
   }
 
   if (newValue instanceof Date) {
-    return newValue.getTime() !== oldValue.getTime();
+    if (oldValue instanceof Date) {
+      const nValue = newValue.getTime();
+      const oValue = oldValue.getTime();
+      return nValue !== oValue;
+    } else if (typeof oldValue === 'string') {
+      const nDate = newValue.toISOString().split('T')[0];
+      return oldValue !== nDate;
+    }
   }
 
   if (newValue instanceof Object && Object.keys(newValue).find(x => x === 'id')) {
