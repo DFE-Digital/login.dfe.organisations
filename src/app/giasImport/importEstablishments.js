@@ -25,7 +25,7 @@ const isEstablishmentImportable = (importing) => {
 
   return true;
 };
-const isRestrictedStatusToCreate = (importing) => {
+const isRestrictedStatus = (importing) => {
   const RestrictedStatuses = [9];
 
   if (RestrictedStatuses.find(s => s === importing.status)) {
@@ -118,16 +118,20 @@ const hasBeenUpdated = (updated, existing) => {
 };
 
 const updateOrDeleteEstablishment = async (importing, existing) => {
+  let result;
+
+  result = await updateEstablishment(importing, existing);
+  result["crud"] = 'update';
+
   const userExists = await getUserOrganisationByOrgId(existing.id);
 
-  let result;
-  if (userExists) {
-    result = await updateEstablishment(importing, existing)
-  } else {
+  if (!userExists && isRestrictedStatus(importing)) {
     result = await deleteEstablishment(existing);
+    if (result.saved) {
+      result["crud"] = 'delete';
+    }
   }
 
-  result["crud"] = userExists ? 'update' : 'delete';
   return result;
 
 }
@@ -181,12 +185,12 @@ const addOrUpdateEstablishments = async (importingEstablishments, existingEstabl
     const importing = importingEstablishments[i];
     if (isEstablishmentImportable(importing)) {
       const existing = existingEstablishments.find(e => e.urn && e.urn.toString().toLowerCase().trim() === importing.urn.toString().toLowerCase().trim());
-      const isRestrictedStatus = isRestrictedStatusToCreate(importing);
+      const isRestricted = isRestrictedStatus(importing);
 
       let result;
       if (existing) {
         result = await updateOrDeleteEstablishment(importing, existing);
-      } else if (!isRestrictedStatus) {
+      } else if (!isRestricted) {
         importing.legacyId = await generateLegacyId();
         result = await addEstablishment(importing);
       }
@@ -219,7 +223,7 @@ const addOrUpdateEstablishments = async (importingEstablishments, existingEstabl
           }
         }
       } else {
-        logger.info(`Not importing establishment ${importing.urn} as it doesn't meet importable status`);  
+        logger.info(`Not importing establishment ${importing.urn} as it doesn't meet importable status`);
       }
     } else {
       logger.info(`Not importing establishment ${importing.urn} as it doesn't meet importable criteria`);
