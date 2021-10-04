@@ -224,7 +224,7 @@ const addOrUpdateGroups = async (importingGroups, importingGroupLinks, existingG
         return
       }
 
-      if (result.hasOwnProperty('crud') && result.crud.toLowerCase() == 'delete') {
+      if (result.hasOwnProperty('crud') && result.crud.toLowerCase() === 'delete') {
         return;
       }
 
