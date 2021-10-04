@@ -7,8 +7,10 @@ const { parse: parseGroupLinks } = require('./groupLinksCsvReader');
 const {
   add, update, pagedListOfCategory, addAssociation,
   removeAssociationsOfType,
-  getNextOrganisationLegacyId
- } = require('./../organisations/data/organisationsStorage');
+  getNextOrganisationLegacyId,
+  getUserOrganisationByOrgId,
+  deleteOrganisation
+} = require('./../organisations/data/organisationsStorage');
 const uuid = require('uuid/v4');
 const rp = require('request-promise');
 
@@ -156,20 +158,77 @@ const linkAcademies = async (importing, existing, importingGroupLinks, existingE
   }
 };
 
+const updateOrDeleteGroup = async (importing, existing) => {
+  let result = {};
+
+  const organisationId = await updateGroup(importing, existing);
+  result["organisationId"] = organisationId;
+  result["crud"] = 'update';
+
+  const userExists = await getUserOrganisationByOrgId(existing.id);
+
+  if (!userExists && isRestrictedStatus(importing)) {
+    result = await deleteGroup(existing);
+    if (result.saved) {
+      result["crud"] = 'delete';
+    }
+  }
+
+  return result;
+}
+
+const isRestrictedStatus = (importing) => {
+  const RestrictedStatuses = ['CREATED_IN_ERROR'];
+
+  if (RestrictedStatuses.find(s => s === importing.status)) {
+    return true;
+  }
+
+  return false;
+};
+
+const deleteGroup = async (existing) => {
+  let orgUpdated = false;
+
+  try {
+    await deleteOrganisation(existing.id)
+    orgUpdated = true;
+    logger.info(`Deleted Group ${existing.uid}`);
+  } catch (e) {
+    logger.warn(`Error deleting Group ${existing.uid} - ${e.message}`);
+  }
+
+  return {
+    organisationId: existing.id,
+    saved: orgUpdated,
+  };
+};
+
 const addOrUpdateGroups = async (importingGroups, importingGroupLinks, existingGroups, existingEstablishments) => {
   for (let i = 0; i < importingGroups.length; i += 1) {
     const importing = importingGroups[i];
     if (isGroupImportable(importing)) {
       const existing = existingGroups.find(e => e.uid === importing.uid);
-      let organisationId;
+      const isRestricted = isRestrictedStatus(importing);
+
+      let result = {};
       if (existing) {
-        organisationId = await updateGroup(importing, existing);
-      } else {
+        result = await updateOrDeleteGroup(importing, existing);
+      } else if (!isRestricted) {
         importing.legacyId = await generateLegacyId();
-        organisationId = await addGroup(importing);
+        result['organisationId'] = await addGroup(importing);
       }
 
-      await linkAcademies(importing, existing, importingGroupLinks, existingEstablishments, organisationId);
+      if (!result.hasOwnProperty('organisationId') || !result['organisationId']) {
+        logger.info(`Not importing group ${importing.uid} as it does meet importable criteria`);
+        return
+      }
+
+      if (result.hasOwnProperty('crud') && result.crud.toLowerCase() === 'delete') {
+        return;
+      }
+
+      await linkAcademies(importing, existing, importingGroupLinks, existingEstablishments, result['organisationId']);
     } else {
       logger.info(`Not importing group ${importing.uid} as it does meet importable criteria`);
     }
@@ -223,6 +282,7 @@ const importAllGroupsData = async () => {
   logger.debug('Parsing group links');
   const importingGroupLinks = await parseGroupLinks(groupData.links);
   logger.debug('Getting existing groups');
+
   const existingMATs = await listOfCategory('010', true);
   const existingSATs = await listOfCategory('013', true);
   const existingGroups = existingMATs.concat(existingSATs);
