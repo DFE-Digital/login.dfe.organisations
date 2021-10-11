@@ -76,6 +76,13 @@
                 "description": "The name of the Resource Group that contains the Key Vault"
             }
         },
+        "includeDeploymentSlot": {
+            "type": "bool",
+            "defaultValue": true,
+            "metadata": {
+                "description": "Set to false for worker"
+            }
+        },
         "virtualNetworkResourceGroupName": {
             "type": "string",
             "defaultValue": "",
@@ -199,6 +206,9 @@
                     },
                     "certificateThumbprint": {
                         "value": "[reference(concat(parameters('appServiceName'), '-certificate')).outputs.certificateThumbprint.value]"
+                    },
+                    "includeDeploymentSlot": {
+                        "value": "[parameters('includeDeploymentSlot')]"
                     },
                     "subnetResourceId": {
                         "value": "[variables('serviceSubnetResourceId')]"
