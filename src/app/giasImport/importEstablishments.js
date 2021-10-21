@@ -331,21 +331,8 @@ const importEstablishmentsAndLocalAuthorities = async () => {
   logger.debug('Parsing establishment data');
   const importingEstablishments = await parse(data.establishments);
 
-  importingEstablishments.forEach((establishment) => {
-    if (establishment.urn === '146419') {
-      logger.info(`Establishment ${establishment.urn} found in Data Feed`);
-    }
-  });
-
   logger.debug('Getting existing establishments');
   const existingEstablishments = await listOfCategory('001', true);
-
-  existingEstablishments.forEach((establishment) => {
-    if (establishment.urn === '146419') {
-      logger.info(`Establishment ${establishment.urn} found in DB`);
-    }
-  });
-
 
   logger.debug('Getting local authorities');
   let localAuthorities = await listOfCategory('002');
