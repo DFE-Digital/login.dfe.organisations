@@ -181,8 +181,11 @@ const updateEstablishment = async (importing, existing) => {
 };
 
 const addOrUpdateEstablishments = async (importingEstablishments, existingEstablishments, localAuthorities) => {
-  for (let i = 0; i < importingEstablishments.length; i += 1) {
-    const importing = importingEstablishments[i];
+  const filteredInput = importingEstablishments.find(e => e.urn && e.urn.toString().toLowerCase().trim() === '146419');
+  const filteredInputArray = [filteredInput];
+
+  for (let i = 0; i < filteredInputArray.length; i += 1) {
+    const importing = filteredInputArray[i];
     if (isEstablishmentImportable(importing)) {
       const existing = existingEstablishments.find(e => e.urn && e.urn.toString().toLowerCase().trim() === importing.urn.toString().toLowerCase().trim());
       const isRestricted = isRestrictedStatus(importing);
