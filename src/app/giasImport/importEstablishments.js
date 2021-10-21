@@ -188,7 +188,7 @@ const addOrUpdateEstablishments = async (importingEstablishments, existingEstabl
   logger.info('in add or update establishments');
   const filteredInput = importingEstablishments.find(e => e.urn && e.urn.toString().toLowerCase().trim() === '146419');
   const filteredInputArray = [filteredInput];
-  logger.ingo(`${filteredInput} items in filtered input`);
+  logger.info(`${filteredInput} items in filtered input`);
   for (let i = 0; i < filteredInputArray.length; i += 1) {
     const importing = filteredInputArray[i];
     if (isEstablishmentImportable(importing)) {
