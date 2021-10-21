@@ -120,12 +120,16 @@ const hasBeenUpdated = (updated, existing) => {
 const updateOrDeleteEstablishment = async (importing, existing) => {
   let result;
 
+  logger.info('update establishment');
   result = await updateEstablishment(importing, existing);
   result["crud"] = 'update';
 
   const userExists = await getUserOrganisationByOrgId(existing.id);
 
+  logger.info(`restricted status: ${isRestrictedStatus(importing)}`);
+
   if (!userExists && isRestrictedStatus(importing)) {
+    logger.info('delete establishment');
     result = await deleteEstablishment(existing);
     if (result.saved) {
       result["crud"] = 'delete';
@@ -181,14 +185,21 @@ const updateEstablishment = async (importing, existing) => {
 };
 
 const addOrUpdateEstablishments = async (importingEstablishments, existingEstablishments, localAuthorities) => {
-  for (let i = 0; i < importingEstablishments.length; i += 1) {
-    const importing = importingEstablishments[i];
+  logger.info('in add or update establishments');
+  const filteredInput = importingEstablishments.find(e => e.urn && e.urn.toString().toLowerCase().trim() === '146419');
+  const filteredInputArray = [filteredInput];
+  logger.ingo(`${filteredInput} items in filtered input`);
+  for (let i = 0; i < filteredInputArray.length; i += 1) {
+    const importing = filteredInputArray[i];
     if (isEstablishmentImportable(importing)) {
+      logger.info('establishment is importable');
+
       const existing = existingEstablishments.find(e => e.urn && e.urn.toString().toLowerCase().trim() === importing.urn.toString().toLowerCase().trim());
       const isRestricted = isRestrictedStatus(importing);
 
       let result;
       if (existing) {
+        logger.info('establishment exists');
         result = await updateOrDeleteEstablishment(importing, existing);
       } else if (!isRestricted) {
         importing.legacyId = await generateLegacyId();
@@ -332,21 +343,35 @@ const listOfCategory = async (category, includeAssociations = false) => {
 };
 
 const importEstablishmentsAndLocalAuthorities = async () => {
-  logger.debug('Getting establishment data');
+  logger.info('Getting establishment data');
   const data = await getEstablishmentsFile();
 
-  logger.debug('Parsing establishment data');
+  logger.info('Parsing establishment data');
   const importingEstablishments = await parse(data.establishments);
+
+  importingEstablishments.forEach((establishment) => {
+    if(establishment.urn === '146419') {
+      logger.info('FOUND in data feed');
+      logger.info(establishment);
+    }
+  });
 
   logger.debug('Getting existing establishments');
   const existingEstablishments = await listOfCategory('001', true);
 
-  logger.debug('Getting local authorities');
+  existingEstablishments.forEach((establishment) => {
+    if(establishment.urn === '146419') {
+      logger.info('FOUND in DB');
+      logger.info(establishment);
+    }
+  });
+
+  logger.info('Getting local authorities');
   let localAuthorities = await listOfCategory('002');
 
   const localAuthoritiesUpdated = await addOrUpdateLocalAuthorities(importingEstablishments, localAuthorities);
   if (localAuthoritiesUpdated) {
-    logger.debug('Re-getting local authorities after updates');
+    logger.info('Re-getting local authorities after updates');
     localAuthorities = await listOfCategory('002');
   }
 
