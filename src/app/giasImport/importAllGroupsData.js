@@ -162,15 +162,15 @@ const updateOrDeleteGroup = async (importing, existing) => {
   let result = {};
 
   const organisationId = await updateGroup(importing, existing);
-  result["organisationId"] = organisationId;
-  result["crud"] = 'update';
+  result.organisationId = organisationId;
+  result.crud = 'update';
 
   const userExists = await getUserOrganisationByOrgId(existing.id);
 
   if (!userExists && isRestrictedStatus(importing)) {
     result = await deleteGroup(existing);
     if (result.saved) {
-      result["crud"] = 'delete';
+      result.crud = 'delete';
     }
   }
 
@@ -216,19 +216,13 @@ const addOrUpdateGroups = async (importingGroups, importingGroupLinks, existingG
         result = await updateOrDeleteGroup(importing, existing);
       } else if (!isRestricted) {
         importing.legacyId = await generateLegacyId();
-        result['organisationId'] = await addGroup(importing);
+        result.organisationId = await addGroup(importing);
       }
 
-      if (!result.hasOwnProperty('organisationId') || !result['organisationId']) {
-        logger.info(`Not importing group ${importing.uid} as it does meet importable criteria`);
-        return
+      // if all went well in add/update/delete and it was NOT a delete, then update links
+      if (result && result.organisationId && !(result.crud && result.crud.toLowerCase() === 'delete')) {
+        await linkAcademies(importing, existing, importingGroupLinks, existingEstablishments, result.organisationId);
       }
-
-      if (result.hasOwnProperty('crud') && result.crud.toLowerCase() === 'delete') {
-        return;
-      }
-
-      await linkAcademies(importing, existing, importingGroupLinks, existingEstablishments, result['organisationId']);
     } else {
       logger.info(`Not importing group ${importing.uid} as it does meet importable criteria`);
     }
