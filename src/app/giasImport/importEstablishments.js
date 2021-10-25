@@ -181,8 +181,9 @@ const updateEstablishment = async (importing, existing) => {
 };
 
 const addOrUpdateEstablishments = async (importingEstablishments, existingEstablishments, localAuthorities) => {
-  for (let i = 0; i < importingEstablishments.length; i += 1) {
-    const importing = importingEstablishments[i];
+  await importingEstablishments.reduce(async (memo, importing) => {
+    await memo;
+
     if (isEstablishmentImportable(importing)) {
       const existing = existingEstablishments.find(e => e.urn && e.urn.toString().toLowerCase().trim() === importing.urn.toString().toLowerCase().trim());
       const isRestricted = isRestrictedStatus(importing);
@@ -228,7 +229,7 @@ const addOrUpdateEstablishments = async (importingEstablishments, existingEstabl
     } else {
       logger.info(`Not importing establishment ${importing.urn} as it doesn't meet importable criteria`);
     }
-  }
+  }, undefined);
 };
 
 const isLocalAuthorityImportable = (importing) => {

@@ -205,8 +205,10 @@ const deleteGroup = async (existing) => {
 };
 
 const addOrUpdateGroups = async (importingGroups, importingGroupLinks, existingGroups, existingEstablishments) => {
-  for (let i = 0; i < importingGroups.length; i += 1) {
-    const importing = importingGroups[i];
+
+  await importingGroups.reduce(async (memo, importing) => {
+    await memo;
+
     if (isGroupImportable(importing)) {
       const existing = existingGroups.find(e => e.uid === importing.uid);
       const isRestricted = isRestrictedStatus(importing);
@@ -232,7 +234,7 @@ const addOrUpdateGroups = async (importingGroups, importingGroupLinks, existingG
     } else {
       logger.info(`Not importing group ${importing.uid} as it does meet importable criteria`);
     }
-  }
+  }, undefined);
 };
 
 const listOfCategory = async (category, includeAssociations = false) => {
