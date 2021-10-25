@@ -205,7 +205,8 @@ const deleteGroup = async (existing) => {
 };
 
 const addOrUpdateGroups = async (importingGroups, importingGroupLinks, existingGroups, existingEstablishments) => {
-
+  //Asynchronous array function-Sequential processing
+  //Elements are processed in-order, one after the other, and the program execution waits for the whole array to finish before moving on.
   await importingGroups.reduce(async (memo, importing) => {
     await memo;
 
