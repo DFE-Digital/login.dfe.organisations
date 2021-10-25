@@ -181,6 +181,8 @@ const updateEstablishment = async (importing, existing) => {
 };
 
 const addOrUpdateEstablishments = async (importingEstablishments, existingEstablishments, localAuthorities) => {
+  //Asynchronous array function-Sequential processing
+  //Elements are processed in-order, one after the other, and the program execution waits for the whole array to finish before moving on.
   await importingEstablishments.reduce(async (memo, importing) => {
     await memo;
 
