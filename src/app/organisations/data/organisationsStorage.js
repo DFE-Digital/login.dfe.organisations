@@ -587,7 +587,7 @@ const deleteOrganisation = async (
   organisationId
 ) => {
   try {
-    logger.info(`Deleting org ${organisationId}`, { organisationId });
+    logger.info(`Deleting org ${organisationId}`);
     await organisations.destroy({
       where: {
         id: {
@@ -596,7 +596,7 @@ const deleteOrganisation = async (
       }
     });
   } catch (e) {
-    logger.error(`error deleting organisation - ${e.message} (id: ${organisationId})`, { organisationId });
+    logger.error(`error deleting organisation - ${e.message} (id: ${organisationId})`);
     throw e;
   }
 };
