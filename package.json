@@ -14,7 +14,7 @@
     "lodash": "^4.17.21",
     "login.dfe.api.auth": "github:DFE-Digital/login.dfe.api.auth#v2.0.2",
     "login.dfe.config.schema.common": "git+https://github.com/DFE-Digital/login.dfe.config.schema.common.git#v1.4",
-    "login.dfe.express-error-handling": "git+https://github.com/DFE-Digital/login.dfe.express-error-handling.git#v1.2",
+    "login.dfe.express-error-handling": "git+https://github.com/DFE-Digital/login.dfe.express-error-handling.git#v1.7.0",
     "login.dfe.healthcheck": "git+https://github.com/DFE-Digital/login.dfe.healthcheck.git#v1.8",
     "login.dfe.jwt-strategies": "git+https://github.com/DFE-Digital/login.dfe.jwt-strategies.git#v3.0",
     "login.dfe.notifications.client": "git+https://github.com/DFE-Digital/login.dfe.notifications.client.git#v3.8",
