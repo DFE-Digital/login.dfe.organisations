@@ -522,6 +522,7 @@ const getOrganisationsAssociatedToUser = async userId => {
   return mapAsync(userOrgs, async userOrg => {
     const role = await userOrg.getRole();
     const approvers = (await userOrg.getApprovers()).map(user => user.user_id);
+    const endUsers = (await userOrg.getEndUsers()).map(user => user.user_id);
     const organisation = await mapOrganisationFromEntity(userOrg.Organisation);
     await updateOrganisationsWithLocalAuthorityDetails([organisation]);
 
@@ -529,6 +530,7 @@ const getOrganisationsAssociatedToUser = async userId => {
       organisation,
       role,
       approvers,
+      endUsers,
       numericIdentifier: userOrg.numeric_identifier || undefined,
       textIdentifier: userOrg.text_identifier || undefined
     };
