@@ -61,6 +61,18 @@ const extend = ({ userOrganisations, organisations, users, roles }) => {
       },
     });
   };
+  userOrganisations.prototype.getEndUsers = function () {
+    return userOrganisations.findAll({
+      where: {
+        organisation_id: {
+          [Op.eq]: this.organisation_id,
+        },
+        role_id: {
+          [Op.eq]: 0,
+        },
+      },
+    });
+  };
 };
 
 module.exports = {
