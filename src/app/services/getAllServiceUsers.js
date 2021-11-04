@@ -50,7 +50,11 @@ const getServiceUsers = async (req, res) => {
       return;
     }
 
-    const usersOfService = await servicesStorage.getAllUsersOfService(serviceId, pageNumber, pageSize, req.header('x-correlation-id'));
+    let userIds;
+    if (req.body && req.body.userIds)
+      userIds = req.body.userIds;
+
+    const usersOfService = await servicesStorage.getAllUsersOfService(serviceId, userIds, pageNumber, pageSize, req.header('x-correlation-id'));
 
     res.status(200).send(usersOfService);
   } catch (e) {
