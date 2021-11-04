@@ -7,8 +7,10 @@ const { parse: parseGroupLinks } = require('./groupLinksCsvReader');
 const {
   add, update, pagedListOfCategory, addAssociation,
   removeAssociationsOfType,
-  getNextOrganisationLegacyId
- } = require('./../organisations/data/organisationsStorage');
+  getNextOrganisationLegacyId,
+  getUserOrganisationByOrgId,
+  deleteOrganisation
+} = require('./../organisations/data/organisationsStorage');
 const uuid = require('uuid/v4');
 const rp = require('request-promise');
 
@@ -21,13 +23,14 @@ const isGroupImportable = (group) => {
     return false;
   }
 
-  const importableStatuses = ['OPEN', 'CLOSED', 'PROPOSED_TO_OPEN'];
+  const importableStatuses = ['OPEN', 'CLOSED', 'PROPOSED_TO_OPEN', 'CREATED_IN_ERROR'];
   if (!importableStatuses.find(x => x === group.status)) {
     return false;
   }
 
   return true;
 };
+
 const mapImportRecordForStorage = (importing) => {
   const address = importing.address.filter(x => x !== null).join(', ');
 
@@ -46,6 +49,11 @@ const mapImportRecordForStorage = (importing) => {
     case 'PROPOSED_TO_OPEN':
       status = {
         id: 4,
+      };
+      break;
+    case "CREATED_IN_ERROR":
+      status = {
+        id: 9,
       };
       break;
     default:
@@ -96,7 +104,14 @@ const hasBeenUpdated = (newValue, oldValue) => {
   }
 
   if (newValue instanceof Date) {
-    return newValue.getTime() !== oldValue.getTime();
+    if (oldValue instanceof Date) {
+      const nValue = newValue.getTime();
+      const oValue = oldValue.getTime();
+      return nValue !== oValue;
+    } else if (typeof oldValue === 'string') {
+      const nDate = newValue.toISOString().split('T')[0];
+      return oldValue !== nDate;
+    }
   }
 
   if (newValue instanceof Object && Object.keys(newValue).find(x => x === 'id')) {
@@ -121,6 +136,7 @@ const updateGroup = async (importing, existing) => {
 
   return updated.id;
 };
+
 const linkAcademies = async (importing, existing, importingGroupLinks, existingEstablishments, organisationId) => {
   const importingLinks = importingGroupLinks.filter(x => x.uid === importing.uid);
   const links = importingLinks.map((link) => {
@@ -141,24 +157,85 @@ const linkAcademies = async (importing, existing, importingGroupLinks, existingE
     await addAssociation(importingLink.organisationId, importingLink.associatedOrganisationId, importingLink.linkType);
   }
 };
+
+const updateOrDeleteGroup = async (importing, existing) => {
+  let result = {};
+
+  const organisationId = await updateGroup(importing, existing);
+  result["organisationId"] = organisationId;
+  result["crud"] = 'update';
+
+  const userExists = await getUserOrganisationByOrgId(existing.id);
+
+  if (!userExists && isRestrictedStatus(importing)) {
+    result = await deleteGroup(existing);
+    if (result.saved) {
+      result["crud"] = 'delete';
+    }
+  }
+
+  return result;
+}
+
+const isRestrictedStatus = (importing) => {
+  const RestrictedStatuses = ['CREATED_IN_ERROR'];
+
+  if (RestrictedStatuses.find(s => s === importing.status)) {
+    return true;
+  }
+
+  return false;
+};
+
+const deleteGroup = async (existing) => {
+  let orgUpdated = false;
+
+  try {
+    await deleteOrganisation(existing.id)
+    orgUpdated = true;
+    logger.info(`Deleted Group ${existing.uid}`);
+  } catch (e) {
+    logger.warn(`Error deleting Group ${existing.uid} - ${e.message}`);
+  }
+
+  return {
+    organisationId: existing.id,
+    saved: orgUpdated,
+  };
+};
+
 const addOrUpdateGroups = async (importingGroups, importingGroupLinks, existingGroups, existingEstablishments) => {
-  for (let i = 0; i < importingGroups.length; i += 1) {
-    const importing = importingGroups[i];
+  //Asynchronous array function-Sequential processing
+  //Elements are processed in-order, one after the other, and the program execution waits for the whole array to finish before moving on.
+  await importingGroups.reduce(async (memo, importing) => {
+    await memo;
+
     if (isGroupImportable(importing)) {
       const existing = existingGroups.find(e => e.uid === importing.uid);
-      let organisationId;
+      const isRestricted = isRestrictedStatus(importing);
+
+      let result = {};
       if (existing) {
-        organisationId = await updateGroup(importing, existing);
-      } else {
+        result = await updateOrDeleteGroup(importing, existing);
+      } else if (!isRestricted) {
         importing.legacyId = await generateLegacyId();
-        organisationId = await addGroup(importing);
+        result['organisationId'] = await addGroup(importing);
       }
 
-      await linkAcademies(importing, existing, importingGroupLinks, existingEstablishments, organisationId);
+      if (!result.hasOwnProperty('organisationId') || !result['organisationId']) {
+        logger.info(`Not importing group ${importing.uid} as it does meet importable criteria`);
+        return
+      }
+
+      if (result.hasOwnProperty('crud') && result.crud.toLowerCase() === 'delete') {
+        return;
+      }
+
+      await linkAcademies(importing, existing, importingGroupLinks, existingEstablishments, result['organisationId']);
     } else {
       logger.info(`Not importing group ${importing.uid} as it does meet importable criteria`);
     }
-  }
+  }, undefined);
 };
 
 const listOfCategory = async (category, includeAssociations = false) => {
@@ -175,7 +252,7 @@ const listOfCategory = async (category, includeAssociations = false) => {
   return allOrgs;
 };
 
-const getAllGroupsDataFile = async() => {
+const getAllGroupsDataFile = async () => {
   // Try to get today's file if you can't find it then read yesterday's file.
   const today = moment().format('YYYYMMDD');
   try {
@@ -188,7 +265,7 @@ const getAllGroupsDataFile = async() => {
   return await getAllGroupsDataFileForDate(yesterday);
 };
 
-const getAllGroupsDataFileForDate = async(date) => {
+const getAllGroupsDataFileForDate = async (date) => {
   const uri = `${config.gias.allGroupsDataUrl}`.replace('#date#', date);
   logger.info(`Reading the allGroupsDataUrl ${uri}`);
 
@@ -208,6 +285,7 @@ const importAllGroupsData = async () => {
   logger.debug('Parsing group links');
   const importingGroupLinks = await parseGroupLinks(groupData.links);
   logger.debug('Getting existing groups');
+
   const existingMATs = await listOfCategory('010', true);
   const existingSATs = await listOfCategory('013', true);
   const existingGroups = existingMATs.concat(existingSATs);
