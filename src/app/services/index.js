@@ -38,6 +38,7 @@ const servicesRouteExport = () => {
   router.get('/associated-with-user/:uid', asyncWrapper(getUserAssociatedServices));
   router.get('/unassociated-with-user/:uid', asyncWrapper(getUnassociatedWithUserServices));
   router.get('/:sid/users', asyncWrapper(getAllServiceUsers));
+  router.post('/:sid/users', asyncWrapper(getAllServiceUsers));
 
   return router;
 };
