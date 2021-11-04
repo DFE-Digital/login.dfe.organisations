@@ -93,7 +93,7 @@ const getForInvitationId = async (id, correlationId) => {
     });
     return Promise.all(invitationOrgs.map(async (invitationOrg) => {
       const role = await invitationOrg.getRole();
-      const approvers = await invitationOrg.getApprovers().map(user => user.user_id);
+      const approvers = (await invitationOrg.getApprovers()).map(user => user.user_id);
       const services = await invitations.findAll(
         {
           where: {
@@ -121,7 +121,7 @@ const getForInvitationId = async (id, correlationId) => {
         role,
         approvers,
         services: await Promise.all(services.map(async (service) => {
-          const externalIdentifiers = await service.getExternalIdentifiers().map(extId => ({
+          const externalIdentifiers = (await service.getExternalIdentifiers()).map(extId => ({
             key: extId.identifier_key,
             value: extId.identifier_value,
           }));

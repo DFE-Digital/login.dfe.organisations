@@ -15,7 +15,7 @@ const isGroupImportable = (group) => {
     return false;
   }
 
-  const importableStatuses = ['OPEN', 'CLOSED', 'PROPOSED_TO_OPEN'];
+  const importableStatuses = ['OPEN', 'CLOSED', 'PROPOSED_TO_OPEN', 'CREATED_IN_ERROR'];
   if (!importableStatuses.find(x => x === group.status)) {
     return false;
   }
@@ -40,6 +40,11 @@ const mapImportRecordForStorage = (importing) => {
     case 'PROPOSED_TO_OPEN':
       status = {
         id: 4,
+      };
+      break;
+    case 'CREATED_IN_ERROR':
+      status = {
+        id: 9,
       };
       break;
     default:
@@ -90,7 +95,14 @@ const hasBeenUpdated = (newValue, oldValue) => {
   }
 
   if (newValue instanceof Date) {
-    return newValue.getTime() !== oldValue.getTime();
+    if (oldValue instanceof Date) {
+      const nValue = newValue.getTime();
+      const oValue = oldValue.getTime();
+      return nValue !== oValue;
+    } else if (typeof oldValue === 'string') {
+      const nDate = newValue.toISOString().split('T')[0];
+      return oldValue !== nDate;
+    }
   }
 
   if (newValue instanceof Object && Object.keys(newValue).find(x => x === 'id')) {

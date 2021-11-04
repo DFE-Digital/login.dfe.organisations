@@ -67,7 +67,7 @@ const extend = ({ users, organisations, services, externalIdentifiers, userOrgan
     });
   };
   users.prototype.getRole = async function () {
-    const userOrganisation = await userOrganisations.find({
+    const userOrganisation = await userOrganisations.findOne({
       where: {
         user_id: {
           [Op.eq]: this.user_id,
