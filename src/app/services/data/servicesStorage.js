@@ -193,24 +193,31 @@ const getUsersOfService = async (organisationId, id, correlationId) => {
   }
 };
 
-const getAllUsersOfService = async (id, page, pageSize, correlationId) => {
+const getAllUsersOfService = async (id, userIds, page, pageSize, correlationId) => {
   try {
     logger.info(`Calling getAllUsersOfService for services storage for request ${correlationId}`, { correlationId });
-    const userServiceEntities = await users.findAndCountAll(
-      {
-        order: [
-          ['user_id', 'ASC'],
-          ['organisation_id', 'ASC'],
-        ],
-        limit: pageSize,
-        offset: page !== 1 ? pageSize * (page - 1) : 0,
-        where: {
-          service_id: {
-            [Op.eq]: id,
-          },
+    const query = {
+      order: [
+        ['user_id', 'ASC'],
+        ['organisation_id', 'ASC'],
+      ],
+      limit: pageSize,
+      offset: page !== 1 ? pageSize * (page - 1) : 0,
+      where: {
+        service_id: {
+          [Op.eq]: id,
         },
-        include: ['Organisation'],
-      });
+      },
+      include: ['Organisation'],
+    };
+
+    if (userIds && userIds.length > 0) {
+      query.where.user_id = {
+        [Op.in]: userIds
+      }
+    }
+
+    const userServiceEntities = await users.findAndCountAll(query);
 
     const mappedUsers = await Promise.all(userServiceEntities.rows.map(async (userServiceEntity) => {
       const role = await userServiceEntity.getRole();
