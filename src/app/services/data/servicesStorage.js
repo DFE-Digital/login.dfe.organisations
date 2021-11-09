@@ -193,7 +193,11 @@ const getUsersOfService = async (organisationId, id, correlationId) => {
   }
 };
 
-const getAllUsersOfService = async (id, userIds, page, pageSize, correlationId) => {
+const getAllUsersOfService = async (id, page, pageSize, correlationId) => {
+  return getUsersOfServiceByUserIds(id, null, page, pageSize, correlationId);
+}
+
+const getUsersOfServiceByUserIds = async (id, userIds, page, pageSize, correlationId) => {
   try {
     logger.info(`Calling getAllUsersOfService for services storage for request ${correlationId}`, { correlationId });
     const query = {
@@ -729,5 +733,7 @@ module.exports = {
   upsertUserService,
   deleteUserService,
   getAllUsersOfService,
+  getUsersOfServiceByUserIds
+  
 };
 
