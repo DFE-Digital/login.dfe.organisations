@@ -99,8 +99,8 @@ const mapOrganisationFromEntity = entity => {
     region: regionCodes.find(c => c.id === entity.regionCode),
     localAuthority: laAssociation
       ? {
-          id: laAssociation.associated_organisation_id
-        }
+        id: laAssociation.associated_organisation_id
+      }
       : undefined,
     phaseOfEducation: phasesOfEducation.find(
       c => c.id === entity.phaseOfEducation
@@ -126,7 +126,7 @@ const mapAnnouncementFromEntity = entity => {
   };
 };
 
-const list = async(includeAssociations = false) => {
+const list = async (includeAssociations = false) => {
   try {
     const findOrgsOpts = {};
     if (includeAssociations) {
@@ -189,7 +189,7 @@ const getOrgById = async id => {
   return org;
 };
 
-const pagedSearch = async(
+const pagedSearch = async (
   criteria,
   pageNumber = 1,
   pageSize = 25,
@@ -273,7 +273,7 @@ const add = async organisation => {
 };
 
 const update = async organisation => {
-  const existing = await organisations.find({
+  const existing = await organisations.findOne({
     where: {
       id: {
         [Op.eq]: organisation.id
@@ -291,7 +291,7 @@ const update = async organisation => {
   await existing.save();
 };
 
-const listOfCategory = async(category, includeAssociations = false) => {
+const listOfCategory = async (category, includeAssociations = false) => {
   const query = {
     where: {
       Category: {
@@ -321,7 +321,7 @@ const listOfCategory = async(category, includeAssociations = false) => {
   }));
 };
 
-const pagedListOfCategory = async(
+const pagedListOfCategory = async (
   category,
   includeAssociations = false,
   pageNumber = 1,
@@ -339,7 +339,8 @@ const pagedListOfCategory = async(
       ['id', 'ASC']
     ],
     limit: pageSize,
-    offset
+    offset,
+    distinct: true
   };
   if (includeAssociations) {
     query.include = ['associations'];
@@ -389,7 +390,7 @@ const pagedListOfCategory = async(
   };
 };
 
-const addAssociation = async(
+const addAssociation = async (
   organisationId,
   associatedOrganisationId,
   linkType
@@ -402,7 +403,7 @@ const addAssociation = async(
   await organisationAssociations.create(entity);
 };
 
-const removeAssociationsOfType = async(organisationId, linkType) => {
+const removeAssociationsOfType = async (organisationId, linkType) => {
   await organisationAssociations.destroy({
     where: {
       organisation_id: {
@@ -444,7 +445,7 @@ const getOrganisationsForUserIncludingServices = async userId => {
         include: ['Service']
       });
       const role = await userOrg.getRole();
-      const approvers = await userOrg.getApprovers().map(user => user.user_id);
+      const approvers = (await userOrg.getApprovers()).map(user => user.user_id);
 
       return {
         organisation: {
@@ -473,8 +474,8 @@ const getOrganisationsForUserIncludingServices = async userId => {
         approvers,
         services: await Promise.all(
           services.map(async service => {
-            const externalIdentifiers = await service
-              .getExternalIdentifiers()
+            const externalIdentifiers = (await service
+              .getExternalIdentifiers())
               .map(extId => ({
                 key: extId.identifier_key,
                 value: extId.identifier_value
@@ -536,7 +537,7 @@ const getOrganisationsAssociatedToUser = async userId => {
   });
 };
 
-const setUserAccessToOrganisation = async(
+const setUserAccessToOrganisation = async (
   organisationId,
   userId,
   roleId,
@@ -555,7 +556,7 @@ const setUserAccessToOrganisation = async(
     text_identifier: textIdentifier
   });
 
-const deleteUserOrganisation = async(
+const deleteUserOrganisation = async (
   organisationId,
   userId,
   correlationId
@@ -584,7 +585,25 @@ const deleteUserOrganisation = async(
   }
 };
 
-const getOrganisationCategories = async() => {
+const deleteOrganisation = async (
+  organisationId
+) => {
+  try {
+    logger.info(`Deleting org ${organisationId}`);
+    await organisations.destroy({
+      where: {
+        id: {
+          [Op.eq]: organisationId
+        }
+      }
+    });
+  } catch (e) {
+    logger.error(`error deleting organisation - ${e.message} (id: ${organisationId})`);
+    throw e;
+  }
+};
+
+const getOrganisationCategories = async () => {
   const categories = organisationCategory.sort((x, y) => {
     if (x.name < y.name) {
       return -1;
@@ -597,7 +616,7 @@ const getOrganisationCategories = async() => {
   return Promise.resolve(categories);
 };
 
-const getOrganisationStates = async() => {
+const getOrganisationStates = async () => {
   const categories = organisationStatus.sort((x, y) => {
     if (x.name < y.name) {
       return -1;
@@ -658,7 +677,7 @@ const getUsersPendingApprovalByUser = async userId => {
   }));
 };
 
-const getUsersPendingApproval = async(pageNumber = 1, pageSize = 25) => {
+const getUsersPendingApproval = async (pageNumber = 1, pageSize = 25) => {
   const offset = (pageNumber - 1) * pageSize;
   const associatedUsersForApproval = await userOrganisations.findAndCountAll({
     where: {
@@ -701,7 +720,7 @@ const getUsersPendingApproval = async(pageNumber = 1, pageSize = 25) => {
   };
 };
 
-const getOrgByUrn = async(urn, category) => {
+const getOrgByUrn = async (urn, category) => {
   try {
     const query = {
       where: {
@@ -723,7 +742,7 @@ const getOrgByUrn = async(urn, category) => {
   }
 };
 
-const getOrgByUid = async(uid, category) => {
+const getOrgByUid = async (uid, category) => {
   try {
     const query = {
       where: {
@@ -745,7 +764,7 @@ const getOrgByUid = async(uid, category) => {
   }
 };
 
-const getOrgByEstablishmentNumber = async(establishmentNumber, category) => {
+const getOrgByEstablishmentNumber = async (establishmentNumber, category) => {
   try {
     const query = {
       where: {
@@ -770,7 +789,7 @@ const getOrgByEstablishmentNumber = async(establishmentNumber, category) => {
   }
 };
 
-const getOrgByUkprn = async(ukprn, category) => {
+const getOrgByUkprn = async (ukprn, category) => {
   try {
     const query = {
       where: {
@@ -792,7 +811,7 @@ const getOrgByUkprn = async(ukprn, category) => {
   }
 };
 
-const getAllOrgsByUkprn = async(ukprn, category) => {
+const getAllOrgsByUkprn = async (ukprn, category) => {
   try {
     const query = {
       where: {
@@ -814,7 +833,7 @@ const getAllOrgsByUkprn = async(ukprn, category) => {
   }
 };
 
-const getOrgByLegacyId = async(legacyId, category) => {
+const getOrgByLegacyId = async (legacyId, category) => {
   try {
     const query = {
       where: {
@@ -836,7 +855,7 @@ const getOrgByLegacyId = async(legacyId, category) => {
   }
 };
 
-const getUsersAssociatedWithOrganisation = async(
+const getUsersAssociatedWithOrganisation = async (
   orgId,
   pageNumber = 1,
   pageSize = 25
@@ -872,7 +891,7 @@ const getUsersAssociatedWithOrganisation = async(
   );
 };
 
-const pagedListOfUsers = async(pageNumber = 1, pageSize = 25) => {
+const pagedListOfUsers = async (pageNumber = 1, pageSize = 25) => {
   const recordset = await userOrganisations.findAndCountAll({
     limit: pageSize,
     offset: (pageNumber - 1) * pageSize,
@@ -904,7 +923,7 @@ const pagedListOfUsers = async(pageNumber = 1, pageSize = 25) => {
   };
 };
 
-const getPagedListOfUsersV2 = async(
+const getPagedListOfUsersV2 = async (
   pageNumber = 1,
   pageSize = 25,
   roleId = undefined,
@@ -963,7 +982,7 @@ const getPagedListOfUsersV2 = async(
   };
 };
 
-const getPagedListOfUsersV3 = async(
+const getPagedListOfUsersV3 = async (
   pageNumber = 1,
   pageSize = 25,
   roleId = undefined,
@@ -1071,7 +1090,7 @@ const getPagedListOfUsersV3 = async(
   };
 };
 
-const pagedListOfInvitations = async(pageNumber = 1, pageSize = 25) => {
+const pagedListOfInvitations = async (pageNumber = 1, pageSize = 25) => {
   const recordset = await invitationOrganisations.findAndCountAll({
     limit: pageSize,
     offset: (pageNumber - 1) * pageSize,
@@ -1101,7 +1120,7 @@ const pagedListOfInvitations = async(pageNumber = 1, pageSize = 25) => {
 };
 
 const getUserOrganisationByTextIdentifier = async textIdentifier => {
-  const entity = await userOrganisations.find({
+  const entity = await userOrganisations.findOne({
     where: {
       text_identifier: {
         [Op.eq]: textIdentifier
@@ -1111,17 +1130,28 @@ const getUserOrganisationByTextIdentifier = async textIdentifier => {
   return entity || undefined;
 };
 
-const getNextUserOrgNumericIdentifier = async() => {
+const getUserOrganisationByOrgId = async orgId => {
+  const entity = await userOrganisations.findOne({
+    where: {
+      organisation_id: {
+        [Op.eq]: orgId
+      }
+    }
+  });
+  return entity || undefined;
+};
+
+const getNextUserOrgNumericIdentifier = async () => {
   const NUMERIC_ID = await getNextNumericId();
   return NUMERIC_ID;
 };
 
-const getNextOrganisationLegacyId = async() => {
+const getNextOrganisationLegacyId = async () => {
   const LEGACY_ID = await getNextLegacyId();
   return LEGACY_ID;
 };
 
-const listAnnouncements = async(
+const listAnnouncements = async (
   organisationId = undefined,
   originId = undefined,
   onlyPublishedAnnouncements = true,
@@ -1160,7 +1190,7 @@ const listAnnouncements = async(
   };
 };
 
-const upsertAnnouncement = async(
+const upsertAnnouncement = async (
   originId,
   organisationId,
   type,
@@ -1171,7 +1201,7 @@ const upsertAnnouncement = async(
   expiresAt,
   published
 ) => {
-  let entity = await organisationAnnouncements.find({
+  let entity = await organisationAnnouncements.findOne({
     where: {
       origin_id: {
         [Op.eq]: originId
@@ -1236,7 +1266,7 @@ const createUserOrgRequest = async request => {
 };
 
 const getUserOrgRequestById = async rid => {
-  const entity = await userOrganisationRequests.find({
+  const entity = await userOrganisationRequests.findOne({
     where: {
       id: {
         [Op.eq]: rid
@@ -1330,7 +1360,7 @@ const getRequestsAssociatedWithOrganisation = async orgId => {
   }));
 };
 
-const pagedListOfRequests = async(
+const pagedListOfRequests = async (
   pageNumber = 1,
   pageSize = 25,
   filterStates = undefined
@@ -1375,7 +1405,7 @@ const pagedListOfRequests = async(
   };
 };
 
-const updateUserOrgRequest = async(requestId, request) => {
+const updateUserOrgRequest = async (requestId, request) => {
   const existingRequest = await userOrganisationRequests.findOne({
     where: {
       id: {
@@ -1486,6 +1516,7 @@ module.exports = {
   getOrganisationsAssociatedToUser,
   setUserAccessToOrganisation,
   deleteUserOrganisation,
+  deleteOrganisation,
   getOrganisationCategories,
   getOrganisationStates,
   getUsersPendingApprovalByUser,
@@ -1495,6 +1526,7 @@ module.exports = {
   pagedListOfUsers,
   pagedListOfInvitations,
   getUserOrganisationByTextIdentifier,
+  getUserOrganisationByOrgId,
   getNextUserOrgNumericIdentifier,
   getNextOrganisationLegacyId,
   listAnnouncements,

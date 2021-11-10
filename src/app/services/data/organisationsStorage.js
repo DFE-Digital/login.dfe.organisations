@@ -10,7 +10,7 @@ const { list, getOrgById, getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber,
 
 const updateOrg = async (id, name) => {
   const org = await getOrgById(id);
-  await org.updateAttributes({ name });
+  await org.update({ name });
 };
 
 const createOrg = async (id, name) => {
