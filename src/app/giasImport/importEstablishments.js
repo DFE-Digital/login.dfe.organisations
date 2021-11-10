@@ -121,20 +121,19 @@ const updateOrDeleteEstablishment = async (importing, existing) => {
   let result;
 
   result = await updateEstablishment(importing, existing);
-  result["crud"] = 'update';
+  result.crud = 'update';
 
   const userExists = await getUserOrganisationByOrgId(existing.id);
 
   if (!userExists && isRestrictedStatus(importing)) {
     result = await deleteEstablishment(existing);
     if (result.saved) {
-      result["crud"] = 'delete';
+      result.crud = 'delete';
     }
   }
 
   return result;
-
-}
+};
 
 const deleteEstablishment = async (existing) => {
   let orgUpdated = false;
@@ -198,12 +197,8 @@ const addOrUpdateEstablishments = async (importingEstablishments, existingEstabl
         result = await addEstablishment(importing);
       }
 
-      if (result && result.organisationId) {
-
-        if (result.hasOwnProperty('crud') && result.crud.toLowerCase() == 'delete') {
-          return;
-        }
-
+      // if all went well in add/update/delete and it was NOT a delete, then update LA links
+      if (result && result.organisationId && !(result.crud && result.crud.toLowerCase() === 'delete')) {
         const organisationId = result.organisationId;
 
         const localAuthority = localAuthorities.find(la => la.establishmentNumber === importing.laCode);
@@ -225,8 +220,6 @@ const addOrUpdateEstablishments = async (importingEstablishments, existingEstabl
             logger.info(`Notified update of establishment ${importing.urn}`);
           }
         }
-      } else {
-        logger.info(`Not importing establishment ${importing.urn} as it doesn't meet importable status`);
       }
     } else {
       logger.info(`Not importing establishment ${importing.urn} as it doesn't meet importable criteria`);
