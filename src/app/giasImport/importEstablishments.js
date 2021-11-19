@@ -1,7 +1,7 @@
 const logger = require('./../../infrastructure/logger');
 const config = require('./../../infrastructure/config')();
 const { parse } = require('./establishmentCsvReader');
-const { getNextOrganisationLegacyId, list, add, update, pagedListOfCategory, addAssociation, removeAssociationsOfType, getUserOrganisationByOrgId, deleteOrganisation } = require('./../organisations/data/organisationsStorage');
+const { getNextOrganisationLegacyId, list, add, update, pagedListOfCategory, addAssociation, removeAssociationsOfType, getUserOrganisationByOrgId, deleteOrganisation, removeAssociations } = require('./../organisations/data/organisationsStorage');
 const { raiseNotificationThatOrganisationHasChanged } = require('./../organisations/notifications');
 const { getEstablishmentsFile } = require('./../../infrastructure/gias');
 const uuid = require('uuid/v4');
@@ -120,15 +120,35 @@ const hasBeenUpdated = (updated, existing) => {
 const updateOrDeleteEstablishment = async (importing, existing) => {
   let result;
 
-  result = await updateEstablishment(importing, existing);
-  result["crud"] = 'update';
+  if (!isRestrictedStatus(importing)) {
+    result = await updateEstablishment(importing, existing);
+    result.crud = 'update';
+  } else {
+    const userExists = await getUserOrganisationByOrgId(existing.id);
+    if (!userExists) {
+      try {
+        // try to delete the organisation if there no user attached. 
+        // Exception thrown when there are child data. Log the information and continue with the next establishment from the GIAS Sync.
+        result = {
+          organisationId: existing.id,
+          saved: false,
+          crud: 'delete'
+        }
 
-  const userExists = await getUserOrganisationByOrgId(existing.id);
+        await removeAssociations(existing.id)
 
-  if (!userExists && isRestrictedStatus(importing)) {
-    result = await deleteEstablishment(existing);
-    if (result.saved) {
-      result["crud"] = 'delete';
+        result = await deleteEstablishment(existing);
+
+        if (result.saved) {
+          logger.info(`Successfully deleted the establishment with status Created-In-Error. Establishment(urn): ${existing.urn}`);
+        }
+
+      } catch (error) {
+        logger.info(`Unable to delete the establishment with status Created-In-Error. There are exception while deleting the child records for the establishment(urn) ${existing.urn}, Exception Message ${error}`);
+      }
+
+    } else {
+      logger.info(`unable to delete the establishment with status Created-In-Error. Establishment(urn) ${existing.urn}, There are associated users with it`);
     }
   }
 
@@ -150,6 +170,7 @@ const deleteEstablishment = async (existing) => {
   return {
     organisationId: existing.id,
     saved: orgUpdated,
+    crud: 'delete'
   };
 };
 
