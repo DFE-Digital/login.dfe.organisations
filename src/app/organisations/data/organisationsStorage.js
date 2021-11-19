@@ -1143,7 +1143,7 @@ const getUserOrganisationByTextIdentifier = async textIdentifier => {
   return entity || undefined;
 };
 
-const getUserOrganisationByOrgId = async orgId => {
+const hasUserOrganisationsByOrgId = async orgId => {
   const entity = await userOrganisations.findOne({
     where: {
       organisation_id: {
@@ -1151,7 +1151,18 @@ const getUserOrganisationByOrgId = async orgId => {
       }
     }
   });
-  return entity || undefined;
+  return !!entity || undefined;
+};
+
+const hasUserOrganisationRequestsByOrgId = async orgId => {
+  const entity = await userOrganisationRequests.findOne({
+    where: {
+      organisation_id: {
+        [Op.eq]: orgId
+      }
+    }
+  });
+  return !!entity || undefined;
 };
 
 const getNextUserOrgNumericIdentifier = async () => {
@@ -1540,7 +1551,7 @@ module.exports = {
   pagedListOfUsers,
   pagedListOfInvitations,
   getUserOrganisationByTextIdentifier,
-  getUserOrganisationByOrgId,
+  hasUserOrganisationsByOrgId,
   getNextUserOrgNumericIdentifier,
   getNextOrganisationLegacyId,
   listAnnouncements,
