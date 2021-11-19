@@ -403,6 +403,19 @@ const addAssociation = async (
   await organisationAssociations.create(entity);
 };
 
+const removeAssociations = async (organisationId) => {
+  let query = {
+    where: {
+      organisation_id: {
+        [Op.eq]: organisationId
+      }
+    }
+  }
+
+  await organisationAssociations.destroy(query);
+};
+
+
 const removeAssociationsOfType = async (organisationId, linkType) => {
   await organisationAssociations.destroy({
     where: {
@@ -1506,6 +1519,7 @@ module.exports = {
   listOfCategory,
   addAssociation,
   removeAssociationsOfType,
+  removeAssociations,
   getOrgByUrn,
   getOrgByUid,
   getOrgByEstablishmentNumber,
