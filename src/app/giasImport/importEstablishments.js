@@ -190,18 +190,18 @@ const addOrUpdateEstablishments = async (importingEstablishments, existingEstabl
       const isRestricted = isRestrictedStatus(importing);
 
       let result;
-      if (existing && !isRestricted) {
+      // Delete the organisation only when it exists with restricted status.
+      if (existing && isRestricted) {
+        result = await deleteEstablishment(existing);
+      } else if (existing) { // update if exists with non-restrictive status.
         result = await updateEstablishment(importing, existing);
-      } else if (!existing && !isRestricted) {
+      } else if (!isRestricted) { // add only non-restrictive status organisation.
         importing.legacyId = await generateLegacyId();
         result = await addEstablishment(importing);
-      } else if (existing && isRestricted) {
-        result = await deleteEstablishment(existing);
       }
 
       if (result && result.organisationId && !isRestricted) {
         const organisationId = result.organisationId;
-
         const localAuthority = localAuthorities.find(la => la.establishmentNumber === importing.laCode);
         const existingLAAssociation = existing && existing.associations ? existing.associations.find(a => a.associationType === 'LA') : undefined;
         if (localAuthority && (!existingLAAssociation || existingLAAssociation.associatedOrganisationId.toLowerCase() !== localAuthority.id.toLowerCase())) {

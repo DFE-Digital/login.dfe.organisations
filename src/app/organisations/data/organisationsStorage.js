@@ -1566,5 +1566,7 @@ module.exports = {
   getPagedListOfUsersV2,
   getPagedListOfUsersV3,
   pagedListOfRequests,
-  getLatestActionedRequestAssociated
+  getLatestActionedRequestAssociated,
+  hasUserOrganisationRequestsByOrgId
+
 };
