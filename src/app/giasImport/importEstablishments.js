@@ -1,7 +1,7 @@
 const logger = require('./../../infrastructure/logger');
 const config = require('./../../infrastructure/config')();
 const { parse } = require('./establishmentCsvReader');
-const { getNextOrganisationLegacyId, list, add, update, pagedListOfCategory, addAssociation, removeAssociationsOfType, getUserOrganisationByOrgId, deleteOrganisation } = require('./../organisations/data/organisationsStorage');
+const { getNextOrganisationLegacyId, list, add, update, pagedListOfCategory, addAssociation, removeAssociationsOfType, hasUserOrganisationsByOrgId, hasUserOrganisationRequestsByOrgId, deleteOrganisation, removeAssociations } = require('./../organisations/data/organisationsStorage');
 const { raiseNotificationThatOrganisationHasChanged } = require('./../organisations/notifications');
 const { getEstablishmentsFile } = require('./../../infrastructure/gias');
 const uuid = require('uuid/v4');
@@ -87,8 +87,7 @@ const addEstablishment = async (importing) => {
     logger.info(`Added establishment ${organisation.urn}`);
     return {
       organisationId: organisation.id,
-      saved: true,
-      crud: 'add'
+      saved: true
     };
   } catch (e) {
     logger.info(`Error adding establishment ${importing.urn} - ${e.message}`);
@@ -117,41 +116,43 @@ const hasBeenUpdated = (updated, existing) => {
   return updated !== existing;
 };
 
-const updateOrDeleteEstablishment = async (importing, existing) => {
+const deleteEstablishment = async (existing) => {
   let result;
 
-  result = await updateEstablishment(importing, existing);
-  result["crud"] = 'update';
+  const hasUsers = await hasUserOrganisationsByOrgId(existing.id);
+  const hasUserRequests = await hasUserOrganisationRequestsByOrgId(existing.id);
 
-  const userExists = await getUserOrganisationByOrgId(existing.id);
+  if (!hasUsers && !hasUserRequests) {
+    try {
+      // try to delete the organisation if there no user attached. 
+      // Exception thrown when there are child data. Log the information and continue with the next establishment from the GIAS Sync.
+      result = {
+        organisationId: existing.id,
+        saved: false
+      };
 
-  if (!userExists && isRestrictedStatus(importing)) {
-    result = await deleteEstablishment(existing);
-    if (result.saved) {
-      result["crud"] = 'delete';
+      await removeAssociations(existing.id);
+
+      try {
+        await deleteOrganisation(existing.id);
+        result.saved = true;
+        logger.info(`Deleted establishment ${existing.urn}`);
+      } catch (e) {
+        logger.warn(`Error deleting establishment ${existing.urn} - ${e.message}`);
+      }
+
+      if (result.saved) {
+        logger.info(`Successfully deleted the establishment with status Created-In-Error. Establishment(urn): ${existing.urn}`);
+      }
+    } catch (error) {
+      logger.info(`Unable to delete the establishment with status Created-In-Error. There are exception while deleting the child records for the establishment(urn) ${existing.urn}, Exception Message ${error}`);
     }
+  } else {
+    logger.info(`unable to delete the establishment with status Created-In-Error. Establishment(urn) ${existing.urn}, There are associated users with it`);
   }
 
   return result;
-
 }
-
-const deleteEstablishment = async (existing) => {
-  let orgUpdated = false;
-
-  try {
-    await deleteOrganisation(existing.id)
-    orgUpdated = true;
-    logger.info(`Deleted establishment ${existing.urn}`);
-  } catch (e) {
-    logger.warn(`Error deleting establishment ${existing.urn} - ${e.message}`);
-  }
-
-  return {
-    organisationId: existing.id,
-    saved: orgUpdated,
-  };
-};
 
 const updateEstablishment = async (importing, existing) => {
   const updated = await mapImportRecordForStorage(importing);
@@ -181,31 +182,26 @@ const updateEstablishment = async (importing, existing) => {
 };
 
 const addOrUpdateEstablishments = async (importingEstablishments, existingEstablishments, localAuthorities) => {
-  //Asynchronous array function-Sequential processing
-  //Elements are processed in-order, one after the other, and the program execution waits for the whole array to finish before moving on.
-  await importingEstablishments.reduce(async (memo, importing) => {
-    await memo;
+  for (let i = 0; i < importingEstablishments.length; i += 1) {
+    const importing = importingEstablishments[i];
 
     if (isEstablishmentImportable(importing)) {
       const existing = existingEstablishments.find(e => e.urn && e.urn.toString().toLowerCase().trim() === importing.urn.toString().toLowerCase().trim());
       const isRestricted = isRestrictedStatus(importing);
 
       let result;
-      if (existing) {
-        result = await updateOrDeleteEstablishment(importing, existing);
-      } else if (!isRestricted) {
+      // Delete the organisation only when it exists with restricted status.
+      if (existing && isRestricted) {
+        result = await deleteEstablishment(existing);
+      } else if (existing) { // update if exists with non-restrictive status.
+        result = await updateEstablishment(importing, existing);
+      } else if (!isRestricted) { // add only non-restrictive status organisation.
         importing.legacyId = await generateLegacyId();
         result = await addEstablishment(importing);
       }
 
-      if (result && result.organisationId) {
-
-        if (result.hasOwnProperty('crud') && result.crud.toLowerCase() == 'delete') {
-          return;
-        }
-
+      if (result && result.organisationId && !isRestricted) {
         const organisationId = result.organisationId;
-
         const localAuthority = localAuthorities.find(la => la.establishmentNumber === importing.laCode);
         const existingLAAssociation = existing && existing.associations ? existing.associations.find(a => a.associationType === 'LA') : undefined;
         if (localAuthority && (!existingLAAssociation || existingLAAssociation.associatedOrganisationId.toLowerCase() !== localAuthority.id.toLowerCase())) {
@@ -220,9 +216,9 @@ const addOrUpdateEstablishments = async (importingEstablishments, existingEstabl
         if (result.saved) {
           await raiseNotificationThatOrganisationHasChanged(organisationId);
           if (existing) {
-            logger.info(`Notified addition of establishment ${importing.urn}`);
-          } else {
             logger.info(`Notified update of establishment ${importing.urn}`);
+          } else {
+            logger.info(`Notified addition of establishment ${importing.urn}`);
           }
         }
       } else {
@@ -231,7 +227,7 @@ const addOrUpdateEstablishments = async (importingEstablishments, existingEstabl
     } else {
       logger.info(`Not importing establishment ${importing.urn} as it doesn't meet importable criteria`);
     }
-  }, undefined);
+  }
 };
 
 const isLocalAuthorityImportable = (importing) => {

@@ -403,6 +403,19 @@ const addAssociation = async (
   await organisationAssociations.create(entity);
 };
 
+const removeAssociations = async (organisationId) => {
+  let query = {
+    where: {
+      organisation_id: {
+        [Op.eq]: organisationId
+      }
+    }
+  }
+
+  await organisationAssociations.destroy(query);
+};
+
+
 const removeAssociationsOfType = async (organisationId, linkType) => {
   await organisationAssociations.destroy({
     where: {
@@ -1130,7 +1143,7 @@ const getUserOrganisationByTextIdentifier = async textIdentifier => {
   return entity || undefined;
 };
 
-const getUserOrganisationByOrgId = async orgId => {
+const hasUserOrganisationsByOrgId = async orgId => {
   const entity = await userOrganisations.findOne({
     where: {
       organisation_id: {
@@ -1138,7 +1151,18 @@ const getUserOrganisationByOrgId = async orgId => {
       }
     }
   });
-  return entity || undefined;
+  return !!entity || undefined;
+};
+
+const hasUserOrganisationRequestsByOrgId = async orgId => {
+  const entity = await userOrganisationRequests.findOne({
+    where: {
+      organisation_id: {
+        [Op.eq]: orgId
+      }
+    }
+  });
+  return !!entity || undefined;
 };
 
 const getNextUserOrgNumericIdentifier = async () => {
@@ -1506,6 +1530,7 @@ module.exports = {
   listOfCategory,
   addAssociation,
   removeAssociationsOfType,
+  removeAssociations,
   getOrgByUrn,
   getOrgByUid,
   getOrgByEstablishmentNumber,
@@ -1526,7 +1551,7 @@ module.exports = {
   pagedListOfUsers,
   pagedListOfInvitations,
   getUserOrganisationByTextIdentifier,
-  getUserOrganisationByOrgId,
+  hasUserOrganisationsByOrgId,
   getNextUserOrgNumericIdentifier,
   getNextOrganisationLegacyId,
   listAnnouncements,
@@ -1541,5 +1566,7 @@ module.exports = {
   getPagedListOfUsersV2,
   getPagedListOfUsersV3,
   pagedListOfRequests,
-  getLatestActionedRequestAssociated
+  getLatestActionedRequestAssociated,
+  hasUserOrganisationRequestsByOrgId
+
 };
