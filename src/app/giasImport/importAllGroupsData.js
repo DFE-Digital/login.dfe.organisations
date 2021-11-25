@@ -8,9 +8,10 @@ const {
   add, update, pagedListOfCategory, addAssociation,
   removeAssociationsOfType,
   getNextOrganisationLegacyId,
-  getUserOrganisationByOrgId,
-  deleteOrganisation
-} = require('./../organisations/data/organisationsStorage');
+  hasUserOrganisationsByOrgId,
+  hasUserOrganisationRequestsByOrgId,
+  deleteOrganisation,
+  removeAssociations } = require('./../organisations/data/organisationsStorage');
 const uuid = require('uuid/v4');
 const rp = require('request-promise');
 
@@ -23,7 +24,7 @@ const isGroupImportable = (group) => {
     return false;
   }
 
-  const importableStatuses = ['OPEN', 'CLOSED', 'PROPOSED_TO_OPEN', 'CREATED_IN_ERROR'];
+  const importableStatuses = ['OPEN', 'CLOSED', 'PROPOSED_TO_OPEN','CREATED_IN_ERROR'];
   if (!importableStatuses.find(x => x === group.status)) {
     return false;
   }
@@ -49,11 +50,6 @@ const mapImportRecordForStorage = (importing) => {
     case 'PROPOSED_TO_OPEN':
       status = {
         id: 4,
-      };
-      break;
-    case "CREATED_IN_ERROR":
-      status = {
-        id: 9,
       };
       break;
     default:
@@ -158,23 +154,34 @@ const linkAcademies = async (importing, existing, importingGroupLinks, existingE
   }
 };
 
-const updateOrDeleteGroup = async (importing, existing) => {
-  let result = {};
+const verifyAndDeleteGroup = async (existing) => {
 
-  const organisationId = await updateGroup(importing, existing);
-  result["organisationId"] = organisationId;
-  result["crud"] = 'update';
+  const hasUsers = await hasUserOrganisationsByOrgId(existing.id);
+  const hasUserRequests = await hasUserOrganisationRequestsByOrgId(existing.id);
 
-  const userExists = await getUserOrganisationByOrgId(existing.id);
+  if (!hasUsers && !hasUserRequests) {
+    try {
+      // try to delete the organisation if there no user attached. 
+      // Exception thrown when there are child data. Log the information and continue with the next establishment from the GIAS Sync.
 
-  if (!userExists && isRestrictedStatus(importing)) {
-    result = await deleteGroup(existing);
-    if (result.saved) {
-      result["crud"] = 'delete';
+      await removeAssociations(existing.id);
+
+      try {
+        await deleteGroup(existing);
+        
+        logger.info(`Successfully deleted the group with status Created-In-Error. Group(uid): ${existing.uid}`);
+      } catch (e) {
+        logger.warn(`Error deleting group ${existing.uid} - ${e.message}`);
+      }
+      
+    } catch (error) {
+      logger.info(`Unable to delete the group with status Created-In-Error. There are exception while deleting the child records for the group(uid) ${existing.uid}, Exception Message ${error}`);
     }
+  } else {
+    logger.info(`unable to delete the group with status Created-In-Error. Group(uid) ${existing.uid}, There are associated users with it`);
   }
 
-  return result;
+  return existing.id;
 }
 
 const isRestrictedStatus = (importing) => {
@@ -205,37 +212,35 @@ const deleteGroup = async (existing) => {
 };
 
 const addOrUpdateGroups = async (importingGroups, importingGroupLinks, existingGroups, existingEstablishments) => {
-  //Asynchronous array function-Sequential processing
-  //Elements are processed in-order, one after the other, and the program execution waits for the whole array to finish before moving on.
-  await importingGroups.reduce(async (memo, importing) => {
-    await memo;
+  for (let i = 0; i < importingGroups.length; i += 1) {
+    const importing = importingGroups[i];
 
     if (isGroupImportable(importing)) {
       const existing = existingGroups.find(e => e.uid === importing.uid);
       const isRestricted = isRestrictedStatus(importing);
 
-      let result = {};
-      if (existing) {
-        result = await updateOrDeleteGroup(importing, existing);
-      } else if (!isRestricted) {
+      let organisationId;
+      // Delete the organisation only when it exists with restricted status.
+      if (existing && isRestricted) {
+        organisationId = await verifyAndDeleteGroup(existing);
+      } else if (existing) { // update if exists with non-restrictive status.
+        organisationId = await updateGroup(importing, existing);
+      } else if (!isRestricted) { // add only non-restrictive status organisation.
         importing.legacyId = await generateLegacyId();
-        result['organisationId'] = await addGroup(importing);
+        organisationId = await addGroup(importing);
       }
 
-      if (!result.hasOwnProperty('organisationId') || !result['organisationId']) {
+      if (isRestricted) {
         logger.info(`Not importing group ${importing.uid} as it does meet importable criteria`);
-        return
+        continue;
       }
 
-      if (result.hasOwnProperty('crud') && result.crud.toLowerCase() === 'delete') {
-        return;
-      }
+      await linkAcademies(importing, existing, importingGroupLinks, existingEstablishments, organisationId);
 
-      await linkAcademies(importing, existing, importingGroupLinks, existingEstablishments, result['organisationId']);
     } else {
       logger.info(`Not importing group ${importing.uid} as it does meet importable criteria`);
     }
-  }, undefined);
+  };
 };
 
 const listOfCategory = async (category, includeAssociations = false) => {
