@@ -42,8 +42,7 @@ const defineStatic = model => {
     { id: 1, name: 'Open' },
     { id: 2, name: 'Closed' },
     { id: 3, name: 'Proposed to close' },
-    { id: 4, name: 'Proposed to open' },
-    { id: 9, name: 'Created In Error' } // GIAS using the code as 9, So same has been used here.
+    { id: 4, name: 'Proposed to open' }
   ];
 
   model.organisationCategory = [
