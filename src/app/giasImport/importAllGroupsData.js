@@ -278,6 +278,7 @@ const getAllGroupsDataFileForDate = async (date) => {
     method: 'GET',
     uri,
     json: false,
+    encoding: 'latin1'
   });
 };
 

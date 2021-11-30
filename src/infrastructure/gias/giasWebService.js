@@ -38,8 +38,8 @@ const getEstablishmentsFile = async (includeLinks = false) => {
   const links = files.find(x => x.name === 'links.csv');
 
   return {
-    establishments: establishments ? establishments.content.toString('utf8') : undefined,
-    links: links ? links.content.toString('utf8') : undefined,
+    establishments: establishments ? establishments.content.toString('latin1') : undefined,
+    links: links ? links.content.toString('latin1') : undefined,
   };
 };
 
@@ -51,8 +51,8 @@ const getGroupsFile = async (includeLinks = false) => {
   const links = files.find(x => x.name === 'links.csv');
 
   return {
-    groups: groups ? groups.content.toString('utf8') : undefined,
-    links: links ? links.content.toString('utf8') : undefined,
+    groups: groups ? groups.content.toString('latin1') : undefined,
+    links: links ? links.content.toString('latin1') : undefined,
   };
 };
 
