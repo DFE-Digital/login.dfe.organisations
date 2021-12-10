@@ -231,7 +231,7 @@ const addOrUpdateGroups = async (importingGroups, importingGroupLinks, existingG
       }
 
       if (isRestricted) {
-        logger.info(`Not importing group ${importing.uid} as it does meet importable criteria`);
+        logger.info(`Not importing group ${importing.uid} as it does meet importable status`);
         continue;
       }
 
