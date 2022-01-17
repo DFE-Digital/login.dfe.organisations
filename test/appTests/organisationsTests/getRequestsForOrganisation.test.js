@@ -19,7 +19,7 @@ const res = {
 };
 const logger = require('./../../../src/infrastructure/logger');
 const { getRequestsAssociatedWithOrganisation } = require('./../../../src/app/organisations/data/organisationsStorage');
-const getRequestsForOrganisation = require('./../../../src/app/organisations/getRequestsForOrganisation');
+const { getRequestsForOrganisation } = require('./../../../src/app/organisations/getRequestsForOrganisation');
 
 
 describe('when getting requests for an organisation', () => {
