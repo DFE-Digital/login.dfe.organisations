@@ -26,7 +26,7 @@ const createUserOrganisationRequest = require('./createUserOrganisationRequest')
 const getUserOrganisationRequest = require('./getUserOrganisationRequest');
 const getApproversForOrganisation = require('./getApproversForOrganisation');
 const getPendingRequestsForApproval = require('./getPendingRequestsForApproval');
-const getRequestsForOrganisation = require('./getRequestsForOrganisation');
+const { getRequestsForOrganisation, getRequestsForOrganisations}  = require('./getRequestsForOrganisation');
 const listRequests = require('./listRequests');
 const updateUserOrganisationRequest = require('./updateUserOrganisationRequest');
 const getPendingRequestsAssociatedWithUser = require('./getPendingRequestsAssociatedWithUser');
@@ -68,6 +68,7 @@ const routes = () => {
   router.get('/:id/approvers', asyncWrapper(getApproversForOrganisation));
   router.post('/:id/users/:uid/requests', asyncWrapper(createUserOrganisationRequest));
   router.get('/:id/requests', asyncWrapper(getRequestsForOrganisation));
+  router.get('/:orgIds/requests/all', asyncWrapper(getRequestsForOrganisations));
 
   router.get('/requests/:rid', asyncWrapper(getUserOrganisationRequest));
   router.patch('/requests/:rid', asyncWrapper(updateUserOrganisationRequest));
