@@ -60,6 +60,7 @@ typings/
 # dev env
 .idea
 .vscode
+.npmrc
 
 #config
 /config/
