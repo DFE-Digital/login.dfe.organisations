@@ -70,8 +70,7 @@ describe('when getting an organisation by id', () => {
       statutoryLowAge: 14,
       statutoryHighAge: 16,
       legacyId: null,
-      companyRegistrationNumber: null,
-      DistrictAdministrative_code: null
+      companyRegistrationNumber: null
     };
     getOrgById.mockReturnValue(org);
 
