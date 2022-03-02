@@ -57,6 +57,7 @@ const defineStatic = model => {
     { id: '013', name: 'Single-Academy Trust' },
     { id: '050', name: 'Software Suppliers' },
     { id: '051', name: 'PIMS Training Providers' }
+    { id: '052', name: 'Billing Authority' }
   ];
 
   model.establishmentTypes = [
