@@ -50,6 +50,7 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.statutoryHighAge = organisation.statutoryHighAge;
   entity.legacyId = organisation.legacyId;
   entity.companyRegistrationNumber = organisation.companyRegistrationNumber;
+  entity.DistrictAdministrative_code = organisation.DistrictAdministrative_code;
 };
 const updateOrganisationsWithLocalAuthorityDetails = async orgs => {
   const localAuthorityIds = uniq(
@@ -108,7 +109,8 @@ const mapOrganisationFromEntity = entity => {
     statutoryLowAge: entity.statutoryLowAge,
     statutoryHighAge: entity.statutoryHighAge,
     legacyId: entity.legacyId,
-    companyRegistrationNumber: entity.companyRegistrationNumber
+    companyRegistrationNumber: entity.companyRegistrationNumber,
+    DistrictAdministrative_code: entity.DistrictAdministrative_code
   };
 };
 const mapAnnouncementFromEntity = entity => {
@@ -317,7 +319,9 @@ const listOfCategory = async (category, includeAssociations = false) => {
     closedOn: entity.ClosedOn,
     address: entity.Address,
     legacyId: entity.legacyId,
-    companyRegistrationNumber: entity.companyRegistrationNumber
+    companyRegistrationNumber: entity.companyRegistrationNumber,
+    DistrictAdministrative_code: entity.DistrictAdministrative_code
+
   }));
 };
 
@@ -368,7 +372,9 @@ const pagedListOfCategory = async (
       statutoryLowAge: entity.statutoryLowAge,
       statutoryHighAge: entity.statutoryHighAge,
       legacyId: entity.legacyId,
-      companyRegistrationNumber: entity.companyRegistrationNumber
+      companyRegistrationNumber: entity.companyRegistrationNumber,
+      DistrictAdministrative_code: entity.DistrictAdministrative_code
+
     };
 
     if (entity.associations) {
@@ -481,7 +487,8 @@ const getOrganisationsForUserIncludingServices = async userId => {
             t => t.id === userOrg.Organisation.getDataValue('Type')
           ),
           companyRegistrationNumber:
-            userOrg.Organisation.companyRegistrationNumber
+            userOrg.Organisation.companyRegistrationNumber,
+          DistrictAdministrative_code: userOrg.Organisation.getDataValue('DistrictAdministrative (code)') || undefined,
         },
         role,
         approvers,
