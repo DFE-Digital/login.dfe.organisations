@@ -488,7 +488,8 @@ const getOrganisationsForUserIncludingServices = async userId => {
           ),
           companyRegistrationNumber:
             userOrg.Organisation.companyRegistrationNumber,
-          DistrictAdministrative_code: userOrg.Organisation.getDataValue('DistrictAdministrative (code)') || undefined,
+          DistrictAdministrative_code:
+            userOrg.Organisation.getDataValue('DistrictAdministrative_code') || undefined,
         },
         role,
         approvers,
