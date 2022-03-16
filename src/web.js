@@ -16,12 +16,15 @@ const { organisationInvitations, invitations } = require('./app/invitations');
 const dev = require('./app/dev');
 const healthCheck = require('login.dfe.healthcheck');
 const { getErrorHandler } = require('login.dfe.express-error-handling');
+const helmet = require("helmet");
 
 configSchema.validate();
 
 https.globalAgent.maxSockets = http.globalAgent.maxSockets = config.hostingEnvironment.agentKeepAlive.maxSockets || 50;
 
 const app = express();
+
+app.use(helmet());
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
