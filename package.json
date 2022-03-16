@@ -11,6 +11,7 @@
     "express-ejs-layouts": "^2.3.1",
     "express-list-endpoints": "^3.0.1",
     "fs": "0.0.1-security",
+    "helmet": "^5.0.2",
     "lodash": "^4.17.21",
     "login.dfe.api.auth": "github:DFE-Digital/login.dfe.api.auth#v2.0.2",
     "login.dfe.config.schema.common": "git+https://github.com/DFE-Digital/login.dfe.config.schema.common.git#v1.4",
@@ -61,7 +62,7 @@
   "scripts": {
     "test": "./node_modules/.bin/jest",
     "setup": "./generate-certs.sh",
-    "web": "settings=login.dfe.organisation.dev.json node src/web.js "
+    "web": "settings='./config/login.dfe.organisations.dev.json' node src/web.js "
   },
   "engines": {
     "node": "12.x.x"
