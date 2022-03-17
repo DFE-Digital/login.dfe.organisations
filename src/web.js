@@ -24,25 +24,19 @@ https.globalAgent.maxSockets = http.globalAgent.maxSockets = config.hostingEnvir
 
 const app = express();
 
-if(config.hostingEnvironment.hstsMaxAge){
-  app.use(helmet({
-    noCache: true,
-    frameguard: {
-      action: 'deny',
-    },
-    hsts: {
-      maxAge: config.hostingEnvironment.hstsMaxAge,
-      preload: true,
-    }
-  }));
-}else {
-  app.use(helmet({
-    noCache: true,
-    frameguard: {
-      action: 'deny',
-    }
-  }));
-}
+const hstsMaxAge = Number(process.env.hstsMaxAge);
+
+app.use(helmet({
+  frameguard: {
+    action: 'deny',
+  },
+  //Apply custom sts value if provided else use default
+  hsts: {
+    maxAge:  isNaN(hstsMaxAge)?15552000:hstsMaxAge,
+    preload: true,
+  }
+}));
+
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
