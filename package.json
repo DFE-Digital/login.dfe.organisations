@@ -38,6 +38,7 @@
     "xml2js": "^0.4.19"
   },
   "devDependencies": {
+    "nodemon": "^2.0.15",
     "eslint": "^7.12.1",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-config-standard": "^16.0.1",
@@ -62,7 +63,8 @@
   "scripts": {
     "test": "./node_modules/.bin/jest",
     "setup": "./generate-certs.sh",
-    "web": "settings='./config/login.dfe.organisations.dev.json' node src/web.js "
+    "web": "settings=login.dfe.organisation.dev.json node src/web.js ",
+    "dev": "settings='./config/login.dfe.organisations.dev.json' nodemon src/web.js "
   },
   "engines": {
     "node": "12.x.x"
