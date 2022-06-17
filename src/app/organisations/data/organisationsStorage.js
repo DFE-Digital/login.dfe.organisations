@@ -478,8 +478,8 @@ const getOrganisationsForUserIncludingServices = async userId => {
             organisationStatus.find(
               c => c.id === userOrg.Organisation.getDataValue('Status')
             ) || undefined,
-          legacyUserId: userOrg.numeric_identifier || undefined,
-          legacyUserName: userOrg.text_identifier || undefined,
+          numeric_identifier: userOrg.getDataValue('numeric_identifier') || undefined,
+          text_identifier: userOrg.getDataValue('text_identifier') || undefined,
           category: organisationCategory.find(
             c => c.id === userOrg.Organisation.getDataValue('Category')
           ),
