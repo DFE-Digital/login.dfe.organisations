@@ -25,6 +25,8 @@ describe('when listing or searching', () => {
     req = {
       query: {
         page: 3,
+        sortBy: 'name',
+        sortDirection: 'asc'
       },
     };
 
