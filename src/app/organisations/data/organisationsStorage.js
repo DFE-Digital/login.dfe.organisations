@@ -1558,11 +1558,7 @@ const getLatestActionedRequestAssociated = async userId => {
   };
 };
 
-// const getOrganisationsAssociatedWithService = async (id, page, pageSize, correlationId) => {
-//   return getOrganisationsOfServiceByUserIds(id, null, page, pageSize, correlationId);
-// }
-
-const getOrganisationsAssociatedToService = async(sid, page, pageSize, correlationId) => {
+const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize, sortBy, sortDirection, correlationId) => {
   try {
     logger.info(`Calling getOrganisationsAssociatedToService for services storage for request ${correlationId}`, { correlationId });
     const query = {
@@ -1572,15 +1568,23 @@ const getOrganisationsAssociatedToService = async(sid, page, pageSize, correlati
         }
       },
       include: ['Organisation'],
-      order: [[Sequelize.col('Organisation.name', 'desc')]]
+      order: [[Sequelize.col('Organisation.name', 'ASC')]]
     };
+
+    if (sortBy && sortBy !== undefined) {
+      query.order[0] = Sequelize.col(`Organisation.${sortBy}`, 'ASC');
+    };
+    if (sortDirection && sortDirection !== undefined) {
+      query.order[0] = Sequelize.col('Organisation.name', `${sortDirection}`);
+    };
+
     const userServiceEntities = await users.findAll(query);
     const organisationsEntities = await Promise.all(userServiceEntities.map(async(userServiceEntity) =>
       (userServiceEntity.Organisation.dataValues)
     ));
 
     const uniqueOrgsList = new Set(organisationsEntities.map(o => JSON.stringify(o)));
-    console.log(typeof (uniqueOrganisationsList))
+    console.log(typeof (uniqueOrganisationsList));
     const uniqueOrganisationsArr = Array.from(uniqueOrgsList).map(o => JSON.parse(o));
     const offset = page !== 1 ? pageSize * (page - 1) : 0;
     const limit = pageSize;
