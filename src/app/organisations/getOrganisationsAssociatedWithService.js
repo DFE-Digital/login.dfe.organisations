@@ -26,6 +26,9 @@ const extractPageSize = (req) => {
 
 const getOrganisationsAssociatedWithService = async(req, res) => {
   const serviceId = req.params.sid ? req.params.sid.toLowerCase() : '';
+  const criteria = req.query.search;
+  const sortBy = req.query.sortBy;
+  const sortDirection = req.query.sortDirection;
 
   if (!isUuid(serviceId)) {
     res.status(404).send();
@@ -49,12 +52,12 @@ const getOrganisationsAssociatedWithService = async(req, res) => {
     if (pageSize < 1) {
       res.status(400).send('pageSize must be greater than 0');
       return;
-    } else if (pageSize > 1000) {
-      res.status(400).send('pageSize must not be greater than 1000');
+    } else if (pageSize > 50) {
+      res.status(400).send('pageSize must not be greater than 50');
       return;
     }
 
-    const pagedResult = await organisationsStorage.getOrganisationsAssociatedToService(serviceId, pageNumber, pageSize, req.header('x-correlation-id'));
+    const pagedResult = await organisationsStorage.getOrganisationsAssociatedToService(serviceId, criteria, pageNumber, pageSize, sortBy, sortDirection, req.header('x-correlation-id'));
 
     res.status(200).send(pagedResult);
   } catch (e) {
