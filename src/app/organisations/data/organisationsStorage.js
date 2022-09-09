@@ -1558,6 +1558,46 @@ const getLatestActionedRequestAssociated = async userId => {
   };
 };
 
+// const getOrganisationsAssociatedWithService = async (id, page, pageSize, correlationId) => {
+//   return getOrganisationsOfServiceByUserIds(id, null, page, pageSize, correlationId);
+// }
+
+const getOrganisationsAssociatedToService = async(sid, page, pageSize, correlationId) => {
+  try {
+    logger.info(`Calling getOrganisationsAssociatedToService for services storage for request ${correlationId}`, { correlationId });
+    const query = {
+      where: {
+        service_id: {
+          [Op.eq]: sid
+        }
+      },
+      include: ['Organisation'],
+      order: [[Sequelize.col('Organisation.name', 'desc')]]
+    };
+    const userServiceEntities = await users.findAll(query);
+    const organisationsEntities = await Promise.all(userServiceEntities.map(async(userServiceEntity) =>
+      (userServiceEntity.Organisation.dataValues)
+    ));
+
+    const uniqueOrgsList = new Set(organisationsEntities.map(o => JSON.stringify(o)));
+    console.log(typeof (uniqueOrganisationsList))
+    const uniqueOrganisationsArr = Array.from(uniqueOrgsList).map(o => JSON.parse(o));
+    const offset = page !== 1 ? pageSize * (page - 1) : 0;
+    const limit = pageSize;
+    const pagedResults = uniqueOrganisationsArr.slice(offset, offset + limit);
+    const organisations = pagedResults.map(o => mapOrganisationFromEntity(o));
+
+    return {
+      organisations,
+      page,
+      totalNumberOfPages: Math.ceil(uniqueOrganisationsArr.length / pageSize),
+      totalNumberOfRecords: uniqueOrganisationsArr.length
+    };
+  } catch (e) {
+    logger.error(`error getting organisations associated with service ${sid} - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
+    throw e;
+  }
+};
 module.exports = {
   list,
   getOrgById,
@@ -1605,6 +1645,7 @@ module.exports = {
   getPagedListOfUsersV3,
   pagedListOfRequests,
   getLatestActionedRequestAssociated,
-  hasUserOrganisationRequestsByOrgId
+  hasUserOrganisationRequestsByOrgId,
+  getOrganisationsAssociatedToService
 
 };
