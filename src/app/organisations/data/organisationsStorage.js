@@ -83,11 +83,11 @@ const mapOrganisationFromEntity = entity => {
   const laAssociation = entity.associations
     ? entity.associations.find(a => a.link_type === 'LA')
     : undefined;
-
+  const category = organisationCategory.find(c => c.id === entity.Category) || { id: entity.Category, name: 'Unknown' };
   return {
     id: entity.id,
     name: entity.name,
-    category: organisationCategory.find(c => c.id === entity.Category),
+    category,
     type: establishmentTypes.find(c => c.id === entity.Type),
     urn: entity.URN,
     uid: entity.UID,
@@ -191,23 +191,32 @@ const getOrgById = async id => {
   return org;
 };
 
-const pagedSearch = async (
+const pagedSearch = async(
   criteria,
   pageNumber = 1,
   pageSize = 25,
   filterCategories = [],
   filterStates = [],
-  filterOutOrgNames = []
+  filterOutOrgNames = [],
+  sortBy,
+  sortDirection
 ) => {
   const offset = (pageNumber - 1) * pageSize;
   const query = {
-    where: {},
+    where: { Status: { [Op.not]: 0 } },
     order: [['name', 'ASC']],
     include: ['associations'],
     distinct: true,
     limit: pageSize,
     offset
   };
+  if (sortBy && sortBy !== undefined) {
+    query.order[0][0] = `${sortBy}`;
+  }
+
+  if (sortDirection && sortDirection !== undefined) {
+    query.order[0][1] = `${sortDirection}`;
+  }
 
   if (criteria && criteria !== undefined) {
     query.where = {
@@ -230,7 +239,9 @@ const pagedSearch = async (
         legacyId: {
           [Op.like]: `%${criteria}%`
         }
-      }
+      },
+      [Op.and]:
+      { Status: { [Op.not]: 0 } }
     };
   }
 
