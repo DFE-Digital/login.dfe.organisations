@@ -19,7 +19,6 @@ const extractPageSize = (req) => {
   if (!paramsSource || paramsSource.pageSize === undefined) {
     return 25;
   }
-
   const pageSize = parseInt(paramsSource.pageSize);
   return isNaN(pageSize) ? 0 : pageSize;
 };
@@ -29,12 +28,10 @@ const getOrganisationsAssociatedWithService = async(req, res) => {
   const criteria = req.query.search;
   const sortBy = req.query.sortBy;
   const sortDirection = req.query.sortDirection;
-
   if (!isUuid(serviceId)) {
     res.status(404).send();
     return;
   }
-
   try {
     const service = await servicesStorage.getById(serviceId, req.header('x-correlation-id'));
     if (!service) {
@@ -47,7 +44,6 @@ const getOrganisationsAssociatedWithService = async(req, res) => {
       res.status(400).send('page must be greater than 0');
       return;
     }
-
     const pageSize = extractPageSize(req);
     if (pageSize < 1) {
       res.status(400).send('pageSize must be greater than 0');
@@ -56,7 +52,6 @@ const getOrganisationsAssociatedWithService = async(req, res) => {
       res.status(400).send('pageSize must not be greater than 50');
       return;
     }
-
     const pagedResult = await organisationsStorage.getOrganisationsAssociatedToService(serviceId, criteria, pageNumber, pageSize, sortBy, sortDirection, req.header('x-correlation-id'));
 
     res.status(200).send(pagedResult);
