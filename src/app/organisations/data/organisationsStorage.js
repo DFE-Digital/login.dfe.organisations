@@ -1572,21 +1572,46 @@ const getLatestActionedRequestAssociated = async userId => {
 const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize, sortBy, sortDirection, correlationId) => {
   try {
     logger.info(`Calling getOrganisationsAssociatedToService for services storage for request ${correlationId}`, { correlationId });
+    const orderDirection = (sortDirection && sortDirection !== undefined) ? sortDirection.toUpperCase() : 'ASC';
+    const orderBy = (sortBy && sortBy !== undefined) ? sortBy : 'name';
+    const searchCriteria = {
+      [Op.or]: {
+        name: {
+          [Op.like]: `%${criteria}%`
+        },
+        urn: {
+          [Op.like]: `%${criteria}%`
+        },
+        uid: {
+          [Op.like]: `%${criteria}%`
+        },
+        ukprn: {
+          [Op.like]: `%${criteria}%`
+        },
+        establishmentNumber: {
+          [Op.like]: `%${criteria}%`
+        },
+        legacyId: {
+          [Op.like]: `%${criteria}%`
+        }
+      },
+      [Op.and]:
+      { Status: { [Op.not]: 0 } }
+    };
+    const searchQuery = (criteria && criteria !== undefined) ? searchCriteria : { Status: { [Op.not]: 0 } };
+
     const query = {
       where: {
         service_id: {
           [Op.eq]: sid
         }
       },
-      include: ['Organisation'],
-      order: [[Sequelize.col('Organisation.name', 'ASC')]]
-    };
-
-    if (sortBy && sortBy !== undefined) {
-      query.order[0] = Sequelize.col(`Organisation.${sortBy}`, 'ASC');
-    };
-    if (sortDirection && sortDirection !== undefined) {
-      query.order[0] = Sequelize.col('Organisation.name', `${sortDirection}`);
+      include: [{
+        model: organisations,
+        as: 'Organisation',
+        where: searchQuery
+      }],
+      order: [['Organisation', `${orderBy}`, `${orderDirection}`]]
     };
 
     const userServiceEntities = await users.findAll(query);
@@ -1595,15 +1620,13 @@ const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize,
     ));
 
     const uniqueOrgsList = new Set(organisationsEntities.map(o => JSON.stringify(o)));
-    console.log(typeof (uniqueOrganisationsList));
     const uniqueOrganisationsArr = Array.from(uniqueOrgsList).map(o => JSON.parse(o));
     const offset = page !== 1 ? pageSize * (page - 1) : 0;
     const limit = pageSize;
     const pagedResults = uniqueOrganisationsArr.slice(offset, offset + limit);
-    const organisations = pagedResults.map(o => mapOrganisationFromEntity(o));
-
+    const organistationsList = pagedResults.map(o => mapOrganisationFromEntity(o));
     return {
-      organisations,
+      organisations: organistationsList,
       page,
       totalNumberOfPages: Math.ceil(uniqueOrganisationsArr.length / pageSize),
       totalNumberOfRecords: uniqueOrganisationsArr.length
