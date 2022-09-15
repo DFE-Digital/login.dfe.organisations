@@ -26,13 +26,14 @@ const createUserOrganisationRequest = require('./createUserOrganisationRequest')
 const getUserOrganisationRequest = require('./getUserOrganisationRequest');
 const getApproversForOrganisation = require('./getApproversForOrganisation');
 const getPendingRequestsForApproval = require('./getPendingRequestsForApproval');
-const { getRequestsForOrganisation, getRequestsForOrganisations}  = require('./getRequestsForOrganisation');
+const { getRequestsForOrganisation, getRequestsForOrganisations } = require('./getRequestsForOrganisation');
 const listRequests = require('./listRequests');
 const updateUserOrganisationRequest = require('./updateUserOrganisationRequest');
 const getPendingRequestsAssociatedWithUser = require('./getPendingRequestsAssociatedWithUser');
 const listUserOrganisationsV2 = require('./listUserOrganisationsV2');
 const listUserOrganisationsV3 = require('./listUserOrganisationsV3');
 const getLatestActionedRequestAssociatedWithUser = require('./getLatestActionedRequestAssociatedWithUser');
+const getOrganisationsAssociatedWithService = require('./getOrganisationsAssociatedWithService');
 
 const router = express.Router();
 
@@ -75,6 +76,8 @@ const routes = () => {
   router.get('/requests-for-approval/:uid', asyncWrapper(getPendingRequestsForApproval));
   router.get('/requests-for-user/:uid', asyncWrapper(getPendingRequestsAssociatedWithUser));
   router.get('/latest-request-for-user/:uid', asyncWrapper(getLatestActionedRequestAssociatedWithUser));
+
+  router.get('/associated-with-service/:sid', asyncWrapper(getOrganisationsAssociatedWithService));
 
   return router;
 };
