@@ -97,8 +97,7 @@ variables:
     value: true
   ${{ else }}:
     value: false
-- name: brch
-  value: $(Build.SourceBranchName)
+
 
 stages:
 
