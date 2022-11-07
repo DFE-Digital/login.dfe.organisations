@@ -115,3 +115,7 @@ which against a blank database will create the necessary tables. If you already 
 6.  Add tenant Url to keyvault with name `tenantUrl` - added
 7.  Add aad shd app id to keyvault with name `aadshdappid` - added
 8.  Add redis Connection in the keyvault with name `redisConn` 
+9.  Add gias Service Url in the keyvault with name `giasServiceUrl` 
+10. Add gias Service Username in the keyvault with name `giasServiceUsername` 
+11. Add gias Service Password in the keyvault with name `giasServicePassword` 
+12. Add gias All Groups DataUrl in the keyvault with name `giasAllGroupsDataUrl` 

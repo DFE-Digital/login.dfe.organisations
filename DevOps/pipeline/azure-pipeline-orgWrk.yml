@@ -138,6 +138,7 @@ stages:
         nodeVersionSpec: '14.18.1'
         npmInstCmd: 'install --force --json --no-package-lock'
         npmPruneFixCmd: 'install --production --json --force --no-package-lock'
+        workerRepo: organisations
 
 
 - ${{ each var in variables }}:
@@ -169,6 +170,7 @@ stages:
               ${{ else }}:
                 certificateName: non-prod-gateway
               AppDeploy: ${{parameters.AppDeploy}}
+              workerRepo: organisations
 
         - ${{ if parameters.AppDeploy }}:
           - template: pipeline/deploy.yml@devopsTemplates
