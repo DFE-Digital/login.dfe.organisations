@@ -105,4 +105,13 @@ settings=./config/login.dfe.organisations.dev.local.json node tools/createDataba
 which against a blank database will create the necessary tables. If you already have a database then use the scripts in the 
 **database_scripts** folder.
 
-
+## Prerequisite
+---
+1. Add audit sql host name to keyvault with name `auditSqlHostName` - added
+2. Add audit sql db name to keyvault with name `auditSqlDbName` - added
+3. Add Organisations host name to keyvault with name `standaloneOrganisationsHostName` - added
+4. Add Directories host name to keyvault with name `standaloneDirectoriesHostName` - added
+5. Add app insights instrumentation Key to keyvault with name `appInsightsInstrumentationKey` - added
+6.  Add tenant Url to keyvault with name `tenantUrl` - added
+7.  Add aad shd app id to keyvault with name `aadshdappid` - added
+8.  Add redis Connection in the keyvault with name `redisConn` 
