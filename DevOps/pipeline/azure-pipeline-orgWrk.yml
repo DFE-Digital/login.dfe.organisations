@@ -62,7 +62,7 @@ parameters:
 variables:
 - group: dsi-global
 - name: applicationShortName
-  value: 'orgwrk'
+  value: 'orgwkr'
 - name: applicationFullName
   value: 'organisationsWorker'
 - name: numberOfWorkers
