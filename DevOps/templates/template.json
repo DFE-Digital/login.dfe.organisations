@@ -63,30 +63,6 @@
                 "description": "JSON string containing app config"
             }
         },
-        "auditServiceBusConnectionString": {
-            "type": "string",
-            "metadata": {
-                "description": "ASB Connection String"
-            }
-        },
-        "auditServiceBusTopicName": {
-            "type": "string",
-            "metadata": {
-                "description": "ASB Topic Name"
-            }
-        },
-        "auditServiceBusSubscriptionName": {
-            "type": "string",
-            "metadata": {
-                "description": "ASB Subscription Name"
-            }
-        },
-        "environmentId": {
-            "type": "string",
-            "metadata": {
-                "description": "Environment Identifier"
-            }
-        },
         "virtualNetworkResourceGroupName": {
             "type": "string",
             "defaultValue": "",
