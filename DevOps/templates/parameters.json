@@ -8,6 +8,9 @@
         "appServiceName": {
             "value": ""
         },
+        "appServicePlanSku": {
+            "value": ""
+        },
         "appServicePlanRG": {
             "value": ""
         },
@@ -17,13 +20,13 @@
         "customHostName": {
             "value": ""
         },
+        "certificateName": {
+            "value": ""
+        },
         "keyVaultName": {
             "value": ""
         },
         "keyVaultResourceGroup": {
-            "value": ""
-        },
-        "certificateName": {
             "value": ""
         },
         "numberOfWorkers": {
@@ -34,9 +37,6 @@
         },
         "appServiceConfigPath": {
             "value": ""
-        },
-        "http20Enabled": {
-            "value": true
         }
     }
 }
