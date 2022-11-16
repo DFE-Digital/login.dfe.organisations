@@ -6,6 +6,7 @@ const getOrganisationsAssociatedWithUser = async (req, res) => {
     const userOrganisations = await getOrganisationsForUserIncludingServices(req.params.uid);
     return res.contentType('json').send(userOrganisations);
   } catch (e) {
+    logger.error(`Inside getOrganisationAssociatedWithUser`);
     logger.error(`Error getting organisations associated with user ${req.params.uid} - ${e.message}`);
     return res.status(500).send();
   }

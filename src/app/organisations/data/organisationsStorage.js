@@ -448,6 +448,7 @@ const removeAssociationsOfType = async (organisationId, linkType) => {
 
 // Deprecated
 const getOrganisationsForUserIncludingServices = async userId => {
+  logger.error(`Here is the userId: ${userId}`);
   const userOrgs = await userOrganisations.findAll({
     where: {
       user_id: {
