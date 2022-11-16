@@ -41,7 +41,7 @@ runSchedule('Find overdue organisation requests', config.schedules.overdueReques
 const port = process.env.PORT || 3000;
 const app = express();
 app.use('/healthcheck', healthCheck({ config }));
-app.get('/', (req, res) => {
+app.get('/org/', (req, res) => {
   res.send();
 });
 app.listen(port, () => {
