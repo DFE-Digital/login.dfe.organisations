@@ -50,6 +50,7 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.statutoryHighAge = organisation.statutoryHighAge;
   entity.legacyId = organisation.legacyId;
   entity.companyRegistrationNumber = organisation.companyRegistrationNumber;
+  entity.DistrictAdministrativeCode = organisation.DistrictAdministrativeCode;
   entity.DistrictAdministrative_code = organisation.DistrictAdministrative_code;
 };
 const updateOrganisationsWithLocalAuthorityDetails = async orgs => {
@@ -110,6 +111,7 @@ const mapOrganisationFromEntity = entity => {
     statutoryHighAge: entity.statutoryHighAge,
     legacyId: entity.legacyId,
     companyRegistrationNumber: entity.companyRegistrationNumber,
+    DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
     DistrictAdministrative_code: entity.DistrictAdministrative_code
   };
 };
@@ -331,6 +333,7 @@ const listOfCategory = async (category, includeAssociations = false) => {
     address: entity.Address,
     legacyId: entity.legacyId,
     companyRegistrationNumber: entity.companyRegistrationNumber,
+    DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
     DistrictAdministrative_code: entity.DistrictAdministrative_code
 
   }));
@@ -384,6 +387,7 @@ const pagedListOfCategory = async (
       statutoryHighAge: entity.statutoryHighAge,
       legacyId: entity.legacyId,
       companyRegistrationNumber: entity.companyRegistrationNumber,
+      DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
       DistrictAdministrative_code: entity.DistrictAdministrative_code
 
     };
@@ -499,6 +503,8 @@ const getOrganisationsForUserIncludingServices = async userId => {
           ),
           companyRegistrationNumber:
             userOrg.Organisation.companyRegistrationNumber,
+          DistrictAdministrativeCode:
+            userOrg.Organisation.getDataValue('DistrictAdministrativeCode') || undefined,
           DistrictAdministrative_code:
             userOrg.Organisation.getDataValue('DistrictAdministrative_code') || undefined,
         },

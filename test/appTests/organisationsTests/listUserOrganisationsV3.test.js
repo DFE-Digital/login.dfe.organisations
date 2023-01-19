@@ -48,6 +48,7 @@ describe('when listing user organisations', () => {
             address: null,
             legacyId: '1234',
             companyRegistrationNumber: null,
+            DistrictAdministrativeCode: null,
             DistrictAdministrative_code: null
           },
           role: {
