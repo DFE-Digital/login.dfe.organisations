@@ -76,6 +76,10 @@ const define = (db, schema) => {
       type: Sequelize.STRING,
       allowNull: true,
     },
+    DistrictAdministrativeCode: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
     DistrictAdministrative_code: {
       type: Sequelize.STRING,
       allowNull: true,
