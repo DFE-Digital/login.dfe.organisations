@@ -71,6 +71,7 @@ describe('when getting an organisation by id', () => {
       statutoryHighAge: 16,
       legacyId: null,
       companyRegistrationNumber: null,
+      DistrictAdministrativeCode: null,
       DistrictAdministrative_code: null
     };
     getOrgById.mockReturnValue(org);
