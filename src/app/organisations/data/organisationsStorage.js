@@ -82,6 +82,45 @@ const mapOrganisationFromEntity = entity => {
   }
 
   const laAssociation = entity.associations
+      ? entity.associations.find(a => a.link_type === 'LA')
+      : undefined;
+  const category = organisationCategory.find(c => c.id === entity.Category) || { id: entity.Category, name: 'Unknown' };
+  return {
+    id: entity.id,
+    name: entity.name,
+    category,
+    type: establishmentTypes.find(c => c.id === entity.Type),
+    urn: entity.URN,
+    uid: entity.UID,
+    ukprn: entity.UKPRN,
+    establishmentNumber: entity.EstablishmentNumber,
+    status: organisationStatus.find(c => c.id === entity.Status),
+    closedOn: entity.ClosedOn,
+    address: entity.Address,
+    telephone: entity.telephone,
+    region: regionCodes.find(c => c.id === entity.regionCode),
+    localAuthority: laAssociation
+        ? {
+          id: laAssociation.associated_organisation_id
+        }
+        : undefined,
+    phaseOfEducation: phasesOfEducation.find(
+        c => c.id === entity.phaseOfEducation
+    ),
+    statutoryLowAge: entity.statutoryLowAge,
+    statutoryHighAge: entity.statutoryHighAge,
+    legacyId: entity.legacyId,
+    companyRegistrationNumber: entity.companyRegistrationNumber,
+    DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
+    DistrictAdministrative_code: entity.DistrictAdministrative_code
+  };
+};
+const mapOrganisationFromEntityWithNewPPFields = entity => {
+  if (!entity) {
+    return null;
+  }
+
+  const laAssociation = entity.associations
     ? entity.associations.find(a => a.link_type === 'LA')
     : undefined;
   const category = organisationCategory.find(c => c.id === entity.Category) || { id: entity.Category, name: 'Unknown' };
@@ -546,7 +585,7 @@ const getOrganisationsForUserIncludingServices = async userId => {
   );
 };
 
-const getOrganisationsAssociatedToUser = async userId => {
+const getOrganisationsAssociatedToUser = async (userId, WithNewPPFields = false) => {
   const userOrgs = await userOrganisations.findAll({
     where: {
       user_id: {
@@ -571,7 +610,10 @@ const getOrganisationsAssociatedToUser = async userId => {
     const role = await userOrg.getRole();
     const approvers = (await userOrg.getApprovers()).map(user => user.user_id);
     const endUsers = (await userOrg.getEndUsers()).map(user => user.user_id);
-    const organisation = await mapOrganisationFromEntity(userOrg.Organisation);
+    let organisation;
+    if (WithNewPPFields) { organisation = await mapOrganisationFromEntityWithNewPPFields(userOrg.Organisation);
+    } else { organisation = await mapOrganisationFromEntity(userOrg.Organisation);
+    }
     await updateOrganisationsWithLocalAuthorityDetails([organisation]);
 
     return {
