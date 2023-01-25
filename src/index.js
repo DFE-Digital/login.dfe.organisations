@@ -43,11 +43,11 @@ app.use(bodyParser.json());
 
 
 app.use('/healthcheck', healthCheck({ config }));
-app.use('/org/services', services.services);
-app.use('/org/organisations', organisations);
-app.use('/org/organisations', services.organisations);
-app.use('/org/organisations', organisationInvitations);
-app.use('/org/invitations', invitations);
+app.use('/services', services.services);
+app.use('/organisations', organisations);
+app.use('/organisations', services.organisations);
+app.use('/organisations', organisationInvitations);
+app.use('/invitations', invitations);
 
 if (config.hostingEnvironment.useDevViews) {
   app.use(expressLayouts);
