@@ -76,10 +76,54 @@ const define = (db, schema) => {
       type: Sequelize.STRING,
       allowNull: true,
     },
+    DistrictAdministrativeCode: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
     DistrictAdministrative_code: {
       type: Sequelize.STRING,
       allowNull: true,
     },
+    ProviderProfileID: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+    UPIN: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+    ProviderTypeName: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+    SourceSystem: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+    GIASProviderType: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+    PIMSProviderType: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+    PIMSProviderTypeCode: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+    },
+    PIMSStatus: {
+      type: Sequelize.INTEGER,
+      allowNull: true,
+    },
+    masteringCode: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+    OpenedOn: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    }
   }, {
     timestamps: true,
     tableName: 'organisation',
