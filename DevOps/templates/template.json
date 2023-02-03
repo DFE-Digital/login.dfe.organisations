@@ -106,7 +106,8 @@
         "prestierG2Id": "[resourceId(parameters('virtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'), 'prestier-g2-sn')]",
         "prestierG3Id": "[resourceId(parameters('virtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'), 'prestier-g3-sn')]",
         "prestierG4Id": "[resourceId(parameters('virtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'), 'prestier-g4-sn')]",
-        "backendG1Id": "[resourceId(parameters('virtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'), 'backend-g1-sn')]"
+        "backendG1Id": "[resourceId(parameters('virtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'), 'backend-g1-sn')]",
+        "midtierG1Id": "[resourceId(parameters('virtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'), 'midtier-g1-sn')]"
     },
     "resources": [
         {
@@ -196,7 +197,14 @@
                                 "action": "Allow",
                                 "tag": "Default",
                                 "name": "backend-g1",
-                                "priority": 10
+                                "priority": 50
+                            },
+                            {
+                                "vnetSubnetResourceId": "[variables('midtierG1Id')]",
+                                "action": "Allow",
+                                "tag": "Default",
+                                "name": "midtier-g1",
+                                "priority": 50
                             }
                         ]
                     }
