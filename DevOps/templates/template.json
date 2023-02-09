@@ -111,6 +111,7 @@
         "prestierG4Id": "[resourceId(parameters('virtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'), 'prestier-g4-sn')]",
         "backendG1Id": "[resourceId(parameters('virtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'), 'backend-g1-sn')]",
         "midtierG1Id": "[resourceId(parameters('virtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'), 'midtier-g1-sn')]",
+        "prestierG5Id": "[resourceId(parameters('virtualNetworkResourceGroupName'),'Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'), 'prestier-g5-sn')]",
         "baseIpSecurityRestrictions": [
             {
                 "vnetSubnetResourceId": "[variables('prestierG1Id')]",
