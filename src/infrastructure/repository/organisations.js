@@ -123,6 +123,30 @@ const define = (db, schema) => {
     OpenedOn: {
       type: Sequelize.STRING,
       allowNull: true,
+    },
+    PIMSStatusName: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+    GIASStatus:{
+      type: Sequelize.INTEGER,
+      allowNull: true,
+    },
+    GIASStatusName: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+    MasterProviderStatusCode:{
+      type: Sequelize.INTEGER,
+      allowNull: true,
+    },
+    MasterProviderStatusName: {
+      type: Sequelize.STRING,
+      allowNull: true,
+    },
+    LegalName: {
+      type: Sequelize.STRING,
+      allowNull: true,
     }
   }, {
     timestamps: true,
