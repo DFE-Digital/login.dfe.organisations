@@ -100,7 +100,8 @@ const defineStatic = model => {
     { id: '46', name: 'Academy 16-19 Sponsor Led' },
     { id: '47', name: 'Children\'s Centre' },
     { id: '48', name: 'Children\'s Centre Linked Site' },
-    { id: '56', name: 'Institution funded by other government department' }
+    { id: '56', name: 'Institution funded by other government department' },
+    { id: '57', name: 'Academy secure 16 to 19' }
   ];
 
   model.phasesOfEducation = [
