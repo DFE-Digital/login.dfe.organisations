@@ -161,7 +161,13 @@ const mapOrganisationFromEntityWithNewPPFields = entity => {
     PIMSProviderType: entity.PIMSProviderType,
     PIMSProviderTypeCode: entity.PIMSProviderTypeCode,
     PIMSStatus: entity.PIMSStatus,
-    masteringCode: entity.masteringCode
+    masteringCode: entity.masteringCode,
+    PIMSStatusName: entity.PIMSStatusName,
+    GIASStatus: entity.GIASStatus,
+    GIASStatusName: entity.GIASStatusName,
+    MasterProviderStatusCode: entity.MasterProviderStatusCode,
+    MasterProviderStatusName: entity.MasterProviderStatusName,
+    LegalName: entity.LegalName
   };
 };
 const mapAnnouncementFromEntity = entity => {
