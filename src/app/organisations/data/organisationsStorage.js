@@ -95,6 +95,7 @@ const mapOrganisationFromEntity = entity => {
     ukprn: entity.UKPRN,
     establishmentNumber: entity.EstablishmentNumber,
     status: organisationStatus.find(c => c.id === entity.Status),
+    pimsStatus: entity.pimsStatus,
     closedOn: entity.ClosedOn,
     address: entity.Address,
     telephone: entity.telephone,
