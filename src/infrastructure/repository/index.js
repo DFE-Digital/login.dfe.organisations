@@ -43,7 +43,11 @@ const defineStatic = model => {
     { id: 1, name: 'Open' },
     { id: 2, name: 'Closed' },
     { id: 3, name: 'Proposed to close' },
-    { id: 4, name: 'Proposed to open' }
+    { id: 4, name: 'Proposed to open' },
+    { id: 5, name: 'Dissolved' },
+    { id: 6, name: 'In Liquidation' },
+    { id: 8, name: 'Locked Duplicate' },
+    { id: 10, name: 'Locked Restructure' }
   ];
 
   model.organisationCategory = [
