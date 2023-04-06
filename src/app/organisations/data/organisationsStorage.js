@@ -90,6 +90,7 @@ const mapOrganisationFromEntity = entity => {
     name: entity.name,
     category,
     type: establishmentTypes.find(c => c.id === entity.Type),
+    providerTypeName: entity.ProviderTypeName,
     urn: entity.URN,
     uid: entity.UID,
     ukprn: entity.UKPRN,
