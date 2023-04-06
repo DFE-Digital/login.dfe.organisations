@@ -17,7 +17,7 @@ const getOrganisation = async (req, res) => {
     Status: organisation.status ? organisation.status.id : null,
     ClosedOn: organisation.closedOn,
     Address: organisation.address,
-    PIMSProviderType: organisation.PIMSProviderType,
+    ProviderTypeName: organisation.ProviderTypeName,
   });
 };
 
