@@ -7,6 +7,8 @@ const externalIdentifiersModel = require('./externalIdentifiers');
 const invitationExternalIdentifiersModel = require('./invitationExternalIdentifiers');
 const invitationOrganisationsModel = require('./invitationOrganisations');
 const invitationsModel = require('./invitations');
+const roleModel = require('./role');
+const invitationServiceRolesModel = require('./invitationServiceRoles');
 const organisationAnnoucementsModel = require('./organisationAnnoucements');
 const organisationAssociationsModel = require('./organisationAssociations');
 const organisationsModel = require('./organisations');
@@ -175,7 +177,9 @@ buildDataModel(dataModel, db, [
   externalIdentifiersModel,
   invitationExternalIdentifiersModel,
   invitationOrganisationsModel,
+  roleModel,
   invitationsModel,
+  invitationServiceRolesModel,
   organisationAnnoucementsModel,
   organisationAssociationsModel,
   organisationsModel,
