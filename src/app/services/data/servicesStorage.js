@@ -50,6 +50,7 @@ const mapOrganisationEntity = async (entity, laCache = undefined) => {
     phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
     statutoryLowAge: entity.statutoryLowAge,
     statutoryHighAge: entity.statutoryHighAge,
+    providerTypeName: entity.ProviderTypeName,
   };
 };
 
@@ -99,6 +100,7 @@ const getOrganisationById = async (organisationId) => {
     phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
     statutoryLowAge: entity.statutoryLowAge,
     statutoryHighAge: entity.statutoryHighAge,
+    providerTypeName:entity.ProviderTypeName,
   };
 };
 

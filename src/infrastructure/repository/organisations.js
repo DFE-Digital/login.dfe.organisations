@@ -28,10 +28,6 @@ const define = (db, schema) => {
       type: Sequelize.STRING,
       allowNull: true,
     },
-    UPIN: {
-      type: Sequelize.STRING,
-      allowNull: true,
-    },
     UKPRN: {
       type: Sequelize.STRING,
       allowNull: true,

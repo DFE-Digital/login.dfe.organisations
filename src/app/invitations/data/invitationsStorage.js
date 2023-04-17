@@ -64,6 +64,7 @@ const listInvitationServices = async (page, pageSize, correlationId) => {
           ukprn: entity.Organisation.getDataValue('UKPRN') || undefined,
           category: organisationCategory.find(c => c.id === entity.Organisation.getDataValue('Category')),
           type: establishmentTypes.find(t => t.id === entity.Organisation.getDataValue('Type')),
+          providerTypeName: entity.Organisation.getDataValue('ProviderTypeName') || undefined,
         },
         role,
       });

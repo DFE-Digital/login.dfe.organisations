@@ -116,7 +116,8 @@ const mapOrganisationFromEntity = entity => {
     legacyId: entity.legacyId,
     companyRegistrationNumber: entity.companyRegistrationNumber,
     DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
-    DistrictAdministrative_code: entity.DistrictAdministrative_code
+    DistrictAdministrative_code: entity.DistrictAdministrative_code,
+    providerTypeName: entity.ProviderTypeName
   };
 };
 const mapOrganisationFromEntityWithNewPPFields = entity => {
@@ -158,9 +159,8 @@ const mapOrganisationFromEntityWithNewPPFields = entity => {
     DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
     DistrictAdministrative_code: entity.DistrictAdministrative_code,
     ProviderProfileID: entity.ProviderProfileID,
-    UPIN: entity.UPIN,
     OpenedOn: entity.OpenedOn,
-    ProviderTypeName: entity.ProviderTypeName,
+    providerTypeName: entity.ProviderTypeName,
     SourceSystem: entity.SourceSystem,
     GIASProviderType: entity.GIASProviderType,
     PIMSProviderType: entity.PIMSProviderType,
