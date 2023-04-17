@@ -53,6 +53,7 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.companyRegistrationNumber = organisation.companyRegistrationNumber;
   entity.DistrictAdministrativeCode = organisation.DistrictAdministrativeCode;
   entity.DistrictAdministrative_code = organisation.DistrictAdministrative_code;
+  entity.providerTypeName = organisation.ProviderTypeName;
 };
 const updateOrganisationsWithLocalAuthorityDetails = async orgs => {
   const localAuthorityIds = uniq(
@@ -91,7 +92,6 @@ const mapOrganisationFromEntity = entity => {
     name: entity.name,
     category,
     type: establishmentTypes.find(c => c.id === entity.Type),
-    providerTypeName: entity.ProviderTypeName,
     urn: entity.URN,
     uid: entity.UID,
     upin: entity.UPIN,
@@ -399,7 +399,8 @@ const listOfCategory = async (category, includeAssociations = false) => {
     legacyId: entity.legacyId,
     companyRegistrationNumber: entity.companyRegistrationNumber,
     DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
-    DistrictAdministrative_code: entity.DistrictAdministrative_code
+    DistrictAdministrative_code: entity.DistrictAdministrative_code,
+    providerTypeName: entity.ProviderTypeName
 
   }));
 };
@@ -454,7 +455,8 @@ const pagedListOfCategory = async (
       legacyId: entity.legacyId,
       companyRegistrationNumber: entity.companyRegistrationNumber,
       DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
-      DistrictAdministrative_code: entity.DistrictAdministrative_code
+      DistrictAdministrative_code: entity.DistrictAdministrative_code,
+      providerTypeName: entity.ProviderTypeName
 
     };
 
@@ -574,6 +576,8 @@ const getOrganisationsForUserIncludingServices = async userId => {
             userOrg.Organisation.getDataValue('DistrictAdministrativeCode') || undefined,
           DistrictAdministrative_code:
             userOrg.Organisation.getDataValue('DistrictAdministrative_code') || undefined,
+          providerTypeName: 
+            userOrg.Organisation.getDataValue('ProviderTypeName') || undefined,
         },
         role,
         approvers,
