@@ -45,6 +45,7 @@ describe('when getting an organisation by id', () => {
       },
       urn: '134418',
       uid: null,
+      upin: null,
       ukprn: null,
       establishmentNumber: '6063',
       status: {
