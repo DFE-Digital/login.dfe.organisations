@@ -36,6 +36,7 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.Type = organisation.type ? organisation.type.id : null;
   entity.URN = updateIfValid(entity.URN, organisation.urn);
   entity.UID = organisation.uid;
+  entity.UPIN = organisation.upin;
   entity.UKPRN = updateIfValid(entity.UKPRN, organisation.ukprn);
   entity.EstablishmentNumber = organisation.establishmentNumber;
   entity.Status = organisation.status.id;
@@ -93,6 +94,7 @@ const mapOrganisationFromEntity = entity => {
     providerTypeName: entity.ProviderTypeName,
     urn: entity.URN,
     uid: entity.UID,
+    upin: entity.UPIN,
     ukprn: entity.UKPRN,
     establishmentNumber: entity.EstablishmentNumber,
     status: organisationStatus.find(c => c.id === entity.Status),
@@ -133,6 +135,7 @@ const mapOrganisationFromEntityWithNewPPFields = entity => {
     type: establishmentTypes.find(c => c.id === entity.Type),
     urn: entity.URN,
     uid: entity.UID,
+    upin: entity.UPIN,
     ukprn: entity.UKPRN,
     establishmentNumber: entity.EstablishmentNumber,
     status: organisationStatus.find(c => c.id === entity.Status),
@@ -209,6 +212,7 @@ const list = async (includeAssociations = false) => {
           type: establishmentTypes.find(c => c.id === serviceEntity.Type),
           urn: serviceEntity.URN,
           uid: serviceEntity.UID,
+          upin: serviceEntity.UPIN,
           ukprn: serviceEntity.UKPRN,
           establishmentNumber: serviceEntity.EstablishmentNumber,
           status: organisationStatus.find(c => c.id === serviceEntity.Status),
@@ -287,6 +291,9 @@ const pagedSearch = async(
           [Op.like]: `%${criteria}%`
         },
         uid: {
+          [Op.like]: `%${criteria}%`
+        },
+        upin: {
           [Op.like]: `%${criteria}%`
         },
         ukprn: {
@@ -383,6 +390,7 @@ const listOfCategory = async (category, includeAssociations = false) => {
     type: establishmentTypes.find(c => c.id === entity.Type),
     urn: entity.URN,
     uid: entity.UID,
+    upin: entity.UPIN,
     ukprn: entity.UKPRN,
     establishmentNumber: entity.EstablishmentNumber,
     status: organisationStatus.find(c => c.id === entity.Status),
@@ -430,6 +438,7 @@ const pagedListOfCategory = async (
       type: establishmentTypes.find(c => c.id === entity.Type),
       urn: entity.URN,
       uid: entity.UID,
+      upin: entity.UPIN,
       ukprn: entity.UKPRN,
       establishmentNumber: entity.EstablishmentNumber,
       status: organisationStatus.find(c => c.id === entity.Status),
@@ -544,6 +553,7 @@ const getOrganisationsForUserIncludingServices = async userId => {
           name: userOrg.Organisation.getDataValue('name'),
           urn: userOrg.Organisation.getDataValue('URN') || undefined,
           uid: userOrg.Organisation.getDataValue('UID') || undefined,
+          upin: userOrganisations.getDataValue('UPIN') || undefined,
           ukprn: userOrg.Organisation.getDataValue('UKPRN') || undefined,
           address: userOrg.Organisation.getDataValue('Address') || undefined,
           status:
@@ -805,6 +815,7 @@ const getUsersPendingApproval = async (pageNumber = 1, pageSize = 25) => {
     ),
     urn: entity.Organisation.getDataValue('URN'),
     uid: entity.Organisation.getDataValue('UID'),
+    upin: entity.Organisation.getDataValue('UPIN'),
     ukprn: entity.Organisation.getDataValue('UKPRN'),
     status: organisationUserStatus.find(
       c => c.id === entity.getDataValue('status')
@@ -883,6 +894,28 @@ const getOrgByEstablishmentNumber = async (establishmentNumber, category) => {
       `error getting organisation by establishment number - ${e.message}`,
       e
     );
+    throw e;
+  }
+};
+
+const getOrgByUpin = async (upin, category) => {
+  try {
+    const query = {
+      where: {
+        UPIN: {
+          [Op.eq]: upin
+        }
+      }
+    };
+    if (category) {
+      query.where.Category = {
+        [Op.eq]: category
+      };
+    }
+    const entity = await organisations.findOne(query);
+    return mapOrganisationFromEntity(entity);
+  } catch (e) {
+    logger.error(`error getting organisation by UPIN - ${e.message}`, e);
     throw e;
   }
 };
@@ -1587,6 +1620,7 @@ const getRequestsAssociatedWithUser = async userId => {
     org_name: entity.Organisation.getDataValue('name'),
     urn: entity.Organisation.getDataValue('URN'),
     uid: entity.Organisation.getDataValue('UID'),
+    upin: entity.Organisation.getDataValue('UPIN'),
     ukprn: entity.Organisation.getDataValue('UKPRN'),
     org_status:
       organisationStatus.find(
@@ -1622,6 +1656,7 @@ const getLatestActionedRequestAssociated = async userId => {
     org_name: entity.Organisation.getDataValue('name'),
     urn: entity.Organisation.getDataValue('URN'),
     uid: entity.Organisation.getDataValue('UID'),
+    upin: entity.Organisation.getDataValue('UPIN'),
     ukprn: entity.Organisation.getDataValue('UKPRN'),
     org_status:
       organisationStatus.find(
@@ -1649,6 +1684,9 @@ const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize,
           [Op.like]: `%${criteria}%`
         },
         uid: {
+          [Op.like]: `%${criteria}%`
+        },
+        upin: {
           [Op.like]: `%${criteria}%`
         },
         ukprn: {
@@ -1715,6 +1753,7 @@ module.exports = {
   getOrgByUrn,
   getOrgByUid,
   getOrgByEstablishmentNumber,
+  getOrgByUpin,
   getOrgByUkprn,
   getAllOrgsByUkprn,
   getOrgByLegacyId,
