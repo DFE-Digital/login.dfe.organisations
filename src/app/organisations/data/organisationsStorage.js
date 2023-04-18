@@ -53,7 +53,7 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.companyRegistrationNumber = organisation.companyRegistrationNumber;
   entity.DistrictAdministrativeCode = organisation.DistrictAdministrativeCode;
   entity.DistrictAdministrative_code = organisation.DistrictAdministrative_code;
-  entity.providerTypeName = organisation.ProviderTypeName;
+  entity.ProviderTypeName = organisation.providerTypeName;
 };
 const updateOrganisationsWithLocalAuthorityDetails = async orgs => {
   const localAuthorityIds = uniq(
