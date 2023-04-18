@@ -158,9 +158,9 @@ const mapOrganisationFromEntityWithNewPPFields = entity => {
     companyRegistrationNumber: entity.companyRegistrationNumber,
     DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
     DistrictAdministrative_code: entity.DistrictAdministrative_code,
+    providerTypeName: entity.ProviderTypeName,
     ProviderProfileID: entity.ProviderProfileID,
     OpenedOn: entity.OpenedOn,
-    providerTypeName: entity.ProviderTypeName,
     SourceSystem: entity.SourceSystem,
     GIASProviderType: entity.GIASProviderType,
     PIMSProviderType: entity.PIMSProviderType,
@@ -576,8 +576,7 @@ const getOrganisationsForUserIncludingServices = async userId => {
             userOrg.Organisation.getDataValue('DistrictAdministrativeCode') || undefined,
           DistrictAdministrative_code:
             userOrg.Organisation.getDataValue('DistrictAdministrative_code') || undefined,
-          providerTypeName: 
-            userOrg.Organisation.getDataValue('ProviderTypeName') || undefined,
+          providerTypeName: userOrg.getDataValue('ProviderTypeName') || undefined,
         },
         role,
         approvers,
