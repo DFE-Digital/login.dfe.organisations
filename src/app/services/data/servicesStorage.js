@@ -100,7 +100,7 @@ const getOrganisationById = async (organisationId) => {
     phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
     statutoryLowAge: entity.statutoryLowAge,
     statutoryHighAge: entity.statutoryHighAge,
-    providerTypeName:entity.ProviderTypeName,
+    providerTypeName: entity.ProviderTypeName,
   };
 };
 
