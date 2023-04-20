@@ -48,7 +48,6 @@ describe('when getting latest request for a user', () => {
                 org_id: 'org1',
                 org_name: 'org name',
                 urn: null,
-                upin: null,
                 ukprn: null,
                 uid: null,
                 org_status: {
@@ -80,7 +79,6 @@ describe('when getting latest request for a user', () => {
                 org_id: 'org1',
                 org_name: 'org name',
                 urn: null,
-                upin: null,
                 ukprn: null,
                 uid: null,
                 org_status: {
