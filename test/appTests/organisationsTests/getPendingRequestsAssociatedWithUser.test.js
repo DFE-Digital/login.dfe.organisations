@@ -79,7 +79,6 @@ describe('when getting pending requests for a user', () => {
         org_id: 'org1',
         org_name: 'org name',
         urn: null,
-        upin: null,
         ukprn: null,
         uid: null,
         org_status: {

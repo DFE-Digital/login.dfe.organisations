@@ -17,7 +17,6 @@ const org = {
   Type: null,
   URN: null,
   UID: '16840',
-  upin: null,
   UKPRN: null,
   EstablishmentNumber: null,
   Status: 1,

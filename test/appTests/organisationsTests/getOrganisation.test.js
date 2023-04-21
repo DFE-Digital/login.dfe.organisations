@@ -41,7 +41,6 @@ describe('when getting an organisation by id', () => {
       type: null,
       urn: null,
       uid: '16840',
-      upin: null,
       ukprn: null,
       establishmentNumber: null,
       status: {
@@ -63,7 +62,6 @@ describe('when getting an organisation by id', () => {
       Type: null,
       URN: null,
       UID: org.uid,
-      upin: null,
       UKPRN: null,
       EstablishmentNumber: null,
       Status: org.status.id,

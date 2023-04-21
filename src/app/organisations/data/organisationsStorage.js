@@ -576,7 +576,6 @@ const getOrganisationsForUserIncludingServices = async userId => {
             userOrg.Organisation.getDataValue('DistrictAdministrativeCode') || undefined,
           DistrictAdministrative_code:
             userOrg.Organisation.getDataValue('DistrictAdministrative_code') || undefined,
-          providerTypeName: userOrg.getDataValue('ProviderTypeName') || undefined,
         },
         role,
         approvers,
