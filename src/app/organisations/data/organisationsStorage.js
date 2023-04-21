@@ -555,7 +555,6 @@ const getOrganisationsForUserIncludingServices = async userId => {
           name: userOrg.Organisation.getDataValue('name'),
           urn: userOrg.Organisation.getDataValue('URN') || undefined,
           uid: userOrg.Organisation.getDataValue('UID') || undefined,
-          upin: userOrganisations.getDataValue('UPIN') || undefined,
           ukprn: userOrg.Organisation.getDataValue('UKPRN') || undefined,
           address: userOrg.Organisation.getDataValue('Address') || undefined,
           status:
