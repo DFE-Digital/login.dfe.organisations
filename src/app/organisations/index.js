@@ -70,10 +70,12 @@ const routes = () => {
   router.post('/:id/users/:uid/requests', asyncWrapper(createUserOrganisationRequest));
   router.get('/:id/requests', asyncWrapper(getRequestsForOrganisation));
   router.get('/:orgIds/requests/all', asyncWrapper(getRequestsForOrganisations));
+  // TODO: IONUT add route here router.get('/:orgIds/service-subService-requests/all') - total number of services + sub services requests
 
   router.get('/requests/:rid', asyncWrapper(getUserOrganisationRequest));
   router.patch('/requests/:rid', asyncWrapper(updateUserOrganisationRequest));
   router.get('/requests-for-approval/:uid', asyncWrapper(getPendingRequestsForApproval));
+  // TODO: PETER add route here router.get('/service-subSerice-requests-for-approval/:uid') - the data that will populate the table for service + subservice req
   router.get('/requests-for-user/:uid', asyncWrapper(getPendingRequestsAssociatedWithUser));
   router.get('/latest-request-for-user/:uid', asyncWrapper(getLatestActionedRequestAssociatedWithUser));
 
