@@ -1670,6 +1670,72 @@ const getServiceAndSubServiceReqForOrgs = async orgIds => {
   }));
 };
 
+const pagedListOfAllRequestTypesForOrg = async(
+  orgIds,
+  pageNumber = 1,
+  pageSize = 25
+) => {
+  const organisationsIds = JSON.parse(decodeURIComponent(orgIds));
+
+  const query = {
+    where: {
+      organisation_id: {
+        [Op.in]: organisationsIds
+      },
+      status: {
+        [Op.or]: [0, 2, 3]
+      }
+    },
+    include: ['Organisation']
+  };
+
+  const userOrgRequests = await userOrganisationRequests.findAndCountAll(query);
+
+  const userServRequests = await userServiceRequests.findAndCountAll(query);
+  let orgsAccessRequests = [];
+  let orgsServiceSubServiceRequests = [];
+  if (userOrgRequests || userOrgRequests.length !== 0) {
+    orgsAccessRequests = userOrgRequests.rows.map(entity => ({
+      id: entity.get('id'),
+      org_id: entity.Organisation.getDataValue('id'),
+      org_name: entity.Organisation.getDataValue('name'),
+      user_id: entity.getDataValue('user_id'),
+      created_date: entity.getDataValue('createdAt'),
+      request_type: { id: 'organisation', name: 'Organisation access' },
+      status: organisationRequestStatus.find(
+        c => c.id === entity.getDataValue('status')
+      )
+    }));
+  }
+  if (userServRequests || userOrgRequests.length !== 0) {
+    orgsServiceSubServiceRequests = userServRequests.rows.map((entity) => ({
+      id: entity.get('id'),
+      org_id: entity.Organisation.getDataValue('id'),
+      org_name: entity.Organisation.getDataValue('name'),
+      user_id: entity.getDataValue('user_id'),
+      created_date: entity.getDataValue('createdAt'),
+      request_type: serviceRequestsTypes.find(
+        (e) => e.id === entity.getDataValue('request_type')
+      ),
+      status: serviceRequestStatus.find(
+        (c) => c.id === entity.getDataValue('status')
+      )
+    }));
+  }
+
+  const allAccessRequestsforOrgs = orgsAccessRequests.concat(orgsServiceSubServiceRequests);
+  const offset = pageSize * (pageNumber - 1);
+  const totalNumberOfPages = Math.ceil(allAccessRequestsforOrgs.length / pageSize);
+  const paginatedItems = allAccessRequestsforOrgs.slice(offset, pageSize * pageNumber);
+  const totalNumberOfRecords = allAccessRequestsforOrgs.length;
+  return {
+    requests: paginatedItems,
+    pageNumber,
+    totalNumberOfPages,
+    totalNumberOfRecords
+  };
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -1719,6 +1785,7 @@ module.exports = {
   getLatestActionedRequestAssociated,
   hasUserOrganisationRequestsByOrgId,
   getOrganisationsAssociatedToService,
-  getServiceAndSubServiceReqForOrgs
+  getServiceAndSubServiceReqForOrgs,
+  pagedListOfAllRequestTypesForOrg
 
 };
