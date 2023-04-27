@@ -15,8 +15,11 @@ const {
   organisationAnnouncements,
   userOrganisationRequests,
   organisationRequestStatus,
+  serviceRequestStatus,
+  serviceRequestsTypes,
   getNextNumericId,
-  getNextLegacyId
+  getNextLegacyId,
+  userServiceRequests
 } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 const { uniq, trim } = require('lodash');
@@ -1636,6 +1639,37 @@ const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize,
     throw e;
   }
 };
+
+const getServiceAndSubServiceReqForOrgs = async orgIds => {
+  const organisationsIds = JSON.parse(decodeURIComponent(orgIds));
+  const userServiceAndSubServiceReq = await userServiceRequests.findAll({
+    where: {
+      organisation_id: {
+        [Op.in]: organisationsIds
+      },
+      status: {
+        [Op.or]: [0, 2, 3]
+      }
+    },
+    include: ['Organisation']
+  });
+  if (!userServiceAndSubServiceReq || userServiceAndSubServiceReq.length === 0) {
+    return [];
+  }
+
+  return userServiceAndSubServiceReq.map(entity => ({
+    id: entity.get('id'),
+    org_id: entity.Organisation.getDataValue('id'),
+    org_name: entity.Organisation.getDataValue('name'),
+    user_id: entity.getDataValue('user_id'),
+    created_date: entity.getDataValue('createdAt'),
+    request_type: serviceRequestsTypes.find(e => e.id === entity.getDataValue('request_type')),
+    status: serviceRequestStatus.find(
+      c => c.id === entity.getDataValue('status')
+    )
+  }));
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -1684,6 +1718,7 @@ module.exports = {
   pagedListOfRequests,
   getLatestActionedRequestAssociated,
   hasUserOrganisationRequestsByOrgId,
-  getOrganisationsAssociatedToService
+  getOrganisationsAssociatedToService,
+  getServiceAndSubServiceReqForOrgs
 
 };

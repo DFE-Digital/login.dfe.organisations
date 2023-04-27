@@ -34,6 +34,7 @@ const listUserOrganisationsV2 = require('./listUserOrganisationsV2');
 const listUserOrganisationsV3 = require('./listUserOrganisationsV3');
 const getLatestActionedRequestAssociatedWithUser = require('./getLatestActionedRequestAssociatedWithUser');
 const getOrganisationsAssociatedWithService = require('./getOrganisationsAssociatedWithService');
+const getOrgsServicesSubServicesRequests = require('./getOrgsServicesSubServicesRequests');
 
 const router = express.Router();
 
@@ -70,7 +71,7 @@ const routes = () => {
   router.post('/:id/users/:uid/requests', asyncWrapper(createUserOrganisationRequest));
   router.get('/:id/requests', asyncWrapper(getRequestsForOrganisation));
   router.get('/:orgIds/requests/all', asyncWrapper(getRequestsForOrganisations));
-  // TODO: IONUT add route here router.get('/:orgIds/service-subService-requests/all') - total number of services + sub services requests
+  router.get('/:orgIds/service-subService-requests/all', asyncWrapper(getOrgsServicesSubServicesRequests));
 
   router.get('/requests/:rid', asyncWrapper(getUserOrganisationRequest));
   router.patch('/requests/:rid', asyncWrapper(updateUserOrganisationRequest));

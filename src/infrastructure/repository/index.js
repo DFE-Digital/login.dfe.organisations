@@ -136,6 +136,11 @@ const defineStatic = model => {
     { id: 'W', name: 'Wales (pseudo)' },
     { id: 'Z', name: 'Not Applicable' }
   ];
+
+  model.serviceRequestsTypes = [
+    { id: 'service', name: 'Service access' },
+    { id: 'subService', name: 'Sub-service access' }
+  ];
 };
 const buildDataModel = (model, connection, entityModels) => {
   const dbSchema = config.database.schema || 'services';
