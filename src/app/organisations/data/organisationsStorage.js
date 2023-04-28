@@ -1377,6 +1377,47 @@ const getAllPendingRequestsForApprover = async userId => {
     )
   }));
 };
+const getAllPendingRequestTypesForApprover = async userId => {
+  const userApproverOrgs = await userOrganisations.findAll({
+    where: {
+      user_id: {
+        [Op.eq]: userId
+      },
+      role_id: {
+        [Op.eq]: 10000
+      }
+    }
+  });
+  if (!userApproverOrgs || userApproverOrgs.length === 0) {
+    return [];
+  }
+  const userServiceAndSubServiceReq = await userServiceRequests.findAll({
+    where: {
+      organisation_id: {
+        [Op.in]: userApproverOrgs.map(c => c.organisation_id)
+      },
+      status: {
+        [Op.or]: [0]
+      }
+    },
+    include: ['Organisation']
+  });
+  if (!userServiceAndSubServiceReq || userServiceAndSubServiceReq.length === 0) {
+    return [];
+  }
+ 
+  return userServiceAndSubServiceReq.map(entity => ({
+    id: entity.get('id'),
+    org_id: entity.Organisation.getDataValue('id'),
+    org_name: entity.Organisation.getDataValue('name'),
+    user_id: entity.getDataValue('user_id'),
+    created_date: entity.getDataValue('createdAt'),
+    request_type: serviceRequestsTypes.find(e => e.id === entity.getDataValue('request_type')),
+    status: serviceRequestStatus.find(
+      c => c.id === entity.getDataValue('status')
+    )
+  }));
+};
 
 const getRequestsAssociatedWithOrganisation = async orgId => {
   const userOrgRequests = await userOrganisationRequests.findAll({
@@ -1786,6 +1827,7 @@ module.exports = {
   hasUserOrganisationRequestsByOrgId,
   getOrganisationsAssociatedToService,
   getServiceAndSubServiceReqForOrgs,
-  pagedListOfAllRequestTypesForOrg
+  pagedListOfAllRequestTypesForOrg,
+  getAllPendingRequestTypesForApprover
 
 };
