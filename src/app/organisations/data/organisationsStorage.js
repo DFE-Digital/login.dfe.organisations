@@ -1377,7 +1377,8 @@ const getAllPendingRequestsForApprover = async userId => {
     )
   }));
 };
-const getAllPendingRequestTypesForApprover = async userId => {
+const getAllPendingRequestTypesForApprover = async (userId, pageNumber =1, pageSize = 25) => {
+  //get the list of organisation for the current logged in user
   const userApproverOrgs = await userOrganisations.findAll({
     where: {
       user_id: {
@@ -1388,35 +1389,18 @@ const getAllPendingRequestTypesForApprover = async userId => {
       }
     }
   });
+  //no orgs leave
   if (!userApproverOrgs || userApproverOrgs.length === 0) {
     return [];
   }
-  const userServiceAndSubServiceReq = await userServiceRequests.findAll({
-    where: {
-      organisation_id: {
-        [Op.in]: userApproverOrgs.map(c => c.organisation_id)
-      },
-      status: {
-        [Op.or]: [0]
-      }
-    },
-    include: ['Organisation']
-  });
-  if (!userServiceAndSubServiceReq || userServiceAndSubServiceReq.length === 0) {
+  //orgs get and send to paged requests
+  const orgIds = userApproverOrgs.map(c => c.organisation_id);
+  const pagedResults = await pagedListOfAllRequestTypesForOrg(JSON.stringify(orgIds),pageNumber,pageSize)
+  if (!pagedResults || pagedResults.length === 0) {
     return [];
   }
- 
-  return userServiceAndSubServiceReq.map(entity => ({
-    id: entity.get('id'),
-    org_id: entity.Organisation.getDataValue('id'),
-    org_name: entity.Organisation.getDataValue('name'),
-    user_id: entity.getDataValue('user_id'),
-    created_date: entity.getDataValue('createdAt'),
-    request_type: serviceRequestsTypes.find(e => e.id === entity.getDataValue('request_type')),
-    status: serviceRequestStatus.find(
-      c => c.id === entity.getDataValue('status')
-    )
-  }));
+  //go through paged results and get the users name and ad it to the paged results
+  return pagedResults;
 };
 
 const getRequestsAssociatedWithOrganisation = async orgId => {
