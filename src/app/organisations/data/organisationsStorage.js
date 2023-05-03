@@ -1378,7 +1378,6 @@ const getAllPendingRequestsForApprover = async userId => {
   }));
 };
 const getAllPendingRequestTypesForApprover = async (userId, pageNumber =1, pageSize = 25) => {
-  //get the list of organisation for the current logged in user
   const userApproverOrgs = await userOrganisations.findAll({
     where: {
       user_id: {
@@ -1389,17 +1388,16 @@ const getAllPendingRequestTypesForApprover = async (userId, pageNumber =1, pageS
       }
     }
   });
-  //no orgs leave
+
   if (!userApproverOrgs || userApproverOrgs.length === 0) {
     return [];
   }
-  //orgs get and send to paged requests
+
   const orgIds = userApproverOrgs.map(c => c.organisation_id);
   const pagedResults = await pagedListOfAllRequestTypesForOrg(JSON.stringify(orgIds),pageNumber,pageSize)
   if (!pagedResults || pagedResults.length === 0) {
     return [];
   }
-  //go through paged results and get the users name and ad it to the paged results
   return pagedResults;
 };
 
