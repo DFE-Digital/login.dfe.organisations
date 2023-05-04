@@ -28,9 +28,9 @@ const getAllRequestsTypesAssociatedWithOrgs = async(req, res) => {
 
   const pageSize = extractPageSize(req);
   if (pageSize < 1) {
-    return res.status(400).send('pageSize must be greater than 0');
+    return res.status(400).send('Page size must be greater than 0');
   } else if (pageSize > 500) {
-    return res.status(400).send('pageSize must not be greater than 500');
+    return res.status(400).send('Page size must not be greater than 500');
   }
   try {
     const orgRequests = await pagedListOfAllRequestTypesForOrg(
@@ -38,7 +38,7 @@ const getAllRequestsTypesAssociatedWithOrgs = async(req, res) => {
     );
     return res.status(200).send(orgRequests);
   } catch (e) {
-    logger.error(`Error getting organisation, service and sub-service access requests for organisation ${req.params.id} - ${e.message}`
+    logger.error(`Error getting organisation, service and sub-service access requests for organisations ${req.params.orgIds} - ${e.message}`
     );
     return res.status(500).send();
   }
