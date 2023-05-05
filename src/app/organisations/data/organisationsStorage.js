@@ -1377,7 +1377,7 @@ const getAllPendingRequestsForApprover = async userId => {
     )
   }));
 };
-const getAllPendingRequestTypesForApprover = async (userId, pageNumber =1, pageSize = 25) => {
+const getAllPendingRequestTypesForApprover = async(userId, pageNumber = 1, pageSize = 25) => {
   const userApproverOrgs = await userOrganisations.findAll({
     where: {
       user_id: {
@@ -1394,7 +1394,7 @@ const getAllPendingRequestTypesForApprover = async (userId, pageNumber =1, pageS
   }
 
   const orgIds = userApproverOrgs.map(c => c.organisation_id);
-  const pagedResults = await pagedListOfAllRequestTypesForOrg(JSON.stringify(orgIds),pageNumber,pageSize)
+  const pagedResults = await pagedListOfAllRequestTypesForOrg(JSON.stringify(orgIds), pageNumber, pageSize);
   if (!pagedResults || pagedResults.length === 0) {
     return [];
   }
