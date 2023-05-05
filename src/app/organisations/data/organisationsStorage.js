@@ -1377,6 +1377,29 @@ const getAllPendingRequestsForApprover = async userId => {
     )
   }));
 };
+const getAllPendingRequestTypesForApprover = async (userId, pageNumber =1, pageSize = 25) => {
+  const userApproverOrgs = await userOrganisations.findAll({
+    where: {
+      user_id: {
+        [Op.eq]: userId
+      },
+      role_id: {
+        [Op.eq]: 10000
+      }
+    }
+  });
+
+  if (!userApproverOrgs || userApproverOrgs.length === 0) {
+    return [];
+  }
+
+  const orgIds = userApproverOrgs.map(c => c.organisation_id);
+  const pagedResults = await pagedListOfAllRequestTypesForOrg(JSON.stringify(orgIds),pageNumber,pageSize)
+  if (!pagedResults || pagedResults.length === 0) {
+    return [];
+  }
+  return pagedResults;
+};
 
 const getRequestsAssociatedWithOrganisation = async orgId => {
   const userOrgRequests = await userOrganisationRequests.findAll({
@@ -1786,6 +1809,7 @@ module.exports = {
   hasUserOrganisationRequestsByOrgId,
   getOrganisationsAssociatedToService,
   getServiceAndSubServiceReqForOrgs,
-  pagedListOfAllRequestTypesForOrg
+  pagedListOfAllRequestTypesForOrg,
+  getAllPendingRequestTypesForApprover
 
 };
