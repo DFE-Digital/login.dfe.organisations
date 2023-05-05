@@ -80,7 +80,7 @@ const routes = () => {
   router.get('/requests/:rid', asyncWrapper(getUserOrganisationRequest));
   router.patch('/requests/:rid', asyncWrapper(updateUserOrganisationRequest));
   router.get('/requests-for-approval/:uid', asyncWrapper(getPendingRequestsForApproval));
-  router.get('/service-subService-requests-for-approval/:uid', asyncWrapper(getPendingRequestTypesForApproval)) //- the data that will populate the table for service + subservice req
+  router.get('/service-subService-requests-for-approval/:uid', asyncWrapper(getPendingRequestTypesForApproval));
   router.get('/requests-for-user/:uid', asyncWrapper(getPendingRequestsAssociatedWithUser));
   router.get('/latest-request-for-user/:uid', asyncWrapper(getLatestActionedRequestAssociatedWithUser));
 
