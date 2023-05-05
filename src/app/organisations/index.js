@@ -37,6 +37,7 @@ const getOrganisationsAssociatedWithService = require('./getOrganisationsAssocia
 const getOrgsServicesSubServicesRequests = require('./getOrgsServicesSubServicesRequests');
 const getAllRequestsTypesAssociatedWithOrgs = require('./getAllRequestsTypesAssociatedWithOrgs'
 );
+const getPendingRequestTypesForApproval = require('./getPendingRequestTypesForApproval');
 
 const router = express.Router();
 
@@ -79,7 +80,7 @@ const routes = () => {
   router.get('/requests/:rid', asyncWrapper(getUserOrganisationRequest));
   router.patch('/requests/:rid', asyncWrapper(updateUserOrganisationRequest));
   router.get('/requests-for-approval/:uid', asyncWrapper(getPendingRequestsForApproval));
-  // TODO: PETER add route here router.get('/service-subSerice-requests-for-approval/:uid') - the data that will populate the table for service + subservice req
+  router.get('/service-subService-requests-for-approval/:uid', asyncWrapper(getPendingRequestTypesForApproval)) //- the data that will populate the table for service + subservice req
   router.get('/requests-for-user/:uid', asyncWrapper(getPendingRequestsAssociatedWithUser));
   router.get('/latest-request-for-user/:uid', asyncWrapper(getLatestActionedRequestAssociatedWithUser));
 
