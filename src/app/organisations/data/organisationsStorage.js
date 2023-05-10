@@ -22,7 +22,7 @@ const {
   userServiceRequests
 } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
-const { uniq, trim } = require('lodash');
+const { uniq, trim, orderBy } = require('lodash');
 const { mapAsync } = require('./../../../utils');
 const uuid = require('uuid/v4');
 
@@ -1747,10 +1747,12 @@ const pagedListOfAllRequestTypesForOrg = async(
   }
 
   const allAccessRequestsforOrgs = orgsAccessRequests.concat(orgsServiceSubServiceRequests);
+  const orderedRequests = orderBy(allAccessRequestsforOrgs, 'created_date', 'desc');
   const offset = pageSize * (pageNumber - 1);
-  const totalNumberOfPages = Math.ceil(allAccessRequestsforOrgs.length / pageSize);
-  const paginatedItems = allAccessRequestsforOrgs.slice(offset, pageSize * pageNumber);
-  const totalNumberOfRecords = allAccessRequestsforOrgs.length;
+  const totalNumberOfPages = Math.ceil(orderedRequests.length / pageSize);
+  const paginatedItems = orderedRequests.slice(offset, pageSize * pageNumber);
+  const totalNumberOfRecords = orderedRequests.length;
+
   return {
     requests: paginatedItems,
     pageNumber,
