@@ -38,6 +38,7 @@ const mapOrganisationEntity = async (entity, laCache = undefined) => {
     type: establishmentTypes.find(c => c.id === entity.Type),
     urn: entity.URN,
     uid: entity.UID,
+    upin: entity.UPIN,
     ukprn: entity.UKPRN,
     establishmentNumber: entity.EstablishmentNumber,
     status: organisationStatus.find(c => c.id === entity.Status),
@@ -49,6 +50,7 @@ const mapOrganisationEntity = async (entity, laCache = undefined) => {
     phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
     statutoryLowAge: entity.statutoryLowAge,
     statutoryHighAge: entity.statutoryHighAge,
+    providerTypeName: entity.ProviderTypeName,
   };
 };
 
@@ -86,6 +88,7 @@ const getOrganisationById = async (organisationId) => {
     type: establishmentTypes.find(c => c.id === entity.Type),
     urn: entity.URN,
     uid: entity.UID,
+    upin: entity.UPIN,
     ukprn: entity.UKPRN,
     establishmentNumber: entity.EstablishmentNumber,
     status: organisationStatus.find(c => c.id === entity.Status),
@@ -97,6 +100,7 @@ const getOrganisationById = async (organisationId) => {
     phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
     statutoryLowAge: entity.statutoryLowAge,
     statutoryHighAge: entity.statutoryHighAge,
+    providerTypeName: entity.ProviderTypeName,
   };
 };
 

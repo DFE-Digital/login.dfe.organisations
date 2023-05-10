@@ -39,6 +39,7 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.Type = organisation.type ? organisation.type.id : null;
   entity.URN = updateIfValid(entity.URN, organisation.urn);
   entity.UID = organisation.uid;
+  entity.UPIN = organisation.upin;
   entity.UKPRN = updateIfValid(entity.UKPRN, organisation.ukprn);
   entity.EstablishmentNumber = organisation.establishmentNumber;
   entity.Status = organisation.status.id;
@@ -53,7 +54,9 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.statutoryHighAge = organisation.statutoryHighAge;
   entity.legacyId = organisation.legacyId;
   entity.companyRegistrationNumber = organisation.companyRegistrationNumber;
+  entity.DistrictAdministrativeCode = organisation.DistrictAdministrativeCode;
   entity.DistrictAdministrative_code = organisation.DistrictAdministrative_code;
+  entity.ProviderTypeName = organisation.providerTypeName;
 };
 const updateOrganisationsWithLocalAuthorityDetails = async orgs => {
   const localAuthorityIds = uniq(
@@ -84,6 +87,48 @@ const mapOrganisationFromEntity = entity => {
   }
 
   const laAssociation = entity.associations
+      ? entity.associations.find(a => a.link_type === 'LA')
+      : undefined;
+  const category = organisationCategory.find(c => c.id === entity.Category) || { id: entity.Category, name: 'Unknown' };
+  return {
+    id: entity.id,
+    name: entity.name,
+    category,
+    type: establishmentTypes.find(c => c.id === entity.Type),
+    urn: entity.URN,
+    uid: entity.UID,
+    upin: entity.UPIN,
+    ukprn: entity.UKPRN,
+    establishmentNumber: entity.EstablishmentNumber,
+    status: organisationStatus.find(c => c.id === entity.Status),
+    pimsStatus: entity.PIMSStatus,
+    closedOn: entity.ClosedOn,
+    address: entity.Address,
+    telephone: entity.telephone,
+    region: regionCodes.find(c => c.id === entity.regionCode),
+    localAuthority: laAssociation
+        ? {
+          id: laAssociation.associated_organisation_id
+        }
+        : undefined,
+    phaseOfEducation: phasesOfEducation.find(
+        c => c.id === entity.phaseOfEducation
+    ),
+    statutoryLowAge: entity.statutoryLowAge,
+    statutoryHighAge: entity.statutoryHighAge,
+    legacyId: entity.legacyId,
+    companyRegistrationNumber: entity.companyRegistrationNumber,
+    DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
+    DistrictAdministrative_code: entity.DistrictAdministrative_code,
+    providerTypeName: entity.ProviderTypeName
+  };
+};
+const mapOrganisationFromEntityWithNewPPFields = entity => {
+  if (!entity) {
+    return null;
+  }
+
+  const laAssociation = entity.associations
     ? entity.associations.find(a => a.link_type === 'LA')
     : undefined;
   const category = organisationCategory.find(c => c.id === entity.Category) || { id: entity.Category, name: 'Unknown' };
@@ -94,6 +139,7 @@ const mapOrganisationFromEntity = entity => {
     type: establishmentTypes.find(c => c.id === entity.Type),
     urn: entity.URN,
     uid: entity.UID,
+    upin: entity.UPIN,
     ukprn: entity.UKPRN,
     establishmentNumber: entity.EstablishmentNumber,
     status: organisationStatus.find(c => c.id === entity.Status),
@@ -113,7 +159,23 @@ const mapOrganisationFromEntity = entity => {
     statutoryHighAge: entity.statutoryHighAge,
     legacyId: entity.legacyId,
     companyRegistrationNumber: entity.companyRegistrationNumber,
-    DistrictAdministrative_code: entity.DistrictAdministrative_code
+    DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
+    DistrictAdministrative_code: entity.DistrictAdministrative_code,
+    providerTypeName: entity.ProviderTypeName,
+    ProviderProfileID: entity.ProviderProfileID,
+    OpenedOn: entity.OpenedOn,
+    SourceSystem: entity.SourceSystem,
+    GIASProviderType: entity.GIASProviderType,
+    PIMSProviderType: entity.PIMSProviderType,
+    PIMSProviderTypeCode: entity.PIMSProviderTypeCode,
+    PIMSStatus: entity.PIMSStatus,
+    masteringCode: entity.masteringCode,
+    PIMSStatusName: entity.PIMSStatusName,
+    GIASStatus: entity.GIASStatus,
+    GIASStatusName: entity.GIASStatusName,
+    MasterProviderStatusCode: entity.MasterProviderStatusCode,
+    MasterProviderStatusName: entity.MasterProviderStatusName,
+    LegalName: entity.LegalName
   };
 };
 const mapAnnouncementFromEntity = entity => {
@@ -153,6 +215,7 @@ const list = async (includeAssociations = false) => {
           type: establishmentTypes.find(c => c.id === serviceEntity.Type),
           urn: serviceEntity.URN,
           uid: serviceEntity.UID,
+          upin: serviceEntity.UPIN,
           ukprn: serviceEntity.UKPRN,
           establishmentNumber: serviceEntity.EstablishmentNumber,
           status: organisationStatus.find(c => c.id === serviceEntity.Status),
@@ -231,6 +294,9 @@ const pagedSearch = async(
           [Op.like]: `%${criteria}%`
         },
         uid: {
+          [Op.like]: `%${criteria}%`
+        },
+        upin: {
           [Op.like]: `%${criteria}%`
         },
         ukprn: {
@@ -327,6 +393,7 @@ const listOfCategory = async (category, includeAssociations = false) => {
     type: establishmentTypes.find(c => c.id === entity.Type),
     urn: entity.URN,
     uid: entity.UID,
+    upin: entity.UPIN,
     ukprn: entity.UKPRN,
     establishmentNumber: entity.EstablishmentNumber,
     status: organisationStatus.find(c => c.id === entity.Status),
@@ -334,7 +401,9 @@ const listOfCategory = async (category, includeAssociations = false) => {
     address: entity.Address,
     legacyId: entity.legacyId,
     companyRegistrationNumber: entity.companyRegistrationNumber,
-    DistrictAdministrative_code: entity.DistrictAdministrative_code
+    DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
+    DistrictAdministrative_code: entity.DistrictAdministrative_code,
+    providerTypeName: entity.ProviderTypeName
 
   }));
 };
@@ -373,6 +442,7 @@ const pagedListOfCategory = async (
       type: establishmentTypes.find(c => c.id === entity.Type),
       urn: entity.URN,
       uid: entity.UID,
+      upin: entity.UPIN,
       ukprn: entity.UKPRN,
       establishmentNumber: entity.EstablishmentNumber,
       status: organisationStatus.find(c => c.id === entity.Status),
@@ -387,7 +457,9 @@ const pagedListOfCategory = async (
       statutoryHighAge: entity.statutoryHighAge,
       legacyId: entity.legacyId,
       companyRegistrationNumber: entity.companyRegistrationNumber,
-      DistrictAdministrative_code: entity.DistrictAdministrative_code
+      DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
+      DistrictAdministrative_code: entity.DistrictAdministrative_code,
+      providerTypeName: entity.ProviderTypeName
 
     };
 
@@ -502,6 +574,8 @@ const getOrganisationsForUserIncludingServices = async userId => {
           ),
           companyRegistrationNumber:
             userOrg.Organisation.companyRegistrationNumber,
+          DistrictAdministrativeCode:
+            userOrg.Organisation.getDataValue('DistrictAdministrativeCode') || undefined,
           DistrictAdministrative_code:
             userOrg.Organisation.getDataValue('DistrictAdministrative_code') || undefined,
         },
@@ -533,7 +607,7 @@ const getOrganisationsForUserIncludingServices = async userId => {
   );
 };
 
-const getOrganisationsAssociatedToUser = async userId => {
+const getOrganisationsAssociatedToUser = async (userId, WithNewPPFields = false) => {
   const userOrgs = await userOrganisations.findAll({
     where: {
       user_id: {
@@ -558,7 +632,10 @@ const getOrganisationsAssociatedToUser = async userId => {
     const role = await userOrg.getRole();
     const approvers = (await userOrg.getApprovers()).map(user => user.user_id);
     const endUsers = (await userOrg.getEndUsers()).map(user => user.user_id);
-    const organisation = await mapOrganisationFromEntity(userOrg.Organisation);
+    let organisation;
+    if (WithNewPPFields) { organisation = await mapOrganisationFromEntityWithNewPPFields(userOrg.Organisation);
+    } else { organisation = await mapOrganisationFromEntity(userOrg.Organisation);
+    }
     await updateOrganisationsWithLocalAuthorityDetails([organisation]);
 
     return {
@@ -742,6 +819,7 @@ const getUsersPendingApproval = async (pageNumber = 1, pageSize = 25) => {
     ),
     urn: entity.Organisation.getDataValue('URN'),
     uid: entity.Organisation.getDataValue('UID'),
+    upin: entity.Organisation.getDataValue('UPIN'),
     ukprn: entity.Organisation.getDataValue('UKPRN'),
     status: organisationUserStatus.find(
       c => c.id === entity.getDataValue('status')
@@ -820,6 +898,28 @@ const getOrgByEstablishmentNumber = async (establishmentNumber, category) => {
       `error getting organisation by establishment number - ${e.message}`,
       e
     );
+    throw e;
+  }
+};
+
+const getOrgByUpin = async (upin, category) => {
+  try {
+    const query = {
+      where: {
+        UPIN: {
+          [Op.eq]: upin
+        }
+      }
+    };
+    if (category) {
+      query.where.Category = {
+        [Op.eq]: category
+      };
+    }
+    const entity = await organisations.findOne(query);
+    return mapOrganisationFromEntity(entity);
+  } catch (e) {
+    logger.error(`error getting organisation by UPIN - ${e.message}`, e);
     throw e;
   }
 };
@@ -1547,6 +1647,7 @@ const getRequestsAssociatedWithUser = async userId => {
     org_name: entity.Organisation.getDataValue('name'),
     urn: entity.Organisation.getDataValue('URN'),
     uid: entity.Organisation.getDataValue('UID'),
+    upin: entity.Organisation.getDataValue('UPIN'),
     ukprn: entity.Organisation.getDataValue('UKPRN'),
     org_status:
       organisationStatus.find(
@@ -1582,6 +1683,7 @@ const getLatestActionedRequestAssociated = async userId => {
     org_name: entity.Organisation.getDataValue('name'),
     urn: entity.Organisation.getDataValue('URN'),
     uid: entity.Organisation.getDataValue('UID'),
+    upin: entity.Organisation.getDataValue('UPIN'),
     ukprn: entity.Organisation.getDataValue('UKPRN'),
     org_status:
       organisationStatus.find(
@@ -1609,6 +1711,9 @@ const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize,
           [Op.like]: `%${criteria}%`
         },
         uid: {
+          [Op.like]: `%${criteria}%`
+        },
+        upin: {
           [Op.like]: `%${criteria}%`
         },
         ukprn: {
@@ -1774,6 +1879,7 @@ module.exports = {
   getOrgByUrn,
   getOrgByUid,
   getOrgByEstablishmentNumber,
+  getOrgByUpin,
   getOrgByUkprn,
   getAllOrgsByUkprn,
   getOrgByLegacyId,
