@@ -32,6 +32,8 @@ describe('When getting all pending sub-service and service request for organisat
       org_id: '1d672383-cf21-49b4-86d2-7cea955ad422',
       org_name: 'Organisation Test One',
       user_id: 'user_id_11',
+      service_id: 'service_id',
+      role_ids: 'role_ids',
       created_date: '2023-04-24T12:01:48.994Z',
       request_type: { id: 'service', name: 'Service access' },
       status: {
@@ -44,6 +46,8 @@ describe('When getting all pending sub-service and service request for organisat
       org_id: '1d672383-cf21-49b4-86d2-7cea955ad421',
       org_name: 'Organisation Test Two',
       user_id: 'user_id_11',
+      service_id: 'service_id',
+      role_ids: 'role_ids',
       created_date: '2023-04-24T12:01:48.994Z',
       request_type: { id: 'sub-service', name: 'Sub-service access' },
       status: {

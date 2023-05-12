@@ -1840,6 +1840,8 @@ const pagedListOfAllRequestTypesForOrg = async(
       id: entity.get('id'),
       org_id: entity.Organisation.getDataValue('id'),
       org_name: entity.Organisation.getDataValue('name'),
+      service_id: entity.getDataValue('service_id'),
+      role_ids: entity.getDataValue('role_ids'),
       user_id: entity.getDataValue('user_id'),
       created_date: entity.getDataValue('createdAt'),
       request_type: serviceRequestsTypes.find(
