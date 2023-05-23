@@ -7,6 +7,8 @@ const externalIdentifiersModel = require('./externalIdentifiers');
 const invitationExternalIdentifiersModel = require('./invitationExternalIdentifiers');
 const invitationOrganisationsModel = require('./invitationOrganisations');
 const invitationsModel = require('./invitations');
+const roleModel = require('./role');
+const invitationServiceRolesModel = require('./invitationServiceRoles');
 const organisationAnnoucementsModel = require('./organisationAnnoucements');
 const organisationAssociationsModel = require('./organisationAssociations');
 const organisationsModel = require('./organisations');
@@ -43,7 +45,11 @@ const defineStatic = model => {
     { id: 1, name: 'Open' },
     { id: 2, name: 'Closed' },
     { id: 3, name: 'Proposed to close' },
-    { id: 4, name: 'Proposed to open' }
+    { id: 4, name: 'Proposed to open' },
+    { id: 5, name: 'Dissolved' },
+    { id: 6, name: 'In Liquidation' },
+    { id: 8, name: 'Locked Duplicate' },
+    { id: 10, name: 'Locked Restructure' }
   ];
 
   model.organisationCategory = [
@@ -100,7 +106,8 @@ const defineStatic = model => {
     { id: '46', name: 'Academy 16-19 Sponsor Led' },
     { id: '47', name: 'Children\'s Centre' },
     { id: '48', name: 'Children\'s Centre Linked Site' },
-    { id: '56', name: 'Institution funded by other government department' }
+    { id: '56', name: 'Institution funded by other government department' },
+    { id: '57', name: 'Academy secure 16 to 19' }
   ];
 
   model.phasesOfEducation = [
@@ -170,7 +177,9 @@ buildDataModel(dataModel, db, [
   externalIdentifiersModel,
   invitationExternalIdentifiersModel,
   invitationOrganisationsModel,
+  roleModel,
   invitationsModel,
+  invitationServiceRolesModel,
   organisationAnnoucementsModel,
   organisationAssociationsModel,
   organisationsModel,
