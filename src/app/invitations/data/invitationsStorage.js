@@ -4,7 +4,7 @@ const Sequelize = require('sequelize');
 
 const Op = Sequelize.Op;
 const logger = require('./../../../infrastructure/logger');
-const { invitations, invitationOrganisations, organisationCategory, establishmentTypes } = require('./../../../infrastructure/repository');
+const { invitations, invitationOrganisations, organisationCategory, establishmentTypes, invitationServiceRoles } = require('./../../../infrastructure/repository');
 
 const list = async (correlationId) => {
   try {
@@ -125,11 +125,27 @@ const getForInvitationId = async (id, correlationId) => {
             key: extId.identifier_key,
             value: extId.identifier_value,
           }));
+          const serviceRoles = await invitationServiceRoles.findAll(
+              {
+                where: {
+                  invitation_id: {
+                    [Op.eq]: id,
+                  },
+                  organisation_id: {
+                    [Op.eq]: invitationOrg.Organisation.getDataValue('id'),
+                  },
+                  service_id: {
+                    [Op.eq]: service.Service.getDataValue('id'),
+                  },
+                },
+                include: ['Role'],
+              });
 
           return {
             id: service.Service.getDataValue('id'),
             name: service.Service.getDataValue('name'),
             externalIdentifiers,
+            serviceRoles
           };
         })),
       };
