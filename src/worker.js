@@ -2,7 +2,6 @@ const logger = require('./infrastructure/logger');
 const config = require('./infrastructure/config')();
 const configSchema = require('./infrastructure/config/schema');
 const schedule = require('node-schedule');
-// const { importEstablishments, importAllGroupsData } = require('./app/giasImport');
 const overdueRequests = require('./app/overdueOrganisationRequests');
 const express = require('express');
 const healthCheck = require('login.dfe.healthcheck');
