@@ -2,7 +2,6 @@ const logger = require('./infrastructure/logger');
 const config = require('./infrastructure/config')();
 const configSchema = require('./infrastructure/config/schema');
 const schedule = require('node-schedule');
-const { importEstablishments, importAllGroupsData } = require('./app/giasImport');
 const overdueRequests = require('./app/overdueOrganisationRequests');
 const express = require('express');
 const healthCheck = require('login.dfe.healthcheck');
@@ -32,10 +31,6 @@ const runSchedule = (name, cronInterval, action) => {
 
 
 configSchema.validate();
-
-runSchedule('import establishments', config.schedules.establishmentImport, importEstablishments);
-runSchedule('import groups', config.schedules.groupImport, importAllGroupsData);
-
 runSchedule('Find overdue organisation requests', config.schedules.overdueRequests, overdueRequests);
 
 const port = process.env.PORT || 3000;
