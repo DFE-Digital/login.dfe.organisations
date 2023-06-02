@@ -15,11 +15,14 @@ const {
   organisationAnnouncements,
   userOrganisationRequests,
   organisationRequestStatus,
+  serviceRequestStatus,
+  serviceRequestsTypes,
   getNextNumericId,
-  getNextLegacyId
+  getNextLegacyId,
+  userServiceRequests
 } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
-const { uniq, trim } = require('lodash');
+const { uniq, trim, orderBy } = require('lodash');
 const { mapAsync } = require('./../../../utils');
 const uuid = require('uuid/v4');
 
@@ -1474,6 +1477,29 @@ const getAllPendingRequestsForApprover = async userId => {
     )
   }));
 };
+const getAllPendingRequestTypesForApprover = async(userId, pageNumber = 1, pageSize = 25) => {
+  const userApproverOrgs = await userOrganisations.findAll({
+    where: {
+      user_id: {
+        [Op.eq]: userId
+      },
+      role_id: {
+        [Op.eq]: 10000
+      }
+    }
+  });
+
+  if (!userApproverOrgs || userApproverOrgs.length === 0) {
+    return [];
+  }
+
+  const orgIds = userApproverOrgs.map(c => c.organisation_id);
+  const pagedResults = await pagedListOfAllRequestTypesForOrg(JSON.stringify(orgIds), pageNumber, pageSize);
+  if (!pagedResults || pagedResults.length === 0) {
+    return [];
+  }
+  return pagedResults;
+};
 
 const getRequestsAssociatedWithOrganisation = async orgId => {
   const userOrgRequests = await userOrganisationRequests.findAll({
@@ -1741,6 +1767,107 @@ const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize,
     throw e;
   }
 };
+
+const getServiceAndSubServiceReqForOrgs = async orgIds => {
+  const organisationsIds = JSON.parse(decodeURIComponent(orgIds));
+  const userServiceAndSubServiceReq = await userServiceRequests.findAll({
+    where: {
+      organisation_id: {
+        [Op.in]: organisationsIds
+      },
+      status: {
+        [Op.or]: [0, 2, 3]
+      }
+    },
+    include: ['Organisation']
+  });
+  if (!userServiceAndSubServiceReq || userServiceAndSubServiceReq.length === 0) {
+    return [];
+  }
+
+  return userServiceAndSubServiceReq.map(entity => ({
+    id: entity.get('id'),
+    org_id: entity.Organisation.getDataValue('id'),
+    org_name: entity.Organisation.getDataValue('name'),
+    user_id: entity.getDataValue('user_id'),
+    created_date: entity.getDataValue('createdAt'),
+    request_type: serviceRequestsTypes.find(e => e.id === entity.getDataValue('request_type')),
+    status: serviceRequestStatus.find(
+      c => c.id === entity.getDataValue('status')
+    )
+  }));
+};
+
+const pagedListOfAllRequestTypesForOrg = async(
+  orgIds,
+  pageNumber = 1,
+  pageSize = 25
+) => {
+  const organisationsIds = JSON.parse(decodeURIComponent(orgIds));
+
+  const query = {
+    where: {
+      organisation_id: {
+        [Op.in]: organisationsIds
+      },
+      status: {
+        [Op.or]: [0, 2, 3]
+      }
+    },
+    include: ['Organisation']
+  };
+
+  const userOrgRequests = await userOrganisationRequests.findAndCountAll(query);
+
+  const userServRequests = await userServiceRequests.findAndCountAll(query);
+  let orgsAccessRequests = [];
+  let orgsServiceSubServiceRequests = [];
+  if (userOrgRequests || userOrgRequests.length !== 0) {
+    orgsAccessRequests = userOrgRequests.rows.map(entity => ({
+      id: entity.get('id'),
+      org_id: entity.Organisation.getDataValue('id'),
+      org_name: entity.Organisation.getDataValue('name'),
+      user_id: entity.getDataValue('user_id'),
+      created_date: entity.getDataValue('createdAt'),
+      request_type: { id: 'organisation', name: 'Organisation access' },
+      status: organisationRequestStatus.find(
+        c => c.id === entity.getDataValue('status')
+      )
+    }));
+  }
+  if (userServRequests || userOrgRequests.length !== 0) {
+    orgsServiceSubServiceRequests = userServRequests.rows.map((entity) => ({
+      id: entity.get('id'),
+      org_id: entity.Organisation.getDataValue('id'),
+      org_name: entity.Organisation.getDataValue('name'),
+      service_id: entity.getDataValue('service_id'),
+      role_ids: entity.getDataValue('role_ids'),
+      user_id: entity.getDataValue('user_id'),
+      created_date: entity.getDataValue('createdAt'),
+      request_type: serviceRequestsTypes.find(
+        (e) => e.id === entity.getDataValue('request_type')
+      ),
+      status: serviceRequestStatus.find(
+        (c) => c.id === entity.getDataValue('status')
+      )
+    }));
+  }
+
+  const allAccessRequestsforOrgs = orgsAccessRequests.concat(orgsServiceSubServiceRequests);
+  const orderedRequests = orderBy(allAccessRequestsforOrgs, 'created_date', 'desc');
+  const offset = pageSize * (pageNumber - 1);
+  const totalNumberOfPages = Math.ceil(orderedRequests.length / pageSize);
+  const paginatedItems = orderedRequests.slice(offset, pageSize * pageNumber);
+  const totalNumberOfRecords = orderedRequests.length;
+
+  return {
+    requests: paginatedItems,
+    pageNumber,
+    totalNumberOfPages,
+    totalNumberOfRecords
+  };
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -1790,6 +1917,9 @@ module.exports = {
   pagedListOfRequests,
   getLatestActionedRequestAssociated,
   hasUserOrganisationRequestsByOrgId,
-  getOrganisationsAssociatedToService
+  getOrganisationsAssociatedToService,
+  getServiceAndSubServiceReqForOrgs,
+  pagedListOfAllRequestTypesForOrg,
+  getAllPendingRequestTypesForApprover
 
 };
