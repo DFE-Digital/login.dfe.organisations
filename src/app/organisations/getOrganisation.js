@@ -19,6 +19,7 @@ const getOrganisation = async (req, res) => {
     ClosedOn: organisation.closedOn,
     Address: organisation.address,
     ProviderTypeName: organisation.providerTypeName,
+    LegalName: organisation.LegalName,
   });
 };
 

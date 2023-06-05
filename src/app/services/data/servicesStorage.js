@@ -51,6 +51,7 @@ const mapOrganisationEntity = async (entity, laCache = undefined) => {
     statutoryLowAge: entity.statutoryLowAge,
     statutoryHighAge: entity.statutoryHighAge,
     providerTypeName: entity.ProviderTypeName,
+    LegalName: entity.LegalName,
   };
 };
 
@@ -101,6 +102,7 @@ const getOrganisationById = async (organisationId) => {
     statutoryLowAge: entity.statutoryLowAge,
     statutoryHighAge: entity.statutoryHighAge,
     providerTypeName: entity.ProviderTypeName,
+    LegalName: entity.LegalName,
   };
 };
 
