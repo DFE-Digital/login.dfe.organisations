@@ -111,7 +111,6 @@ const overdueAllRequestsTypes = async() => {
 
       const approversReminderReq = await listApproversReqToOverdue(approver.sub, 15, emailReminderDateStart, emailReminderDateEnd);
       if (approversReminderReq > 0) {
-        // console.log(`${approver.given_name}${approver.family_name}`, approversReminderReq, approver.email);
         await notificationClient.sendSupportOverdueRequest(`${approver.given_name} ${approver.family_name}`, approversReminderReq, approver.email);
       }
     }
