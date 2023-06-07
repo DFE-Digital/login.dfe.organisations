@@ -57,6 +57,7 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.DistrictAdministrativeCode = organisation.DistrictAdministrativeCode;
   entity.DistrictAdministrative_code = organisation.DistrictAdministrative_code;
   entity.ProviderTypeName = organisation.providerTypeName;
+  entity.LegalName = organisation.LegalName;
 };
 const updateOrganisationsWithLocalAuthorityDetails = async orgs => {
   const localAuthorityIds = uniq(
@@ -120,7 +121,8 @@ const mapOrganisationFromEntity = entity => {
     companyRegistrationNumber: entity.companyRegistrationNumber,
     DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
     DistrictAdministrative_code: entity.DistrictAdministrative_code,
-    providerTypeName: entity.ProviderTypeName
+    providerTypeName: entity.ProviderTypeName,
+    LegalName: entity.LegalName
   };
 };
 const mapOrganisationFromEntityWithNewPPFields = entity => {
@@ -403,7 +405,8 @@ const listOfCategory = async (category, includeAssociations = false) => {
     companyRegistrationNumber: entity.companyRegistrationNumber,
     DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
     DistrictAdministrative_code: entity.DistrictAdministrative_code,
-    providerTypeName: entity.ProviderTypeName
+    providerTypeName: entity.ProviderTypeName,
+    LegalName: entity.LegalName
 
   }));
 };
@@ -459,7 +462,8 @@ const pagedListOfCategory = async (
       companyRegistrationNumber: entity.companyRegistrationNumber,
       DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
       DistrictAdministrative_code: entity.DistrictAdministrative_code,
-      providerTypeName: entity.ProviderTypeName
+      providerTypeName: entity.ProviderTypeName,
+      LegalName: entity.LegalName
 
     };
 
@@ -556,6 +560,7 @@ const getOrganisationsForUserIncludingServices = async userId => {
         organisation: {
           id: userOrg.Organisation.getDataValue('id'),
           name: userOrg.Organisation.getDataValue('name'),
+          LegalName: userOrg.Organisation.getDataValue('LegalName'),
           urn: userOrg.Organisation.getDataValue('URN') || undefined,
           uid: userOrg.Organisation.getDataValue('UID') || undefined,
           ukprn: userOrg.Organisation.getDataValue('UKPRN') || undefined,
