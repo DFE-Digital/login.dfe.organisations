@@ -5,7 +5,7 @@ const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 const logger = require('./../../../infrastructure/logger');
 const { organisations, organisationCategory, organisationStatus, establishmentTypes } = require('./../../../infrastructure/repository');
-const { list, getOrgById, getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber, getOrgByUpin, getOrgByUkprn, getOrgByLegacyId } = require('./../../organisations/data/organisationsStorage');
+const { list, getOrgById, getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber, getOrgByUpin,getOrgByLegalName, getOrgByUkprn, getOrgByLegacyId } = require('./../../organisations/data/organisationsStorage');
 
 
 const updateOrg = async (id, name) => {
@@ -29,6 +29,7 @@ module.exports = {
   getOrgByUid,
   getOrgByEstablishmentNumber,
   getOrgByUpin,
+  getOrgByLegalName,
   getOrgByUkprn,
   getOrgByLegacyId,
 };
