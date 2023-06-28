@@ -35,6 +35,10 @@ const listUserOrganisationsV2 = require('./listUserOrganisationsV2');
 const listUserOrganisationsV3 = require('./listUserOrganisationsV3');
 const getLatestActionedRequestAssociatedWithUser = require('./getLatestActionedRequestAssociatedWithUser');
 const getOrganisationsAssociatedWithService = require('./getOrganisationsAssociatedWithService');
+const getOrgsServicesSubServicesRequests = require('./getOrgsServicesSubServicesRequests');
+const getAllRequestsTypesAssociatedWithOrgs = require('./getAllRequestsTypesAssociatedWithOrgs'
+);
+const getPendingRequestTypesForApproval = require('./getPendingRequestTypesForApproval');
 
 const router = express.Router();
 
@@ -72,10 +76,13 @@ const routes = () => {
   router.post('/:id/users/:uid/requests', asyncWrapper(createUserOrganisationRequest));
   router.get('/:id/requests', asyncWrapper(getRequestsForOrganisation));
   router.get('/:orgIds/requests/all', asyncWrapper(getRequestsForOrganisations));
+  router.get('/:orgIds/requests/service-subService/all', asyncWrapper(getOrgsServicesSubServicesRequests));
+  router.get('/:orgIds/requests/organisation-service-subService/all', asyncWrapper(getAllRequestsTypesAssociatedWithOrgs));
 
   router.get('/requests/:rid', asyncWrapper(getUserOrganisationRequest));
   router.patch('/requests/:rid', asyncWrapper(updateUserOrganisationRequest));
   router.get('/requests-for-approval/:uid', asyncWrapper(getPendingRequestsForApproval));
+  router.get('/org-service-subService-requests-for-approval/:uid', asyncWrapper(getPendingRequestTypesForApproval));
   router.get('/requests-for-user/:uid', asyncWrapper(getPendingRequestsAssociatedWithUser));
   router.get('/latest-request-for-user/:uid', asyncWrapper(getLatestActionedRequestAssociatedWithUser));
 
