@@ -222,7 +222,8 @@ const list = async (includeAssociations = false) => {
           establishmentNumber: serviceEntity.EstablishmentNumber,
           status: organisationStatus.find(c => c.id === serviceEntity.Status),
           closedOn: serviceEntity.ClosedOn,
-          address: serviceEntity.Address
+          address: serviceEntity.Address,
+          LegalName: serviceEntity.getDataValue('LegalName')
         };
 
         if (serviceEntity.associations) {
@@ -290,6 +291,9 @@ const pagedSearch = async(
     query.where = {
       [Op.or]: {
         name: {
+          [Op.like]: `%${criteria}%`
+        },
+        LegalName: {
           [Op.like]: `%${criteria}%`
         },
         urn: {
@@ -816,6 +820,7 @@ const getUsersPendingApproval = async (pageNumber = 1, pageSize = 25) => {
   const usersForApproval = associatedUsersForApproval.rows.map(entity => ({
     org_id: entity.Organisation.getDataValue('id'),
     org_name: entity.Organisation.getDataValue('name'),
+    LegalName: entity.Organisation.getDataValue('LegalName'),
     user_id: entity.getDataValue('user_id'),
     created_date: entity.getDataValue('createdAt'),
     org_address: entity.Organisation.getDataValue('Address'),
@@ -1650,6 +1655,7 @@ const getRequestsAssociatedWithUser = async userId => {
     id: entity.get('id'),
     org_id: entity.Organisation.getDataValue('id'),
     org_name: entity.Organisation.getDataValue('name'),
+    LegalName: entity.Organisation.getDataValue('LegalName'),
     urn: entity.Organisation.getDataValue('URN'),
     uid: entity.Organisation.getDataValue('UID'),
     upin: entity.Organisation.getDataValue('UPIN'),
@@ -1686,6 +1692,7 @@ const getLatestActionedRequestAssociated = async userId => {
     id: entity.get('id'),
     org_id: entity.Organisation.getDataValue('id'),
     org_name: entity.Organisation.getDataValue('name'),
+    LegalName: entity.Organisation.getDataValue('LegalName'),
     urn: entity.Organisation.getDataValue('URN'),
     uid: entity.Organisation.getDataValue('UID'),
     upin: entity.Organisation.getDataValue('UPIN'),
@@ -1710,6 +1717,9 @@ const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize,
     const searchCriteria = {
       [Op.or]: {
         name: {
+          [Op.like]: `%${criteria}%`
+        },
+        LegalName: {
           [Op.like]: `%${criteria}%`
         },
         urn: {
