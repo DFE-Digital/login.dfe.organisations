@@ -223,7 +223,7 @@ const list = async (includeAssociations = false) => {
           status: organisationStatus.find(c => c.id === serviceEntity.Status),
           closedOn: serviceEntity.ClosedOn,
           address: serviceEntity.Address,
-          upin: serviceEntity.LegalName
+          LegalName: serviceEntity.getDataValue('LegalName'),
         };
 
         if (serviceEntity.associations) {
@@ -820,7 +820,7 @@ const getUsersPendingApproval = async (pageNumber = 1, pageSize = 25) => {
   const usersForApproval = associatedUsersForApproval.rows.map(entity => ({
     org_id: entity.Organisation.getDataValue('id'),
     org_name: entity.Organisation.getDataValue('name'),
-    LegalName: entity.Organisation.getDataValue('Legal name'),
+    LegalName: entity.Organisation.getDataValue('LegalName'),
     user_id: entity.getDataValue('user_id'),
     created_date: entity.getDataValue('createdAt'),
     org_address: entity.Organisation.getDataValue('Address'),
@@ -930,28 +930,6 @@ const getOrgByUpin = async (upin, category) => {
     return mapOrganisationFromEntity(entity);
   } catch (e) {
     logger.error(`error getting organisation by UPIN - ${e.message}`, e);
-    throw e;
-  }
-};
-
-const getOrgByLegalName = async (LegalName, category) => {
-  try {
-    const query = {
-      where: {
-        LegalName: {
-          [Op.eq]: LegalName
-        }
-      }
-    };
-    if (category) {
-      query.where.Category = {
-        [Op.eq]: category
-      };
-    }
-    const entity = await organisations.findOne(query);
-    return mapOrganisationFromEntity(entity);
-  } catch (e) {
-    logger.error(`error getting organisation by Legal name - ${e.message}`, e);
     throw e;
   }
 };
@@ -1677,7 +1655,7 @@ const getRequestsAssociatedWithUser = async userId => {
     id: entity.get('id'),
     org_id: entity.Organisation.getDataValue('id'),
     org_name: entity.Organisation.getDataValue('name'),
-    upin: entity.Organisation.getDataValue('LegalName'),
+    LegalName: entity.Organisation.getDataValue('LegalName'),
     urn: entity.Organisation.getDataValue('URN'),
     uid: entity.Organisation.getDataValue('UID'),
     upin: entity.Organisation.getDataValue('UPIN'),
@@ -2003,7 +1981,6 @@ module.exports = {
   getOrgByUid,
   getOrgByEstablishmentNumber,
   getOrgByUpin,
-  getOrgByLegalName,
   getOrgByUkprn,
   getAllOrgsByUkprn,
   getOrgByLegacyId,
