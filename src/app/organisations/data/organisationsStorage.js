@@ -223,7 +223,7 @@ const list = async (includeAssociations = false) => {
           status: organisationStatus.find(c => c.id === serviceEntity.Status),
           closedOn: serviceEntity.ClosedOn,
           address: serviceEntity.Address,
-          LegalName: serviceEntity.getDataValue('LegalName'),
+          LegalName: serviceEntity.getDataValue('LegalName')
         };
 
         if (serviceEntity.associations) {
