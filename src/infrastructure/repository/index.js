@@ -7,6 +7,8 @@ const externalIdentifiersModel = require('./externalIdentifiers');
 const invitationExternalIdentifiersModel = require('./invitationExternalIdentifiers');
 const invitationOrganisationsModel = require('./invitationOrganisations');
 const invitationsModel = require('./invitations');
+const roleModel = require('./role');
+const invitationServiceRolesModel = require('./invitationServiceRoles');
 const organisationAnnoucementsModel = require('./organisationAnnoucements');
 const organisationAssociationsModel = require('./organisationAssociations');
 const organisationsModel = require('./organisations');
@@ -15,6 +17,7 @@ const usersModel = require('./users');
 const userOrganisationsModel = require('./userOrganisations');
 const countersModel = require('./counters');
 const userOrganisationRequestsModel = require('./userOrganisationRequests');
+const userServiceRequestsModel = require('./userServiceRequests');
 
 const db = makeConnection();
 
@@ -31,6 +34,14 @@ const defineStatic = model => {
   ];
 
   model.organisationRequestStatus = [
+    { id: -1, name: 'Rejected' },
+    { id: 0, name: 'Pending' },
+    { id: 1, name: 'Approved' },
+    { id: 2, name: 'Overdue' },
+    { id: 3, name: 'No Approvers' }
+  ];
+
+  model.serviceRequestStatus = [
     { id: -1, name: 'Rejected' },
     { id: 0, name: 'Pending' },
     { id: 1, name: 'Approved' },
@@ -134,6 +145,11 @@ const defineStatic = model => {
     { id: 'W', name: 'Wales (pseudo)' },
     { id: 'Z', name: 'Not Applicable' }
   ];
+
+  model.serviceRequestsTypes = [
+    { id: 'service', name: 'Service access' },
+    { id: 'subService', name: 'Sub-service access' }
+  ];
 };
 const buildDataModel = (model, connection, entityModels) => {
   const dbSchema = config.database.schema || 'services';
@@ -177,7 +193,9 @@ buildDataModel(dataModel, db, [
   externalIdentifiersModel,
   invitationExternalIdentifiersModel,
   invitationOrganisationsModel,
+  roleModel,
   invitationsModel,
+  invitationServiceRolesModel,
   organisationAnnoucementsModel,
   organisationAssociationsModel,
   organisationsModel,
@@ -185,7 +203,8 @@ buildDataModel(dataModel, db, [
   usersModel,
   userOrganisationsModel,
   countersModel,
-  userOrganisationRequestsModel
+  userOrganisationRequestsModel,
+  userServiceRequestsModel
 ]);
 
 module.exports = dataModel;
