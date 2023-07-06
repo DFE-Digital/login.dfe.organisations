@@ -15,11 +15,14 @@ const {
   organisationAnnouncements,
   userOrganisationRequests,
   organisationRequestStatus,
+  serviceRequestStatus,
+  serviceRequestsTypes,
   getNextNumericId,
-  getNextLegacyId
+  getNextLegacyId,
+  userServiceRequests
 } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
-const { uniq, trim } = require('lodash');
+const { uniq, trim, orderBy } = require('lodash');
 const { mapAsync } = require('./../../../utils');
 const uuid = require('uuid/v4');
 
@@ -36,6 +39,7 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.Type = organisation.type ? organisation.type.id : null;
   entity.URN = updateIfValid(entity.URN, organisation.urn);
   entity.UID = organisation.uid;
+  entity.UPIN = organisation.upin;
   entity.UKPRN = updateIfValid(entity.UKPRN, organisation.ukprn);
   entity.EstablishmentNumber = organisation.establishmentNumber;
   entity.Status = organisation.status.id;
@@ -52,6 +56,8 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.companyRegistrationNumber = organisation.companyRegistrationNumber;
   entity.DistrictAdministrativeCode = organisation.DistrictAdministrativeCode;
   entity.DistrictAdministrative_code = organisation.DistrictAdministrative_code;
+  entity.ProviderTypeName = organisation.providerTypeName;
+  entity.LegalName = organisation.LegalName;
 };
 const updateOrganisationsWithLocalAuthorityDetails = async orgs => {
   const localAuthorityIds = uniq(
@@ -92,6 +98,7 @@ const mapOrganisationFromEntity = entity => {
     type: establishmentTypes.find(c => c.id === entity.Type),
     urn: entity.URN,
     uid: entity.UID,
+    upin: entity.UPIN,
     ukprn: entity.UKPRN,
     establishmentNumber: entity.EstablishmentNumber,
     status: organisationStatus.find(c => c.id === entity.Status),
@@ -113,7 +120,9 @@ const mapOrganisationFromEntity = entity => {
     legacyId: entity.legacyId,
     companyRegistrationNumber: entity.companyRegistrationNumber,
     DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
-    DistrictAdministrative_code: entity.DistrictAdministrative_code
+    DistrictAdministrative_code: entity.DistrictAdministrative_code,
+    providerTypeName: entity.ProviderTypeName,
+    LegalName: entity.LegalName
   };
 };
 const mapOrganisationFromEntityWithNewPPFields = entity => {
@@ -132,6 +141,7 @@ const mapOrganisationFromEntityWithNewPPFields = entity => {
     type: establishmentTypes.find(c => c.id === entity.Type),
     urn: entity.URN,
     uid: entity.UID,
+    upin: entity.UPIN,
     ukprn: entity.UKPRN,
     establishmentNumber: entity.EstablishmentNumber,
     status: organisationStatus.find(c => c.id === entity.Status),
@@ -153,10 +163,9 @@ const mapOrganisationFromEntityWithNewPPFields = entity => {
     companyRegistrationNumber: entity.companyRegistrationNumber,
     DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
     DistrictAdministrative_code: entity.DistrictAdministrative_code,
+    providerTypeName: entity.ProviderTypeName,
     ProviderProfileID: entity.ProviderProfileID,
-    UPIN: entity.UPIN,
     OpenedOn: entity.OpenedOn,
-    ProviderTypeName: entity.ProviderTypeName,
     SourceSystem: entity.SourceSystem,
     GIASProviderType: entity.GIASProviderType,
     PIMSProviderType: entity.PIMSProviderType,
@@ -208,11 +217,13 @@ const list = async (includeAssociations = false) => {
           type: establishmentTypes.find(c => c.id === serviceEntity.Type),
           urn: serviceEntity.URN,
           uid: serviceEntity.UID,
+          upin: serviceEntity.UPIN,
           ukprn: serviceEntity.UKPRN,
           establishmentNumber: serviceEntity.EstablishmentNumber,
           status: organisationStatus.find(c => c.id === serviceEntity.Status),
           closedOn: serviceEntity.ClosedOn,
-          address: serviceEntity.Address
+          address: serviceEntity.Address,
+          LegalName: serviceEntity.getDataValue('LegalName')
         };
 
         if (serviceEntity.associations) {
@@ -282,10 +293,16 @@ const pagedSearch = async(
         name: {
           [Op.like]: `%${criteria}%`
         },
+        LegalName: {
+          [Op.like]: `%${criteria}%`
+        },
         urn: {
           [Op.like]: `%${criteria}%`
         },
         uid: {
+          [Op.like]: `%${criteria}%`
+        },
+        upin: {
           [Op.like]: `%${criteria}%`
         },
         ukprn: {
@@ -382,6 +399,7 @@ const listOfCategory = async (category, includeAssociations = false) => {
     type: establishmentTypes.find(c => c.id === entity.Type),
     urn: entity.URN,
     uid: entity.UID,
+    upin: entity.UPIN,
     ukprn: entity.UKPRN,
     establishmentNumber: entity.EstablishmentNumber,
     status: organisationStatus.find(c => c.id === entity.Status),
@@ -390,7 +408,9 @@ const listOfCategory = async (category, includeAssociations = false) => {
     legacyId: entity.legacyId,
     companyRegistrationNumber: entity.companyRegistrationNumber,
     DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
-    DistrictAdministrative_code: entity.DistrictAdministrative_code
+    DistrictAdministrative_code: entity.DistrictAdministrative_code,
+    providerTypeName: entity.ProviderTypeName,
+    LegalName: entity.LegalName
 
   }));
 };
@@ -429,6 +449,7 @@ const pagedListOfCategory = async (
       type: establishmentTypes.find(c => c.id === entity.Type),
       urn: entity.URN,
       uid: entity.UID,
+      upin: entity.UPIN,
       ukprn: entity.UKPRN,
       establishmentNumber: entity.EstablishmentNumber,
       status: organisationStatus.find(c => c.id === entity.Status),
@@ -444,7 +465,9 @@ const pagedListOfCategory = async (
       legacyId: entity.legacyId,
       companyRegistrationNumber: entity.companyRegistrationNumber,
       DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
-      DistrictAdministrative_code: entity.DistrictAdministrative_code
+      DistrictAdministrative_code: entity.DistrictAdministrative_code,
+      providerTypeName: entity.ProviderTypeName,
+      LegalName: entity.LegalName
 
     };
 
@@ -541,6 +564,7 @@ const getOrganisationsForUserIncludingServices = async userId => {
         organisation: {
           id: userOrg.Organisation.getDataValue('id'),
           name: userOrg.Organisation.getDataValue('name'),
+          LegalName: userOrg.Organisation.getDataValue('LegalName'),
           urn: userOrg.Organisation.getDataValue('URN') || undefined,
           uid: userOrg.Organisation.getDataValue('UID') || undefined,
           ukprn: userOrg.Organisation.getDataValue('UKPRN') || undefined,
@@ -796,6 +820,7 @@ const getUsersPendingApproval = async (pageNumber = 1, pageSize = 25) => {
   const usersForApproval = associatedUsersForApproval.rows.map(entity => ({
     org_id: entity.Organisation.getDataValue('id'),
     org_name: entity.Organisation.getDataValue('name'),
+    LegalName: entity.Organisation.getDataValue('LegalName'),
     user_id: entity.getDataValue('user_id'),
     created_date: entity.getDataValue('createdAt'),
     org_address: entity.Organisation.getDataValue('Address'),
@@ -804,6 +829,7 @@ const getUsersPendingApproval = async (pageNumber = 1, pageSize = 25) => {
     ),
     urn: entity.Organisation.getDataValue('URN'),
     uid: entity.Organisation.getDataValue('UID'),
+    upin: entity.Organisation.getDataValue('UPIN'),
     ukprn: entity.Organisation.getDataValue('UKPRN'),
     status: organisationUserStatus.find(
       c => c.id === entity.getDataValue('status')
@@ -882,6 +908,28 @@ const getOrgByEstablishmentNumber = async (establishmentNumber, category) => {
       `error getting organisation by establishment number - ${e.message}`,
       e
     );
+    throw e;
+  }
+};
+
+const getOrgByUpin = async (upin, category) => {
+  try {
+    const query = {
+      where: {
+        UPIN: {
+          [Op.eq]: upin
+        }
+      }
+    };
+    if (category) {
+      query.where.Category = {
+        [Op.eq]: category
+      };
+    }
+    const entity = await organisations.findOne(query);
+    return mapOrganisationFromEntity(entity);
+  } catch (e) {
+    logger.error(`error getting organisation by UPIN - ${e.message}`, e);
     throw e;
   }
 };
@@ -1439,6 +1487,29 @@ const getAllPendingRequestsForApprover = async userId => {
     )
   }));
 };
+const getAllPendingRequestTypesForApprover = async(userId, pageNumber = 1, pageSize = 25, filterDateStart = undefined, filterDateEnd = undefined) => {
+  const userApproverOrgs = await userOrganisations.findAll({
+    where: {
+      user_id: {
+        [Op.eq]: userId
+      },
+      role_id: {
+        [Op.eq]: 10000
+      }
+    }
+  });
+
+  if (!userApproverOrgs || userApproverOrgs.length === 0) {
+    return [];
+  }
+
+  const orgIds = userApproverOrgs.map(c => c.organisation_id);
+  const pagedResults = await pagedListOfAllRequestTypesForOrg(JSON.stringify(orgIds), pageNumber, pageSize, filterDateStart, filterDateEnd);
+  if (!pagedResults || pagedResults.length === 0) {
+    return [];
+  }
+  return pagedResults;
+};
 
 const getRequestsAssociatedWithOrganisation = async orgId => {
   const userOrgRequests = await userOrganisationRequests.findAll({
@@ -1584,8 +1655,10 @@ const getRequestsAssociatedWithUser = async userId => {
     id: entity.get('id'),
     org_id: entity.Organisation.getDataValue('id'),
     org_name: entity.Organisation.getDataValue('name'),
+    LegalName: entity.Organisation.getDataValue('LegalName'),
     urn: entity.Organisation.getDataValue('URN'),
     uid: entity.Organisation.getDataValue('UID'),
+    upin: entity.Organisation.getDataValue('UPIN'),
     ukprn: entity.Organisation.getDataValue('UKPRN'),
     org_status:
       organisationStatus.find(
@@ -1619,8 +1692,10 @@ const getLatestActionedRequestAssociated = async userId => {
     id: entity.get('id'),
     org_id: entity.Organisation.getDataValue('id'),
     org_name: entity.Organisation.getDataValue('name'),
+    LegalName: entity.Organisation.getDataValue('LegalName'),
     urn: entity.Organisation.getDataValue('URN'),
     uid: entity.Organisation.getDataValue('UID'),
+    upin: entity.Organisation.getDataValue('UPIN'),
     ukprn: entity.Organisation.getDataValue('UKPRN'),
     org_status:
       organisationStatus.find(
@@ -1644,10 +1719,16 @@ const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize,
         name: {
           [Op.like]: `%${criteria}%`
         },
+        LegalName: {
+          [Op.like]: `%${criteria}%`
+        },
         urn: {
           [Op.like]: `%${criteria}%`
         },
         uid: {
+          [Op.like]: `%${criteria}%`
+        },
+        upin: {
           [Op.like]: `%${criteria}%`
         },
         ukprn: {
@@ -1701,6 +1782,191 @@ const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize,
     throw e;
   }
 };
+
+const getServiceAndSubServiceReqForOrgs = async orgIds => {
+  const organisationsIds = JSON.parse(decodeURIComponent(orgIds));
+  const userServiceAndSubServiceReq = await userServiceRequests.findAll({
+    where: {
+      organisation_id: {
+        [Op.in]: organisationsIds
+      },
+      status: {
+        [Op.or]: [0, 2, 3]
+      }
+    },
+    include: ['Organisation']
+  });
+  if (!userServiceAndSubServiceReq || userServiceAndSubServiceReq.length === 0) {
+    return [];
+  }
+
+  return userServiceAndSubServiceReq.map(entity => ({
+    id: entity.get('id'),
+    org_id: entity.Organisation.getDataValue('id'),
+    org_name: entity.Organisation.getDataValue('name'),
+    user_id: entity.getDataValue('user_id'),
+    created_date: entity.getDataValue('createdAt'),
+    request_type: serviceRequestsTypes.find(e => e.id === entity.getDataValue('request_type')),
+    status: serviceRequestStatus.find(
+      c => c.id === entity.getDataValue('status')
+    )
+  }));
+};
+
+const pagedListOfAllRequestTypesForOrg = async(
+  orgIds,
+  pageNumber = 1,
+  pageSize = 25,
+  filterDateStart = undefined,
+  filterDateEnd = undefined
+) => {
+  const organisationsIds = JSON.parse(decodeURIComponent(orgIds));
+
+  const query = {
+    where: {
+      organisation_id: {
+        [Op.in]: organisationsIds
+      },
+      status: {
+        [Op.or]: [0, 2, 3]
+      }
+    },
+    include: ['Organisation']
+  };
+  if (filterDateStart !== undefined && filterDateEnd !== undefined) {
+    query.where.createdAt = {
+      [Op.between]: [filterDateStart, filterDateEnd]
+
+    };
+  }
+
+  const userOrgRequests = await userOrganisationRequests.findAndCountAll(query);
+
+  const userServRequests = await userServiceRequests.findAndCountAll(query);
+  let orgsAccessRequests = [];
+  let orgsServiceSubServiceRequests = [];
+  if (userOrgRequests || userOrgRequests.length !== 0) {
+    orgsAccessRequests = userOrgRequests.rows.map(entity => ({
+      id: entity.get('id'),
+      org_id: entity.Organisation.getDataValue('id'),
+      org_name: entity.Organisation.getDataValue('name'),
+      user_id: entity.getDataValue('user_id'),
+      created_date: entity.getDataValue('createdAt'),
+      request_type: { id: 'organisation', name: 'Organisation access' },
+      status: organisationRequestStatus.find(
+        c => c.id === entity.getDataValue('status')
+      )
+    }));
+  }
+  if (userServRequests || userOrgRequests.length !== 0) {
+    orgsServiceSubServiceRequests = userServRequests.rows.map((entity) => ({
+      id: entity.get('id'),
+      org_id: entity.Organisation.getDataValue('id'),
+      org_name: entity.Organisation.getDataValue('name'),
+      service_id: entity.getDataValue('service_id'),
+      role_ids: entity.getDataValue('role_ids'),
+      user_id: entity.getDataValue('user_id'),
+      created_date: entity.getDataValue('createdAt'),
+      request_type: serviceRequestsTypes.find(
+        (e) => e.id === entity.getDataValue('request_type')
+      ),
+      status: serviceRequestStatus.find(
+        (c) => c.id === entity.getDataValue('status')
+      )
+    }));
+  }
+
+  const allAccessRequestsforOrgs = orgsAccessRequests.concat(orgsServiceSubServiceRequests);
+  const orderedRequests = orderBy(allAccessRequestsforOrgs, 'created_date', 'desc');
+  const offset = pageSize * (pageNumber - 1);
+  const totalNumberOfPages = Math.ceil(orderedRequests.length / pageSize);
+  const paginatedItems = orderedRequests.slice(offset, pageSize * pageNumber);
+  const totalNumberOfRecords = orderedRequests.length;
+
+  return {
+    requests: paginatedItems,
+    pageNumber,
+    totalNumberOfPages,
+    totalNumberOfRecords
+  };
+};
+
+const pagedListOfServSubServRequests = async(
+  pageNumber = 1,
+  pageSize = 25,
+  filterStates = undefined
+) => {
+  const offset = (pageNumber - 1) * pageSize;
+  const query = {
+    where: {},
+    limit: pageSize,
+    offset,
+    order: [['createdAt', 'ASC']],
+    include: ['Organisation']
+  };
+
+  if (filterStates && filterStates.length > 0) {
+    query.where.status = {
+      [Op.in]: filterStates
+    };
+  }
+  const userServSubServRequests = await userServiceRequests.findAndCountAll(query);
+  if (!userServSubServRequests || userServSubServRequests.length === 0) {
+    return [];
+  }
+  const totalNumberOfRecords = userServSubServRequests.count;
+  const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
+
+  const requests = userServSubServRequests.rows.map(entity => ({
+
+    id: entity.get('id'),
+    org_id: entity.Organisation.getDataValue('id'),
+    org_name: entity.Organisation.getDataValue('name'),
+    service_id: entity.getDataValue('service_id'),
+    role_ids: entity.getDataValue('role_ids'),
+    user_id: entity.getDataValue('user_id'),
+    created_date: entity.getDataValue('createdAt'),
+    request_type: serviceRequestsTypes.find(
+      (e) => e.id === entity.getDataValue('request_type')
+    ),
+    status: serviceRequestStatus.find(
+      (c) => c.id === entity.getDataValue('status')
+    )
+  }));
+
+  return {
+    requests,
+    totalNumberOfRecords,
+    totalNumberOfPages
+  };
+};
+
+const updateUserServSubServRequest = async(requestId, request) => {
+  const existingRequest = await userServiceRequests.findOne({
+    where: {
+      id: {
+        [Op.eq]: requestId
+      },
+      status: {
+        [Op.eq]: 0
+      }
+    }
+  });
+
+  if (!existingRequest) {
+    return null;
+  }
+
+  const updatedRequest = Object.assign(existingRequest, request);
+
+  await existingRequest.update({
+    status: updatedRequest.status,
+    actioned_by: updatedRequest.actioned_by,
+    actioned_reason: updatedRequest.actioned_reason,
+    actioned_at: updatedRequest.actioned_at
+  });
+};
+
 module.exports = {
   list,
   getOrgById,
@@ -1714,6 +1980,7 @@ module.exports = {
   getOrgByUrn,
   getOrgByUid,
   getOrgByEstablishmentNumber,
+  getOrgByUpin,
   getOrgByUkprn,
   getAllOrgsByUkprn,
   getOrgByLegacyId,
@@ -1749,6 +2016,10 @@ module.exports = {
   pagedListOfRequests,
   getLatestActionedRequestAssociated,
   hasUserOrganisationRequestsByOrgId,
-  getOrganisationsAssociatedToService
-
+  getOrganisationsAssociatedToService,
+  getServiceAndSubServiceReqForOrgs,
+  pagedListOfAllRequestTypesForOrg,
+  getAllPendingRequestTypesForApprover,
+  pagedListOfServSubServRequests,
+  updateUserServSubServRequest
 };

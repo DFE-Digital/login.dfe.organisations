@@ -12,11 +12,14 @@ const getOrganisation = async (req, res) => {
     Type: organisation.type ? organisation.type.id : null,
     URN: organisation.urn,
     UID: organisation.uid,
+    UPIN: organisation.upin,
     UKPRN: organisation.ukprn,
     EstablishmentNumber: organisation.establishmentNumber,
     Status: organisation.status ? organisation.status.id : null,
     ClosedOn: organisation.closedOn,
     Address: organisation.address,
+    ProviderTypeName: organisation.providerTypeName,
+    LegalName: organisation.LegalName,
   });
 };
 

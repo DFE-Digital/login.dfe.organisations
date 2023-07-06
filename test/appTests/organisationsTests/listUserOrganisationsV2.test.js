@@ -40,6 +40,7 @@ describe('when listing user organisations', () => {
             },
             urn: null,
             uid: null,
+            upin: '123456',
             ukprn: '12345',
             status: {
               id: 1,
