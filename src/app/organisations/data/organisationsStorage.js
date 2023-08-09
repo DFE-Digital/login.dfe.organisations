@@ -1712,70 +1712,53 @@ const getLatestActionedRequestAssociated = async userId => {
 const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize, sortBy, sortDirection, correlationId) => {
   try {
     logger.info(`Calling getOrganisationsAssociatedToService for services storage for request ${correlationId}`, { correlationId });
-    const orderDirection = (sortDirection && sortDirection !== undefined) ? sortDirection.toUpperCase() : 'ASC';
-    const orderBy = (sortBy && sortBy !== undefined) ? sortBy : 'name';
-    const searchCriteria = {
-      [Op.or]: {
-        name: {
-          [Op.like]: `%${criteria}%`
-        },
-        LegalName: {
-          [Op.like]: `%${criteria}%`
-        },
-        urn: {
-          [Op.like]: `%${criteria}%`
-        },
-        uid: {
-          [Op.like]: `%${criteria}%`
-        },
-        upin: {
-          [Op.like]: `%${criteria}%`
-        },
-        ukprn: {
-          [Op.like]: `%${criteria}%`
-        },
-        establishmentNumber: {
-          [Op.like]: `%${criteria}%`
-        },
-        legacyId: {
-          [Op.like]: `%${criteria}%`
-        }
-      },
-      [Op.and]:
-      { Status: { [Op.not]: 0 } }
-    };
-    const searchQuery = (criteria && criteria !== undefined) ? searchCriteria : { Status: { [Op.not]: 0 } };
+    const orderDirection = sortDirection ? sortDirection.toUpperCase() : 'ASC';
+    const orderBy = sortBy || 'name';
+
+    const fieldsToSearch = ['name', 'LegalName', 'URN', 'UID', 'UPIN', 'UKPRN', 'EstablishmentNumber', 'legacyId'];
+    const fieldsToDisplay = [...fieldsToSearch, 'id', 'Status', 'Type'];
+
+    const transformedFieldsToDisplay = fieldsToDisplay.map(field => [Sequelize.col(`Organisation.${field}`), field]);
+    let searchQuery = { Status: { [Op.not]: 0 } };
+
+    if (criteria) {
+      const likeQueries = fieldsToSearch.map(field => ({
+        [field]: { [Op.like]: `%${criteria}%` }
+      }));
+
+      searchQuery = {
+        ...searchQuery,
+        [Op.or]: likeQueries
+      };
+    }
 
     const query = {
-      where: {
-        service_id: {
-          [Op.eq]: sid
-        }
-      },
+      where: { service_id: sid },
+      attributes: [
+        [Sequelize.fn('DISTINCT', Sequelize.col('Organisation.id')), 'id'],
+        ...transformedFieldsToDisplay
+      ],
       include: [{
         model: organisations,
         as: 'Organisation',
         where: searchQuery
       }],
-      order: [['Organisation', `${orderBy}`, `${orderDirection}`]]
+      order: [['Organisation', orderBy, orderDirection]],
+      raw: true
     };
 
-    const userServiceEntities = await users.findAll(query);
-    const organisationsEntities = await Promise.all(userServiceEntities.map(async(userServiceEntity) =>
-      (userServiceEntity.Organisation.dataValues)
-    ));
+    const organisationEntities = await users.findAll(query);
 
-    const uniqueOrgsList = new Set(organisationsEntities.map(o => JSON.stringify(o)));
-    const uniqueOrganisationsArr = Array.from(uniqueOrgsList).map(o => JSON.parse(o));
-    const offset = page !== 1 ? pageSize * (page - 1) : 0;
-    const limit = pageSize;
-    const pagedResults = uniqueOrganisationsArr.slice(offset, offset + limit);
+    const offset = (page - 1) * pageSize;
+    const pagedResults = organisationEntities.slice(offset, offset + pageSize);
+
+    const totalNumberOfRecords = organisationEntities.length;
     const organistationsList = pagedResults.map(o => mapOrganisationFromEntity(o));
     return {
       organisations: organistationsList,
       page,
-      totalNumberOfPages: Math.ceil(uniqueOrganisationsArr.length / pageSize),
-      totalNumberOfRecords: uniqueOrganisationsArr.length
+      totalNumberOfPages: Math.ceil(totalNumberOfRecords / pageSize),
+      totalNumberOfRecords
     };
   } catch (e) {
     logger.error(`error getting organisations associated with service ${sid} - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
