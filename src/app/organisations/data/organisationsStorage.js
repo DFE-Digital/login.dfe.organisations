@@ -1709,27 +1709,35 @@ const getLatestActionedRequestAssociated = async userId => {
   };
 };
 
-const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize, sortBy, sortDirection, correlationId) => {
+const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize, sortBy, sortDirection, filterCategories = [],
+  filterStates = []) => {
   try {
-    logger.info(`Calling getOrganisationsAssociatedToService for services storage for request ${correlationId}`, { correlationId });
     const orderDirection = sortDirection ? sortDirection.toUpperCase() : 'ASC';
     const orderBy = sortBy || 'name';
 
     const fieldsToSearch = ['name', 'LegalName', 'URN', 'UID', 'UPIN', 'UKPRN', 'EstablishmentNumber', 'legacyId'];
-    const fieldsToDisplay = [...fieldsToSearch, 'id', 'Status', 'Type'];
+    const fieldsToDisplay = [...fieldsToSearch, 'id', 'Status', 'Type', 'Category'];
 
     const transformedFieldsToDisplay = fieldsToDisplay.map(field => [Sequelize.col(`Organisation.${field}`), field]);
-    let searchQuery = { Status: { [Op.not]: 0 } };
+
+    const searchQuery = {};
 
     if (criteria) {
       const likeQueries = fieldsToSearch.map(field => ({
         [field]: { [Op.like]: `%${criteria}%` }
       }));
 
-      searchQuery = {
-        ...searchQuery,
-        [Op.or]: likeQueries
-      };
+      searchQuery[Op.or] = likeQueries;
+    }
+
+    if (filterCategories.length > 0) {
+      searchQuery.Category = { [Op.in]: filterCategories };
+    }
+
+    if (filterStates.length > 0) {
+      searchQuery.Status = { [Op.in]: filterStates };
+    } else {
+      searchQuery.Status = { [Op.not]: 0 };
     }
 
     const query = {
@@ -1741,27 +1749,47 @@ const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize,
       include: [{
         model: organisations,
         as: 'Organisation',
-        where: searchQuery
+        where: searchQuery,
+        attributes: []
       }],
       order: [['Organisation', orderBy, orderDirection]],
       raw: true
     };
 
-    const organisationEntities = await users.findAll(query);
+    const orgCategoriesQuery = {
+      where: { service_id: sid },
+      attributes: [
+        [Sequelize.fn('DISTINCT', Sequelize.col('Organisation.Category')), 'Category']
+      ],
+      include: [{
+        model: organisations,
+        as: 'Organisation',
+        attributes: []
+      }],
+      raw: true
+    };
+
+    const [organisationEntities, allAvailableCategories] = await Promise.all([
+      users.findAll(query),
+      users.findAll(orgCategoriesQuery)
+    ]);
 
     const offset = (page - 1) * pageSize;
     const pagedResults = organisationEntities.slice(offset, offset + pageSize);
 
     const totalNumberOfRecords = organisationEntities.length;
     const organistationsList = pagedResults.map(o => mapOrganisationFromEntity(o));
+    const availableCategories = allAvailableCategories.map(e => e.Category);
     return {
       organisations: organistationsList,
       page,
       totalNumberOfPages: Math.ceil(totalNumberOfRecords / pageSize),
-      totalNumberOfRecords
+      totalNumberOfRecords,
+      availableCategories
+
     };
   } catch (e) {
-    logger.error(`error getting organisations associated with service ${sid} - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
+    logger.error(`error getting organisations associated with service ${sid} - ${e.message} - error: ${e}`);
     throw e;
   }
 };
