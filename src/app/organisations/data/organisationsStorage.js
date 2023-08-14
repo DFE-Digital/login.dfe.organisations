@@ -1759,13 +1759,16 @@ const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize,
     const orgCategoriesQuery = {
       where: { service_id: sid },
       attributes: [
-        [Sequelize.fn('DISTINCT', Sequelize.col('Organisation.Category')), 'Category']
+        [Sequelize.fn('DISTINCT', Sequelize.col('Organisation.Category')), 'Category'],
+        [Sequelize.fn('COUNT', Sequelize.col('Organisation.Category')), 'CategoryCount']
       ],
       include: [{
         model: organisations,
         as: 'Organisation',
         attributes: []
       }],
+      group: ['Organisation.Category'],
+      order: [[Sequelize.fn('COUNT', Sequelize.col('Organisation.Category')), 'DESC']],
       raw: true
     };
 
