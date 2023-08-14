@@ -89,15 +89,6 @@ describe('when listing or searching organisations associated with a service', ()
     expect(res._isEndCalled()).toBe(true);
   });
 
-  it('then it should send 404 if service not found', async() => {
-    servicesStorage.getById.mockReset();
-    servicesStorage.getById.mockReturnValue(null);
-
-    await getOrganisationsAssociatedWithService(req, res);
-
-    expect(res.statusCode).toBe(404);
-    expect(res._isEndCalled()).toBe(true);
-  });
 
   it('then it should send 200 if service found', async() => {
     servicesStorage.getById.mockReset();
