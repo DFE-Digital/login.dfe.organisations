@@ -1783,13 +1783,19 @@ const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize,
     const totalNumberOfRecords = organisationEntities.length;
     const organistationsList = pagedResults.map(o => mapOrganisationFromEntity(o));
     const availableCategories = allAvailableCategories.map(e => e.Category);
+
+    const organisationCategoryMap = new Map();
+    organisationCategory.forEach(x => {
+      organisationCategoryMap.set(x.id, x);
+    });
+
+    const organisationCategories = availableCategories.map(id => organisationCategoryMap.get(id)).filter(Boolean);
     return {
       organisations: organistationsList,
       page,
       totalNumberOfPages: Math.ceil(totalNumberOfRecords / pageSize),
       totalNumberOfRecords,
-      availableCategories
-
+      organisationCategories
     };
   } catch (e) {
     logger.error(`error getting organisations associated with service ${sid} - ${e.message} - error: ${e}`);
