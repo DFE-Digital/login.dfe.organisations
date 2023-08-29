@@ -195,6 +195,16 @@ const mapAnnouncementFromEntity = entity => {
   };
 };
 
+const mapArrayToProperty = (array, property) => array.map(e => e[property]);
+
+const arrayToMapById = (array) => {
+  const map = new Map();
+  array.forEach(item => map.set(item.id, item));
+  return map;
+};
+
+const mapAndFilterArray = (array, map) => array.map(id => map.get(id)).filter(Boolean);
+
 const list = async (includeAssociations = false) => {
   try {
     const findOrgsOpts = {};
@@ -1772,9 +1782,26 @@ const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize,
       raw: true
     };
 
-    const [organisationEntities, allAvailableCategories] = await Promise.all([
+    const orgStatusesQuery = {
+      where: { service_id: sid },
+      attributes: [
+        [Sequelize.fn('DISTINCT', Sequelize.col('Organisation.Status')), 'Status'],
+        [Sequelize.fn('COUNT', Sequelize.col('Organisation.Status')), 'StatusCount']
+      ],
+      include: [{
+        model: organisations,
+        as: 'Organisation',
+        attributes: []
+      }],
+      group: ['Organisation.Status'],
+      order: [[Sequelize.fn('COUNT', Sequelize.col('Organisation.Status')), 'DESC']],
+      raw: true
+    };
+
+    const [organisationEntities, allAvailableCategories, allAvailableStatuses] = await Promise.all([
       users.findAll(query),
-      users.findAll(orgCategoriesQuery)
+      users.findAll(orgCategoriesQuery),
+      users.findAll(orgStatusesQuery)
     ]);
 
     const offset = (page - 1) * pageSize;
@@ -1782,20 +1809,20 @@ const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize,
 
     const totalNumberOfRecords = organisationEntities.length;
     const organistationsList = pagedResults.map(o => mapOrganisationFromEntity(o));
-    const availableCategories = allAvailableCategories.map(e => e.Category);
+    const availableCategories = mapArrayToProperty(allAvailableCategories, 'Category');
+    const availableStatuses = mapArrayToProperty(allAvailableStatuses, 'Status');
+    const organisationCategoryMap = arrayToMapById(organisationCategory);
+    const organisationStatusesMap = arrayToMapById(organisationStatus);
 
-    const organisationCategoryMap = new Map();
-    organisationCategory.forEach(x => {
-      organisationCategoryMap.set(x.id, x);
-    });
-
-    const organisationCategories = availableCategories.map(id => organisationCategoryMap.get(id)).filter(Boolean);
+    const organisationCategories = mapAndFilterArray(availableCategories, organisationCategoryMap);
+    const organisationStatuses = mapAndFilterArray(availableStatuses, organisationStatusesMap);
     return {
       organisations: organistationsList,
       page,
       totalNumberOfPages: Math.ceil(totalNumberOfRecords / pageSize),
       totalNumberOfRecords,
-      organisationCategories
+      organisationCategories,
+      organisationStatuses
     };
   } catch (e) {
     logger.error(`error getting organisations associated with service ${sid} - ${e.message} - error: ${e}`);
