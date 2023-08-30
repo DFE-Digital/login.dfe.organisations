@@ -23,7 +23,7 @@ const {
 } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 const { uniq, trim, orderBy } = require('lodash');
-const { mapAsync } = require('./../../../utils');
+const { mapAsync, mapArrayToProperty, arrayToMapById, mapAndFilterArray } = require('./../../../utils');
 const uuid = require('uuid/v4');
 
 const Op = Sequelize.Op;
@@ -194,16 +194,6 @@ const mapAnnouncementFromEntity = entity => {
     published: entity.published
   };
 };
-
-const mapArrayToProperty = (array, property) => array.map(e => e[property]);
-
-const arrayToMapById = (array) => {
-  const map = new Map();
-  array.forEach(item => map.set(item.id, item));
-  return map;
-};
-
-const mapAndFilterArray = (array, map) => array.map(id => map.get(id)).filter(Boolean);
 
 const list = async (includeAssociations = false) => {
   try {
