@@ -23,7 +23,7 @@ const {
 } = require('./../../../infrastructure/repository');
 const Sequelize = require('sequelize');
 const { uniq, trim, orderBy } = require('lodash');
-const { mapAsync } = require('./../../../utils');
+const { mapAsync, mapArrayToProperty, arrayToMapById, mapAndFilterArray } = require('./../../../utils');
 const uuid = require('uuid/v4');
 
 const Op = Sequelize.Op;
@@ -1709,76 +1709,113 @@ const getLatestActionedRequestAssociated = async userId => {
   };
 };
 
-const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize, sortBy, sortDirection, correlationId) => {
+const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize, sortBy, sortDirection, filterCategories = [],
+  filterStates = []) => {
   try {
-    logger.info(`Calling getOrganisationsAssociatedToService for services storage for request ${correlationId}`, { correlationId });
-    const orderDirection = (sortDirection && sortDirection !== undefined) ? sortDirection.toUpperCase() : 'ASC';
-    const orderBy = (sortBy && sortBy !== undefined) ? sortBy : 'name';
-    const searchCriteria = {
-      [Op.or]: {
-        name: {
-          [Op.like]: `%${criteria}%`
-        },
-        LegalName: {
-          [Op.like]: `%${criteria}%`
-        },
-        urn: {
-          [Op.like]: `%${criteria}%`
-        },
-        uid: {
-          [Op.like]: `%${criteria}%`
-        },
-        upin: {
-          [Op.like]: `%${criteria}%`
-        },
-        ukprn: {
-          [Op.like]: `%${criteria}%`
-        },
-        establishmentNumber: {
-          [Op.like]: `%${criteria}%`
-        },
-        legacyId: {
-          [Op.like]: `%${criteria}%`
-        }
-      },
-      [Op.and]:
-      { Status: { [Op.not]: 0 } }
-    };
-    const searchQuery = (criteria && criteria !== undefined) ? searchCriteria : { Status: { [Op.not]: 0 } };
+    const orderDirection = sortDirection ? sortDirection.toUpperCase() : 'ASC';
+    const orderBy = sortBy || 'name';
+
+    const fieldsToSearch = ['name', 'LegalName', 'URN', 'UID', 'UPIN', 'UKPRN', 'EstablishmentNumber', 'legacyId'];
+    const fieldsToDisplay = [...fieldsToSearch, 'id', 'Status', 'Type', 'Category'];
+
+    const transformedFieldsToDisplay = fieldsToDisplay.map(field => [Sequelize.col(`Organisation.${field}`), field]);
+
+    const searchQuery = {};
+
+    if (criteria) {
+      const likeQueries = fieldsToSearch.map(field => ({
+        [field]: { [Op.like]: `%${criteria}%` }
+      }));
+
+      searchQuery[Op.or] = likeQueries;
+    }
+
+    if (filterCategories.length > 0) {
+      searchQuery.Category = { [Op.in]: filterCategories };
+    }
+
+    if (filterStates.length > 0) {
+      searchQuery.Status = { [Op.in]: filterStates };
+    } else {
+      searchQuery.Status = { [Op.not]: 0 };
+    }
 
     const query = {
-      where: {
-        service_id: {
-          [Op.eq]: sid
-        }
-      },
+      where: { service_id: sid },
+      attributes: [
+        [Sequelize.fn('DISTINCT', Sequelize.col('Organisation.id')), 'id'],
+        ...transformedFieldsToDisplay
+      ],
       include: [{
         model: organisations,
         as: 'Organisation',
-        where: searchQuery
+        where: searchQuery,
+        attributes: []
       }],
-      order: [['Organisation', `${orderBy}`, `${orderDirection}`]]
+      order: [['Organisation', orderBy, orderDirection]],
+      raw: true
     };
 
-    const userServiceEntities = await users.findAll(query);
-    const organisationsEntities = await Promise.all(userServiceEntities.map(async(userServiceEntity) =>
-      (userServiceEntity.Organisation.dataValues)
-    ));
+    const orgCategoriesQuery = {
+      where: { service_id: sid },
+      attributes: [
+        [Sequelize.fn('DISTINCT', Sequelize.col('Organisation.Category')), 'Category'],
+        [Sequelize.fn('COUNT', Sequelize.col('Organisation.Category')), 'CategoryCount']
+      ],
+      include: [{
+        model: organisations,
+        as: 'Organisation',
+        attributes: []
+      }],
+      group: ['Organisation.Category'],
+      order: [[Sequelize.fn('COUNT', Sequelize.col('Organisation.Category')), 'DESC']],
+      raw: true
+    };
 
-    const uniqueOrgsList = new Set(organisationsEntities.map(o => JSON.stringify(o)));
-    const uniqueOrganisationsArr = Array.from(uniqueOrgsList).map(o => JSON.parse(o));
-    const offset = page !== 1 ? pageSize * (page - 1) : 0;
-    const limit = pageSize;
-    const pagedResults = uniqueOrganisationsArr.slice(offset, offset + limit);
+    const orgStatusesQuery = {
+      where: { service_id: sid },
+      attributes: [
+        [Sequelize.fn('DISTINCT', Sequelize.col('Organisation.Status')), 'Status'],
+        [Sequelize.fn('COUNT', Sequelize.col('Organisation.Status')), 'StatusCount']
+      ],
+      include: [{
+        model: organisations,
+        as: 'Organisation',
+        attributes: []
+      }],
+      group: ['Organisation.Status'],
+      order: [[Sequelize.fn('COUNT', Sequelize.col('Organisation.Status')), 'DESC']],
+      raw: true
+    };
+
+    const [organisationEntities, allAvailableCategories, allAvailableStatuses] = await Promise.all([
+      users.findAll(query),
+      users.findAll(orgCategoriesQuery),
+      users.findAll(orgStatusesQuery)
+    ]);
+
+    const offset = (page - 1) * pageSize;
+    const pagedResults = organisationEntities.slice(offset, offset + pageSize);
+
+    const totalNumberOfRecords = organisationEntities.length;
     const organistationsList = pagedResults.map(o => mapOrganisationFromEntity(o));
+    const availableCategories = mapArrayToProperty(allAvailableCategories, 'Category');
+    const availableStatuses = mapArrayToProperty(allAvailableStatuses, 'Status');
+    const organisationCategoryMap = arrayToMapById(organisationCategory);
+    const organisationStatusesMap = arrayToMapById(organisationStatus);
+
+    const organisationCategories = mapAndFilterArray(availableCategories, organisationCategoryMap);
+    const organisationStatuses = mapAndFilterArray(availableStatuses, organisationStatusesMap);
     return {
       organisations: organistationsList,
       page,
-      totalNumberOfPages: Math.ceil(uniqueOrganisationsArr.length / pageSize),
-      totalNumberOfRecords: uniqueOrganisationsArr.length
+      totalNumberOfPages: Math.ceil(totalNumberOfRecords / pageSize),
+      totalNumberOfRecords,
+      organisationCategories,
+      organisationStatuses
     };
   } catch (e) {
-    logger.error(`error getting organisations associated with service ${sid} - ${e.message} for request ${correlationId} error: ${e}`, { correlationId });
+    logger.error(`error getting organisations associated with service ${sid} - ${e.message} - error: ${e}`);
     throw e;
   }
 };
