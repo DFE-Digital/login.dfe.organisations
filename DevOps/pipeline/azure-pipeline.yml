@@ -16,8 +16,9 @@ resources:
 trigger:
   branches:
     include:
-    - release/*
     - feature/*
+    - develop
+    - release/*
 
 pr:
   branches:
