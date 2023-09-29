@@ -21,6 +21,7 @@ const {
   getNextLegacyId,
   userServiceRequests
 } = require('./../../../infrastructure/repository');
+const { getUserById } = require('../../../infrastructure/directories');
 const Sequelize = require('sequelize');
 const { uniq, trim, orderBy } = require('lodash');
 const { mapAsync, mapArrayToProperty, arrayToMapById, mapAndFilterArray } = require('./../../../utils');
@@ -2003,6 +2004,95 @@ const updateUserServSubServRequest = async(requestId, request) => {
     actioned_at: updatedRequest.actioned_at
   });
 };
+const getUsersdetsAssociatedWithOrganisation = async(
+  orgId,
+  pageNumber = 2,
+  sortColum = 'email',
+  order = 'asc',
+  pageSize = 4,
+) => {
+  const offset = (pageNumber - 1) * pageSize;
+  const userOrgs = await userOrganisations.findAndCountAll({
+    where: {
+      organisation_id: {
+        [Op.eq]: orgId
+      }
+    }
+  });
+  if (!userOrgs || userOrgs.length === 0) {
+    return [];
+  }
+
+  const UsersDets = await Promise.all(
+    userOrgs.rows.map(async userOrgEntity => {
+      const role = await userOrgEntity.getRole();
+      const userItem = await getUserById(userOrgEntity.getDataValue('user_id'));
+      return {
+        id: userOrgEntity.getDataValue('user_id'),
+        status: userItem.status,
+        name: userItem.given_name + ' ' + userItem.family_name,
+        email: userItem.email,
+        lastLogin: userItem.last_login,
+        role: role.name || undefined,
+        numericIdentifier: userOrgEntity.numeric_identifier || undefined,
+        textIdentifier: userOrgEntity.text_identifier || undefined
+      };
+    })
+  );
+
+    // add sort by to stuff here then page later
+
+    //case switch both column and direction
+  const sortedResults = GetSortedresults(UsersDets, sortColum, order);
+  
+  const pagedresults = sortedResults.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
+  const totalNumberOfRecords = sortedResults.length;
+  const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
+
+  return {
+    pagedresults,
+    totalNumberOfPages,
+    currentpage: pageNumber
+  };
+};
+
+const GetSortedresults = (UsersDets, sortItem, order) =>{
+
+  switch(sortItem) {
+    case 'email':
+      if(order === 'asc'){
+        return UsersDets.sort((a, b) => a.email.localeCompare(b.email));
+      }else{
+        return UsersDets.sort((a, b) => b.email.localeCompare(a.email));
+      };
+    case 'LsatLogin':
+        if(order === 'asc'){
+          return UsersDets.sort((a, b) => a.lastLogin.localeCompare(b.lastLogin));
+        }else{
+          return UsersDets.sort((a, b) => b.lastLogin.localeCompare(a.lastLogin));
+        };
+    case 'permission level':
+      if(order === 'asc'){
+        return UsersDets.sort((a, b) => a.role.localeCompare(b.role));
+      }else{
+        return UsersDets.sort((a, b) => b.role.localeCompare(a.role));
+      };
+    case 'name':
+      if(order === 'asc'){
+        return UsersDets.sort((a, b) => a.name.localeCompare(b.name));
+      }else{
+        return UsersDets.sort((a, b) => b.name.localeCompare(a.name));
+      };
+    case 'status':
+      if(order === 'asc'){
+        return UsersDets.sort((a, b) => a.status - b.status);
+      }else{
+        return UsersDets.sort((a, b) => a.status - b.status);
+      };
+    default:
+      break;
+  };
+};
 
 module.exports = {
   list,
@@ -2058,5 +2148,6 @@ module.exports = {
   pagedListOfAllRequestTypesForOrg,
   getAllPendingRequestTypesForApprover,
   pagedListOfServSubServRequests,
-  updateUserServSubServRequest
+  updateUserServSubServRequest,
+  getUsersdetsAssociatedWithOrganisation
 };

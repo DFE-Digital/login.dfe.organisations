@@ -19,6 +19,7 @@ const getOrganisationsAssociatedWithUserV3 = require('./getOrganisationsAssociat
 const putUserInOrg = require('./putUserInOrg');
 const getUsersAssocatedWithOrganisationsForApproval = require('./getUsersAssociatedWithOrganisationForApproval');
 const deleteUserOrganisation = require('./deleteUserOrganisation');
+const getUserDetsForOrgs = require('./getUserDetsForOrgs');
 const getUsersForOrganisation = require('./getUsersForOrganisation');
 const listOrganisationAnnouncements = require('./listOrganisationAnnouncements');
 const upsertOrganisationAnnouncement = require('./upsertOrganisationAnnouncement');
@@ -65,6 +66,44 @@ const routes = () => {
   router.get('/v2/associated-with-user/:uid', asyncWrapper(getOrganisationsAssociatedWithUserV2));
   router.get('/v3/associated-with-user/:uid', asyncWrapper(getOrganisationsAssociatedWithUserV3))
   router.get('/users-for-approval/:uid?', asyncWrapper(getUsersAssocatedWithOrganisationsForApproval));
+  /**
+ * @openapi
+ * /organisations/{id}/users:
+ *  get:
+ *     tags:
+ *     - Organisations
+ *     description: Returns organisation
+ *     parameters:
+ *       - name: order
+  *         in: query
+  *         description: order asc or desc
+  *         type: string
+  *         required: true
+  *       - name: sortColum
+  *         in: query
+  *         description: name of the colum you wish to sort the rows by
+  *         type: string
+  *         required: true
+ *       - name: pageNumber
+  *         in: query
+  *         description: what page to collect
+  *         type: integer
+  *         required: true
+ *       - name: pageSize
+  *         in: query
+  *         description: what page to collect
+  *         type: integer
+  *         required: true
+ *       - name: id
+  *         in: path
+  *         description: id
+  *         type: GUid
+  *         required: true
+ *     responses:
+ *       200:
+ *         description: object returned
+ */
+  router.get('/:id/users', asyncWrapper(getUserDetsForOrgs));
   router.get('/:id/users', asyncWrapper(getUsersForOrganisation));
   router.get('/:id/announcements', asyncWrapper(listOrganisationAnnouncements));
   router.post('/:id/announcements', asyncWrapper(upsertOrganisationAnnouncement));

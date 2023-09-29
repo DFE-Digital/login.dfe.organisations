@@ -4,6 +4,9 @@ const config = require('./infrastructure/config')();
 const configSchema = require('./infrastructure/config/schema');
 const logger = require('./infrastructure/logger');
 const express = require('express');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+const { swaggerSpec, options } = require('./infrastructure/swaggerConfig');
 const bodyParser = require('body-parser');
 const http = require('http');
 const https = require('https');
@@ -37,11 +40,28 @@ app.use(helmet({
   }
 }));
 
+// serve swagger
+app.get('/swagger.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+const specs = swaggerJsdoc(options);
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(specs),
+);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-
+  /**
+ * @openapi
+ * /healthcheck:
+ *  get:
+ *     tags:
+ *     - Healthcheck
+ * */
 app.use('/healthcheck', healthCheck({ config }));
 app.use('/services', services.services);
 app.use('/organisations', organisations);
