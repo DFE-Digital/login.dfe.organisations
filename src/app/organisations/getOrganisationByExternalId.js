@@ -1,9 +1,10 @@
-const { getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber, getOrgByLegacyId, getOrgByUpin, getOrgByUkprn, getAllOrgsByUkprn } = require('./data/organisationsStorage');
+const { getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber, getOrgByLegacyId, getOrgByUpin, getOrgByUkprn, getAllOrgsByUkprn, getAllOrgsByUpin } = require('./data/organisationsStorage');
 
 const getOrganisationByExternalIdentifier = async (req, res) => {
   if (!req.params.id || !req.params.type) {
     return res.status(403).send();
   }
+
 
   let result;
   if (req.params.type === '000') {
@@ -17,6 +18,8 @@ const getOrganisationByExternalIdentifier = async (req, res) => {
     result = await getOrgByUid(req.params.id);
   } else if (req.params.type === 'UPIN') {
     result = await getOrgByUpin(req.params.id);
+  } else if (req.params.type === 'UPIN-multi') {
+    result = await getAllOrgsByUpin(req.params.id);
   } else if (req.params.type === '001') {
     result = await getOrgByUrn(req.params.id);
   } else if (req.params.type === '002') {
