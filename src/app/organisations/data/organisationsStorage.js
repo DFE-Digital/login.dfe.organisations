@@ -934,6 +934,29 @@ const getOrgByUpin = async (upin, category) => {
   }
 };
 
+const getAllOrgsByUpin = async (upin, category) => {
+  try {
+    const query = {
+      where: {
+        UPIN: {
+          [Op.eq]: upin
+        }
+      }
+    };
+    if (category) {
+      query.where.Category = {
+        [Op.eq]: category
+      };
+    }
+    const orgEntities = await organisations.findAll(query);
+    console.log('orgEntities', orgEntities)
+    return orgEntities.map(mapOrganisationFromEntity);
+  } catch (e) {
+    logger.error(`error getting organisation by UPIN - ${e.message}`, e);
+    throw e;
+  }
+};
+
 const getOrgByUkprn = async (ukprn, category) => {
   try {
     const query = {
@@ -2058,5 +2081,6 @@ module.exports = {
   pagedListOfAllRequestTypesForOrg,
   getAllPendingRequestTypesForApprover,
   pagedListOfServSubServRequests,
-  updateUserServSubServRequest
+  updateUserServSubServRequest,
+  getAllOrgsByUpin
 };
