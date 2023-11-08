@@ -1,7 +1,7 @@
 'use strict';
 
 const logger = require('./../../infrastructure/logger');
-const uuid = require('uuid/v4');
+const uuid = require('uuid');
 const invitationStorage = require('./data/invitationsStorage');
 
 
@@ -25,7 +25,7 @@ const action = async (req, res) => {
 
     res.status(202).send();
   } catch (e) {
-    const id = uuid();
+    const id = uuid.v4();
     logger.error(`error putting invitation (eid: ${id}) - ${e.message}`);
     res.status(500).send(`An error occured (id: ${id})`);
   }

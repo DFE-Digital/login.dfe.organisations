@@ -4,7 +4,7 @@ const express = require('express');
 const listEndpoints = require('express-list-endpoints');
 
 const router = express.Router({ mergeParams: true });
-const uuid = require('uuid/v4');
+const uuid = require('uuid');
 const { partition, flatten } = require('lodash');
 
 const servicesStorage = require('./../services/data/servicesStorage');
@@ -56,7 +56,7 @@ const getCreateServices = (req, res) => {
   });
 };
 const postCreateServices = async (req, res) => {
-  const id = uuid();
+  const id = uuid.v4();
   const name = req.body.name;
   const description = req.body.description || '';
 
@@ -106,7 +106,7 @@ const getCreateOrganisation = (req, res) => {
   });
 };
 const postCreateOrganisation = async (req, res) => {
-  const id = uuid();
+  const id = uuid.v4();
   const name = req.body.name;
 
   await organisationsStorage.createOrg(id, name);
@@ -153,7 +153,7 @@ const postSeedUserServices = async (req, res) => {
   const status = req.body.status;
 
   await servicesStorage.upsertServiceUser({
-    id: uuid(),
+    id: uuid.v4(),
     userId,
     organisationId,
     serviceId,

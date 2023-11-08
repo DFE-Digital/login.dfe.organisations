@@ -1,6 +1,6 @@
 'use strict';
 
-const uuid = require('uuid/v4');
+const uuid = require('uuid');
 const invitationStorage = require('./data/invitationsStorage');
 const serviceStorage = require('./../services/data/servicesStorage');
 const organisationsStorage = require('./../organisations/data/organisationsStorage');
@@ -32,7 +32,7 @@ const handler = async (req, res) => {
       for (let s = 0; s < org.services.length; s += 1) {
         const svc = org.services[s];
         await serviceStorage.upsertServiceUser({
-          id: uuid(),
+          id: uuid.v4(),
           userId,
           organisationId: org.organisation.id,
           serviceId: svc.id,

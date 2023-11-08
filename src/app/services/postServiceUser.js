@@ -1,4 +1,4 @@
-const uuid = require('uuid/v4');
+const uuid = require('uuid');
 const { upsertServiceUser } = require('./../services/data/servicesStorage');
 const { getOrgByUrn, getOrgByUid } = require('./../services/data/organisationsStorage');
 
@@ -29,7 +29,7 @@ const action = async (req, res) => {
 
 
   await upsertServiceUser({
-    id: uuid(),
+    id: uuid.v4(),
     userId: req.params.uid.toLowerCase(),
     organisationId,
     serviceId: req.params.sid.toLowerCase(),
