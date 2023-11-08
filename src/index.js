@@ -16,7 +16,7 @@ const { organisationInvitations, invitations } = require('./app/invitations');
 const dev = require('./app/dev');
 const healthCheck = require('login.dfe.healthcheck');
 const { getErrorHandler } = require('login.dfe.express-error-handling');
-const helmet = require("helmet");
+const helmet = require('helmet');
 
 configSchema.validate();
 
@@ -28,35 +28,35 @@ const hstsMaxAge = Number(process.env.hstsMaxAge);
 
 app.use(helmet({
   frameguard: {
-    action: 'deny',
+    action: 'deny'
   },
-  //Apply custom sts value if provided else use default
+  // Apply custom sts value if provided else use default
   hsts: {
-    maxAge:  isNaN(hstsMaxAge)?15552000:hstsMaxAge,
-    preload: true,
+    maxAge: isNaN(hstsMaxAge) ? 15552000 : hstsMaxAge,
+    preload: true
   }
 }));
 
 logger.info('set helmet policy defaults');
 
 // Setting helmet Content Security Policy
-const scriptSources = ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'localhost', '*.signin.education.gov.uk'];
+const scriptSources = ['\'self\'', '\'unsafe-inline\'', '\'unsafe-eval\'', '*.localhost', '*.signin.education.gov.uk', 'https://code.jquery.com', 'https://rawgit.com'];
 
 app.use(helmet.contentSecurityPolicy({
   browserSniff: false,
   setAllHeaders: false,
   useDefaults: false,
   directives: {
-    defaultSrc: ["'self'"],
-    childSrc: ["'none'"],
-    objectSrc: ["'none'"],
+    defaultSrc: ['\'self\''],
+    childSrc: ['none'],
+    objectSrc: ['none'],
     scriptSrc: scriptSources,
-    styleSrc: ["'self'", "'unsafe-inline'", 'localhost', '*.signin.education.gov.uk'],
-    imgSrc: ["'self'", 'data:', 'blob:', 'localhost', '*.signin.education.gov.uk'],
-    fontSrc: ["'self'", 'data:', '*.signin.education.gov.uk'],
-    connectSrc: ["'self'"],
-    formAction: ["'self'", '*'],
-  },
+    styleSrc: ['\'self\'', '*.localhost', '*.signin.education.gov.uk', 'https://rawgit.com', '\'unsafe-inline\''],
+    imgSrc: ['\'self\'', 'data:', 'blob:', '*.localhost', '*.signin.education.gov.uk', 'https://rawgit.com', 'https://raw.githubusercontent.com'],
+    fontSrc: ['\'self\'', 'data:', '*.signin.education.gov.uk'],
+    connectSrc: ['\'self\''],
+    formAction: ['\'self\'', '*']
+  }
 }));
 
 logger.info('Set helmet filters');
@@ -91,7 +91,7 @@ if (config.hostingEnvironment.useDevViews) {
 }
 
 app.use(getErrorHandler({
-  logger,
+  logger
 }));
 
 if (config.hostingEnvironment.env === 'dev') {
@@ -100,7 +100,7 @@ if (config.hostingEnvironment.env === 'dev') {
     key: config.hostingEnvironment.sslKey,
     cert: config.hostingEnvironment.sslCert,
     requestCert: false,
-    rejectUnauthorized: false,
+    rejectUnauthorized: false
   };
   const server = https.createServer(options, app);
 
