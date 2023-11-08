@@ -37,10 +37,38 @@ app.use(helmet({
   }
 }));
 
+logger.info('set helmet policy defaults');
+
+// Setting helmet Content Security Policy
+const scriptSources = ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'localhost', '*.signin.education.gov.uk'];
+
+app.use(helmet.contentSecurityPolicy({
+  browserSniff: false,
+  setAllHeaders: false,
+  useDefaults: false,
+  directives: {
+    defaultSrc: ["'self'"],
+    childSrc: ["'none'"],
+    objectSrc: ["'none'"],
+    scriptSrc: scriptSources,
+    styleSrc: ["'self'", "'unsafe-inline'", 'localhost', '*.signin.education.gov.uk'],
+    imgSrc: ["'self'", 'data:', 'blob:', 'localhost', '*.signin.education.gov.uk'],
+    fontSrc: ["'self'", 'data:', '*.signin.education.gov.uk'],
+    connectSrc: ["'self'"],
+    formAction: ["'self'", '*'],
+  },
+}));
+
+logger.info('Set helmet filters');
+
+app.use(helmet.xssFilter());
+app.use(helmet.frameguard('false'));
+app.use(helmet.ieNoOpen());
+
+logger.info('helmet setup complete');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
 
 app.use('/healthcheck', healthCheck({ config }));
 app.use('/services', services.services);
