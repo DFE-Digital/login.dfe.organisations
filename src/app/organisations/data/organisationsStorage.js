@@ -24,7 +24,7 @@ const {
 const Sequelize = require('sequelize');
 const { uniq, trim, orderBy } = require('lodash');
 const { mapAsync, mapArrayToProperty, arrayToMapById, mapAndFilterArray } = require('./../../../utils');
-const uuid = require('uuid/v4');
+const uuid = require('uuid');
 
 const Op = Sequelize.Op;
 
@@ -1377,7 +1377,7 @@ const upsertAnnouncement = async (
   }
 
   entity = {
-    announcement_id: uuid(),
+    announcement_id: uuid.v4(),
     origin_id: originId,
     organisation_id: organisationId,
     type,
@@ -1409,7 +1409,7 @@ const getApproversForOrg = async organisationId => {
 };
 
 const createUserOrgRequest = async request => {
-  const id = uuid();
+  const id = uuid.v4();
   const entity = {
     id,
     user_id: request.userId.toUpperCase(),

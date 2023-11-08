@@ -5,7 +5,7 @@ const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 const logger = require('./../../../infrastructure/logger');
 const { users, services, roles, organisations, userOrganisations, externalIdentifiers, organisationCategory, establishmentTypes, organisationStatus, regionCodes, phasesOfEducation } = require('./../../../infrastructure/repository');
-const uuid = require('uuid/v4');
+const uuid = require('uuid');
 
 const mapOrganisationEntity = async (entity, laCache = undefined) => {
   const laAssociation = entity.associations.find(a => a.link_type === 'LA');
@@ -660,7 +660,7 @@ const upsertUserService = async (organisationId, serviceId, userId, status, corr
       return userService.id;
     }
 
-    const id = uuid();
+    const id = uuid.v4();
     await users.create({
       id,
       user_id: userId,

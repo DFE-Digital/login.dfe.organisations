@@ -12,7 +12,7 @@ const {
   hasUserOrganisationRequestsByOrgId,
   deleteOrganisation,
   removeAssociations } = require('./../organisations/data/organisationsStorage');
-const uuid = require('uuid/v4');
+const uuid = require('uuid');
 const rp = require('request-promise');
 
 const isGroupImportable = (group) => {
@@ -65,7 +65,7 @@ const mapImportRecordForStorage = (importing) => {
   }
 
   return {
-    id: uuid(),
+    id: uuid.v4(),
     name: importing.name,
     category,
     type: null,

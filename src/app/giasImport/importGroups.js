@@ -4,7 +4,7 @@ const { getGroupsFile } = require('./../../infrastructure/gias');
 const { parse: parseGroups } = require('./groupCsvReader');
 const { parse: parseGroupLinks } = require('./groupLinksCsvReader');
 const { add, update, pagedListOfCategory, addAssociation, removeAssociationsOfType, getNextOrganisationLegacyId } = require('./../organisations/data/organisationsStorage');
-const uuid = require('uuid/v4');
+const uuid = require('uuid');
 
 const isGroupImportable = (group) => {
   const importableTypes = [
@@ -55,7 +55,7 @@ const mapImportRecordForStorage = (importing) => {
   }
 
   return {
-    id: uuid(),
+    id: uuid.v4(),
     name: importing.name,
     category,
     type: null,
