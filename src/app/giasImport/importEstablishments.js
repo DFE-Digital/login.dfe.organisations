@@ -4,7 +4,7 @@ const { parse } = require('./establishmentCsvReader');
 const { getNextOrganisationLegacyId, list, add, update, pagedListOfCategory, addAssociation, removeAssociationsOfType, hasUserOrganisationsByOrgId, hasUserOrganisationRequestsByOrgId, deleteOrganisation, removeAssociations } = require('./../organisations/data/organisationsStorage');
 const { raiseNotificationThatOrganisationHasChanged } = require('./../organisations/notifications');
 const { getEstablishmentsFile } = require('./../../infrastructure/gias');
-const uuid = require('uuid/v4');
+const uuid = require('uuid');
 const uniqBy = require('lodash/uniqBy');
 
 const isEstablishmentImportable = (importing) => {
@@ -44,7 +44,7 @@ const mapImportRecordForStorage = async (importing) => {
     importing.postcode,
   ].filter(x => x !== undefined && x !== null && x.trim().length > 0).join(', ');
   return {
-    id: uuid(),
+    id: uuid.v4(),
     name: importing.name,
     category: {
       id: '001',
@@ -238,7 +238,7 @@ const isLocalAuthorityImportable = (importing) => {
 };
 const mapImportLocalAuthorityForStorage = (importing) => {
   return {
-    id: uuid(),
+    id: uuid.v4(),
     name: importing.name,
     category: {
       id: '002',
