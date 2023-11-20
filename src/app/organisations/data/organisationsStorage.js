@@ -1001,6 +1001,28 @@ const getAllOrgsByUkprn = async (ukprn, category) => {
   }
 };
 
+const getAllOrgsByIsOnAPAR = async (IsOnAPAR, category) => {
+  try {
+    const query = {
+      where: {
+        IsOnAPAR: {
+          [Op.eq]: IsOnAPAR
+        }
+      }
+    };
+    if (category) {
+      query.where.Category = {
+        [Op.eq]: category
+      };
+    }
+    const orgEntities = await organisations.findAll(query);
+    return orgEntities.map(mapOrganisationFromEntity);
+  } catch (e) {
+    logger.error(`error getting organisations by IsOnAPAR - ${e.message}`, e);
+    throw e;
+  }
+};
+
 const getOrgByLegacyId = async (legacyId, category) => {
   try {
     const query = {
@@ -2043,6 +2065,7 @@ module.exports = {
   getOrgByUpin,
   getOrgByUkprn,
   getAllOrgsByUkprn,
+  getAllOrgsByIsOnAPAR,
   getOrgByLegacyId,
   getOrganisationsForUserIncludingServices,
   getOrganisationsAssociatedToUser,
