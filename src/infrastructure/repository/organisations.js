@@ -6,152 +6,156 @@ const define = (db, schema) => {
     id: {
       type: Sequelize.UUID,
       primaryKey: true,
-      allowNull: false,
+      allowNull: false
     },
     name: {
       type: Sequelize.STRING,
-      allowNull: false,
+      allowNull: false
     },
     Category: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     Type: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     URN: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     UID: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     UKPRN: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     EstablishmentNumber: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     Status: {
       type: Sequelize.INTEGER,
-      allowNull: false,
+      allowNull: false
     },
     ClosedOn: {
       type: Sequelize.DATE,
-      allowNull: true,
+      allowNull: true
     },
     Address: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     phaseOfEducation: {
       type: Sequelize.INTEGER,
-      allowNull: true,
+      allowNull: true
     },
     statutoryLowAge: {
       type: Sequelize.INTEGER,
-      allowNull: true,
+      allowNull: true
     },
     statutoryHighAge: {
       type: Sequelize.INTEGER,
-      allowNull: true,
+      allowNull: true
     },
     telephone: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     regionCode: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     legacyId: {
       type: Sequelize.BIGINT,
-      allowNull: true,
+      allowNull: true
     },
     companyRegistrationNumber: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     DistrictAdministrativeCode: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     DistrictAdministrative_code: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     ProviderProfileID: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     UPIN: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     ProviderTypeName: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     SourceSystem: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     GIASProviderType: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     PIMSProviderType: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     PIMSProviderTypeCode: {
       type: Sequelize.INTEGER,
-      allowNull: true,
+      allowNull: true
     },
     PIMSStatus: {
       type: Sequelize.INTEGER,
-      allowNull: true,
+      allowNull: true
     },
     masteringCode: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     OpenedOn: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     PIMSStatusName: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
-    GIASStatus:{
+    GIASStatus: {
       type: Sequelize.INTEGER,
-      allowNull: true,
+      allowNull: true
     },
     GIASStatusName: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
-    MasterProviderStatusCode:{
+    MasterProviderStatusCode: {
       type: Sequelize.INTEGER,
-      allowNull: true,
+      allowNull: true
     },
     MasterProviderStatusName: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
     },
     LegalName: {
       type: Sequelize.STRING,
-      allowNull: true,
+      allowNull: true
+    },
+    IsOnAPAR: {
+      type: Sequelize.STRING,
+      allowNull: true
     }
   }, {
     timestamps: true,
     tableName: 'organisation',
-    schema,
+    schema
   });
 };
 
@@ -163,5 +167,5 @@ const extend = ({ organisations, organisationAssociations, organisationAnnouncem
 module.exports = {
   name: 'organisations',
   define,
-  extend,
+  extend
 };

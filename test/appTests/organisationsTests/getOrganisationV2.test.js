@@ -72,7 +72,8 @@ describe('when getting an organisation by id', () => {
       legacyId: null,
       companyRegistrationNumber: null,
       DistrictAdministrativeCode: null,
-      DistrictAdministrative_code: null
+      DistrictAdministrative_code: null,
+      IsOnAPAR: 'No'
     };
     getOrgById.mockReturnValue(org);
 

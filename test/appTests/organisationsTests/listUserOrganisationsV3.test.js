@@ -50,7 +50,8 @@ describe('when listing user organisations', () => {
             legacyId: '1234',
             companyRegistrationNumber: null,
             DistrictAdministrativeCode: null,
-            DistrictAdministrative_code: null
+            DistrictAdministrative_code: null,
+            IsOnAPAR: 'No'
           },
           role: {
             id: 0,

@@ -51,6 +51,7 @@ describe('when listing user organisations', () => {
             companyRegistrationNumber: null,
             DistrictAdministrativeCode: null,
             DistrictAdministrative_code: null,
+            IsOnAPAR: 'No'
           },
           role: {
             id: 0,
