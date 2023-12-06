@@ -35,6 +35,7 @@ const updateIfValid = (oldValue, newValue) => {
 
 const updateEntityFromOrganisation = (entity, organisation) => {
   entity.name = organisation.name;
+  entity.LegalName = organisation.LegalName;
   entity.Category = organisation.category.id;
   entity.Type = organisation.type ? organisation.type.id : null;
   entity.URN = updateIfValid(entity.URN, organisation.urn);
@@ -54,10 +55,21 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.statutoryHighAge = organisation.statutoryHighAge;
   entity.legacyId = organisation.legacyId;
   entity.companyRegistrationNumber = organisation.companyRegistrationNumber;
+  entity.providerTypeName = organisation.providerTypeName;
+  entity.ProviderTypeCode = organisation.ProviderTypeCode;
+  entity.GIASProviderType = organisation.GIASProviderType;
+  entity.PIMSProviderType = organisation.PIMSProviderType;
+  entity.PIMSProviderTypeCode = organisation.PIMSProviderTypeCode;
+  entity.PIMSStatusName = organisation.PIMSStatusName;
+  entity.pimsStatus = organisation.pimsStatu;
+  entity.GIASStatusName = organisation.GIASStatusName;
+  entity.GIASStatus = organisation.GIASStatus;
+  entity.MasterProviderStatusName = organisation.MasterProviderStatusName;
+  entity.MasterProviderStatusCode = organisation.MasterProviderStatusCode;
+  entity.OpenedOn = organisation.OpenedOn;
+  entity.DistrictAdministrativeName = organisation.DistrictAdministrativeName;
   entity.DistrictAdministrativeCode = organisation.DistrictAdministrativeCode;
   entity.DistrictAdministrative_code = organisation.DistrictAdministrative_code;
-  entity.ProviderTypeName = organisation.providerTypeName;
-  entity.LegalName = organisation.LegalName;
   entity.IsOnAPAR = organisation.IsOnAPAR;
 };
 const updateOrganisationsWithLocalAuthorityDetails = async orgs => {
@@ -95,6 +107,7 @@ const mapOrganisationFromEntity = entity => {
   return {
     id: entity.id,
     name: entity.name,
+    LegalName: entity.LegalName,
     category,
     type: establishmentTypes.find(c => c.id === entity.Type),
     urn: entity.URN,
@@ -103,7 +116,6 @@ const mapOrganisationFromEntity = entity => {
     ukprn: entity.UKPRN,
     establishmentNumber: entity.EstablishmentNumber,
     status: organisationStatus.find(c => c.id === entity.Status),
-    pimsStatus: entity.PIMSStatus,
     closedOn: entity.ClosedOn,
     address: entity.Address,
     telephone: entity.telephone,
@@ -120,10 +132,21 @@ const mapOrganisationFromEntity = entity => {
     statutoryHighAge: entity.statutoryHighAge,
     legacyId: entity.legacyId,
     companyRegistrationNumber: entity.companyRegistrationNumber,
+    providerTypeName: entity.ProviderTypeName,
+    ProviderTypeCode: entity.ProviderTypeCode,
+    GIASProviderType: entity.GIASProviderType,
+    PIMSProviderType: entity.PIMSProviderType,
+    PIMSProviderTypeCode: entity.PIMSProviderTypeCode,
+    PIMSStatusName: entity.PIMSStatusName,
+    pimsStatus: entity.PIMSStatus,
+    GIASStatusName: entity.GIASStatusName,
+    GIASStatus: entity.GIASStatus,
+    MasterProviderStatusName: entity.MasterProviderStatusName,
+    MasterProviderStatusCode: entity.MasterProviderStatusCode,
+    OpenedOn: entity.OpenedOn,
+    DistrictAdministrativeName: entity.DistrictAdministrativeName,
     DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
     DistrictAdministrative_code: entity.DistrictAdministrative_code,
-    providerTypeName: entity.ProviderTypeName,
-    LegalName: entity.LegalName,
     IsOnAPAR: entity.IsOnAPAR
   };
 };
@@ -139,6 +162,7 @@ const mapOrganisationFromEntityWithNewPPFields = entity => {
   return {
     id: entity.id,
     name: entity.name,
+    LegalName: entity.LegalName,
     category,
     type: establishmentTypes.find(c => c.id === entity.Type),
     urn: entity.URN,
@@ -163,23 +187,21 @@ const mapOrganisationFromEntityWithNewPPFields = entity => {
     statutoryHighAge: entity.statutoryHighAge,
     legacyId: entity.legacyId,
     companyRegistrationNumber: entity.companyRegistrationNumber,
-    DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
-    DistrictAdministrative_code: entity.DistrictAdministrative_code,
-    providerTypeName: entity.ProviderTypeName,
-    ProviderProfileID: entity.ProviderProfileID,
-    OpenedOn: entity.OpenedOn,
-    SourceSystem: entity.SourceSystem,
+    providerTypeName: entity.providerTypeName,
+    ProviderTypeCode: entity.ProviderTypeCode,
     GIASProviderType: entity.GIASProviderType,
     PIMSProviderType: entity.PIMSProviderType,
     PIMSProviderTypeCode: entity.PIMSProviderTypeCode,
-    PIMSStatus: entity.PIMSStatus,
-    masteringCode: entity.masteringCode,
     PIMSStatusName: entity.PIMSStatusName,
-    GIASStatus: entity.GIASStatus,
+    pimsStatus: entity.pimsStatus,
     GIASStatusName: entity.GIASStatusName,
-    MasterProviderStatusCode: entity.MasterProviderStatusCode,
+    GIASStatus: entity.GIASStatus,
     MasterProviderStatusName: entity.MasterProviderStatusName,
-    LegalName: entity.LegalName,
+    MasterProviderStatusCode: entity.MasterProviderStatusCode,
+    OpenedOn: entity.OpenedOn,
+    DistrictAdministrativeName: entity.DistrictAdministrativeName,
+    DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
+    DistrictAdministrative_code: entity.DistrictAdministrative_code,
     IsOnAPAR: entity.IsOnAPAR
   };
 };
@@ -398,6 +420,7 @@ const listOfCategory = async(category, includeAssociations = false) => {
   return orgEntities.map(entity => ({
     id: entity.id,
     name: entity.name,
+    LegalName: entity.LegalName,
     category: organisationCategory.find(c => c.id === entity.Category),
     type: establishmentTypes.find(c => c.id === entity.Type),
     urn: entity.URN,
@@ -410,10 +433,21 @@ const listOfCategory = async(category, includeAssociations = false) => {
     address: entity.Address,
     legacyId: entity.legacyId,
     companyRegistrationNumber: entity.companyRegistrationNumber,
+    providerTypeName: entity.ProviderTypeName,
+    ProviderTypeCode: entity.ProviderTypeCode,
+    GIASProviderType: entity.GIASProviderType,
+    PIMSProviderType: entity.PIMSProviderType,
+    PIMSProviderTypeCode: entity.PIMSProviderTypeCode,
+    PIMSStatusName: entity.PIMSStatusName,
+    pimsStatus: entity.PIMSStatus,
+    GIASStatusName: entity.GIASStatusName,
+    GIASStatus: entity.GIASStatus,
+    MasterProviderStatusName: entity.MasterProviderStatusName,
+    MasterProviderStatusCode: entity.MasterProviderStatusCode,
+    OpenedOn: entity.OpenedOn,
+    DistrictAdministrativeName: entity.DistrictAdministrativeName,
     DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
     DistrictAdministrative_code: entity.DistrictAdministrative_code,
-    providerTypeName: entity.ProviderTypeName,
-    LegalName: entity.LegalName,
     IsOnAPAR: entity.IsOnAPAR
   }));
 };
@@ -448,6 +482,7 @@ const pagedListOfCategory = async(
     const organisation = {
       id: entity.id,
       name: entity.name,
+      LegalName: entity.LegalName,
       category: organisationCategory.find(c => c.id === entity.Category),
       type: establishmentTypes.find(c => c.id === entity.Type),
       urn: entity.URN,
@@ -467,10 +502,21 @@ const pagedListOfCategory = async(
       statutoryHighAge: entity.statutoryHighAge,
       legacyId: entity.legacyId,
       companyRegistrationNumber: entity.companyRegistrationNumber,
+      providerTypeName: entity.ProviderTypeName,
+      ProviderTypeCode: entity.ProviderTypeCode,
+      GIASProviderType: entity.GIASProviderType,
+      PIMSProviderType: entity.PIMSProviderType,
+      PIMSProviderTypeCode: entity.PIMSProviderTypeCode,
+      PIMSStatusName: entity.PIMSStatusName,
+      pimsStatus: entity.PIMSStatus,
+      GIASStatusName: entity.GIASStatusName,
+      GIASStatus: entity.GIASStatus,
+      MasterProviderStatusName: entity.MasterProviderStatusName,
+      MasterProviderStatusCode: entity.MasterProviderStatusCode,
+      OpenedOn: entity.OpenedOn,
+      DistrictAdministrativeName: entity.DistrictAdministrativeName,
       DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
       DistrictAdministrative_code: entity.DistrictAdministrative_code,
-      providerTypeName: entity.ProviderTypeName,
-      LegalName: entity.LegalName,
       IsOnAPAR: entity.IsOnAPAR
     };
 
@@ -565,7 +611,7 @@ const getOrganisationsForUserIncludingServices = async userId => {
         organisation: {
           id: userOrg.Organisation.getDataValue('id'),
           name: userOrg.Organisation.getDataValue('name'),
-          LegalName: userOrg.Organisation.getDataValue('LegalName'),
+          LegalName: userOrg.Organisation.getDataValue('LegalName') || undefined,
           urn: userOrg.Organisation.getDataValue('URN') || undefined,
           uid: userOrg.Organisation.getDataValue('UID') || undefined,
           ukprn: userOrg.Organisation.getDataValue('UKPRN') || undefined,
@@ -584,11 +630,38 @@ const getOrganisationsForUserIncludingServices = async userId => {
           ),
           companyRegistrationNumber:
             userOrg.Organisation.companyRegistrationNumber,
-          DistrictAdministrativeCode:
+          providerTypeName: 
+            userOrg.Organisation.getDataValue('providerTypeName') || undefined,
+          ProviderTypeCode: 
+            userOrg.Organisation.getDataValue('ProviderTypeCode') || undefined,
+          GIASProviderType: 
+            userOrg.Organisation.getDataValue('GIASProviderType') || undefined,
+          PIMSProviderType: 
+            userOrg.Organisation.getDataValue('PIMSProviderType') || undefined,
+          PIMSProviderTypeCode: 
+            userOrg.Organisation.getDataValue('PIMSProviderTypeCode') || undefined,
+          PIMSStatusName: 
+            userOrg.Organisation.getDataValue('PIMSStatusName') || undefined,
+          pimsStatus: 
+            userOrg.Organisation.getDataValue('pimsStatus') || undefined,
+          GIASStatusName: 
+            userOrg.Organisation.getDataValue('GIASStatusName') || undefined,
+          GIASStatus: 
+            userOrg.Organisation.getDataValue('GIASStatus') || undefined,
+          MasterProviderStatusName: 
+            userOrg.Organisation.getDataValue('MasterProviderStatusName') || undefined,
+          MasterProviderStatusCode: 
+            userOrg.Organisation.getDataValue('MasterProviderStatusCode') || undefined,
+          OpenedOn: 
+            userOrg.Organisation.getDataValue('OpenedOn') || undefined,
+          DistrictAdministrativeName: 
+            userOrg.Organisation.getDataValue('DistrictAdministrativeName') || undefined,
+          DistrictAdministrativeCode: 
             userOrg.Organisation.getDataValue('DistrictAdministrativeCode') || undefined,
-          DistrictAdministrative_code:
+          DistrictAdministrative_code: 
             userOrg.Organisation.getDataValue('DistrictAdministrative_code') || undefined,
-          IsOnAPAR: userOrg.Organisation.getDataValue('IsOnAPAR')
+          IsOnAPAR: 
+            userOrg.Organisation.getDataValue('IsOnAPAR') || undefined
         },
         role,
         approvers,

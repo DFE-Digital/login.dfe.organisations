@@ -12,6 +12,10 @@ const define = (db, schema) => {
       type: Sequelize.STRING,
       allowNull: false
     },
+    LegalName: {
+      type: Sequelize.STRING,
+      allowNull: true
+    },
     Category: {
       type: Sequelize.STRING,
       allowNull: true
@@ -73,6 +77,10 @@ const define = (db, schema) => {
       allowNull: true
     },
     companyRegistrationNumber: {
+      type: Sequelize.STRING,
+      allowNull: true
+    },
+    DistrictAdministrativeName: {
       type: Sequelize.STRING,
       allowNull: true
     },
@@ -141,10 +149,6 @@ const define = (db, schema) => {
       allowNull: true
     },
     MasterProviderStatusName: {
-      type: Sequelize.STRING,
-      allowNull: true
-    },
-    LegalName: {
       type: Sequelize.STRING,
       allowNull: true
     },
