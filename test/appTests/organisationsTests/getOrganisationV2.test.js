@@ -71,8 +71,22 @@ describe('when getting an organisation by id', () => {
       statutoryHighAge: 16,
       legacyId: null,
       companyRegistrationNumber: null,
-      DistrictAdministrativeCode: null,
-      DistrictAdministrative_code: null
+      providerTypeName: 'TEST VALUE',
+      ProviderTypeCode: 'TEST VALUE',
+      GIASProviderType: 'TEST VALUE',
+      PIMSProviderType: 'TEST VALUE',
+      PIMSProviderTypeCode: 'TEST VALUE',
+      PIMSStatusName: 'TEST VALUE',
+      pimsStatus: 'TEST VALUE',
+      GIASStatusName: 'TEST VALUE',
+      GIASStatus: 'TEST VALUE',
+      MasterProviderStatusName: 'TEST VALUE',
+      MasterProviderStatusCode: 'TEST VALUE',
+      OpenedOn: 'TEST VALUE',
+      DistrictAdministrativeName: 'TEST VALUE',
+      DistrictAdministrativeCode: 'TEST VALUE',
+      DistrictAdministrative_code: 'TEST VALUE',
+      IsOnAPAR: 'TEST VALUE'
     };
     getOrgById.mockReturnValue(org);
 
