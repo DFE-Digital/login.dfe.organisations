@@ -19,6 +19,7 @@ const getOrganisation = async (req, res) => {
     Status: organisation.status ? organisation.status.id : null,
     ClosedOn: organisation.closedOn,
     Address: organisation.address,
+    SourceSystem: organisation.SourceSystem,
     ProviderTypeName: organisation.providerTypeName,
     ProviderTypeCode: organisation.ProviderTypeCode,
     GIASProviderType: organisation.GIASProviderType,

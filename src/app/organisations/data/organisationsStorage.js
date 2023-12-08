@@ -55,7 +55,8 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.statutoryHighAge = organisation.statutoryHighAge;
   entity.legacyId = organisation.legacyId;
   entity.companyRegistrationNumber = organisation.companyRegistrationNumber;
-  entity.providerTypeName = organisation.providerTypeName;
+  entity.SourceSystem = organisation.SourceSystem;
+  entity.ProviderTypeName = organisation.providerTypeName;
   entity.ProviderTypeCode = organisation.ProviderTypeCode;
   entity.GIASProviderType = organisation.GIASProviderType;
   entity.PIMSProviderType = organisation.PIMSProviderType;
@@ -132,6 +133,7 @@ const mapOrganisationFromEntity = entity => {
     statutoryHighAge: entity.statutoryHighAge,
     legacyId: entity.legacyId,
     companyRegistrationNumber: entity.companyRegistrationNumber,
+    SourceSystem: entity.SourceSystem,
     providerTypeName: entity.ProviderTypeName,
     ProviderTypeCode: entity.ProviderTypeCode,
     GIASProviderType: entity.GIASProviderType,
@@ -187,6 +189,7 @@ const mapOrganisationFromEntityWithNewPPFields = entity => {
     statutoryHighAge: entity.statutoryHighAge,
     legacyId: entity.legacyId,
     companyRegistrationNumber: entity.companyRegistrationNumber,
+    SourceSystem: entity.SourceSystem,
     providerTypeName: entity.providerTypeName,
     ProviderTypeCode: entity.ProviderTypeCode,
     GIASProviderType: entity.GIASProviderType,
@@ -249,6 +252,7 @@ const list = async(includeAssociations = false) => {
           status: organisationStatus.find(c => c.id === serviceEntity.Status),
           closedOn: serviceEntity.ClosedOn,
           address: serviceEntity.Address,
+          SourceSystem: serviceEntity.SourceSystem,
           providerTypeName: serviceEntity.ProviderTypeName,
           ProviderTypeCode: serviceEntity.ProviderTypeCode,
           GIASProviderType: serviceEntity.GIASProviderType,
@@ -449,6 +453,7 @@ const listOfCategory = async(category, includeAssociations = false) => {
     address: entity.Address,
     legacyId: entity.legacyId,
     companyRegistrationNumber: entity.companyRegistrationNumber,
+    SourceSystem: entity.SourceSystem,
     providerTypeName: entity.ProviderTypeName,
     ProviderTypeCode: entity.ProviderTypeCode,
     GIASProviderType: entity.GIASProviderType,
@@ -518,6 +523,7 @@ const pagedListOfCategory = async(
       statutoryHighAge: entity.statutoryHighAge,
       legacyId: entity.legacyId,
       companyRegistrationNumber: entity.companyRegistrationNumber,
+      SourceSystem: entity.SourceSystem,
       providerTypeName: entity.ProviderTypeName,
       ProviderTypeCode: entity.ProviderTypeCode,
       GIASProviderType: entity.GIASProviderType,
@@ -646,6 +652,8 @@ const getOrganisationsForUserIncludingServices = async userId => {
           ),
           companyRegistrationNumber:
             userOrg.Organisation.companyRegistrationNumber,
+          SourceSystem:
+            userOrg.Organisation.getDataValue('SourceSystem') || undefined,
           providerTypeName:
             userOrg.Organisation.getDataValue('ProviderTypeName') || undefined,
           ProviderTypeCode:

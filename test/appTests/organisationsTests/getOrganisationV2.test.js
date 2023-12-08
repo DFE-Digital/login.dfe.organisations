@@ -71,6 +71,7 @@ describe('when getting an organisation by id', () => {
       statutoryHighAge: 16,
       legacyId: null,
       companyRegistrationNumber: null,
+      SourceSystem: 'TEST VALUE',
       providerTypeName: 'TEST VALUE',
       ProviderTypeCode: 'TEST VALUE',
       GIASProviderType: 'TEST VALUE',
