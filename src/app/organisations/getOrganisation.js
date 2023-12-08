@@ -8,6 +8,7 @@ const getOrganisation = async (req, res) => {
   return res.contentType('json').send({
     id: organisation.id,
     name: organisation.name,
+    LegalName: organisation.LegalName,
     Category: organisation.category ? organisation.category.id : null,
     Type: organisation.type ? organisation.type.id : null,
     URN: organisation.urn,
@@ -19,7 +20,21 @@ const getOrganisation = async (req, res) => {
     ClosedOn: organisation.closedOn,
     Address: organisation.address,
     ProviderTypeName: organisation.providerTypeName,
-    LegalName: organisation.LegalName,
+    ProviderTypeCode: organisation.ProviderTypeCode,
+    GIASProviderType: organisation.GIASProviderType,
+    PIMSProviderType: organisation.PIMSProviderType,
+    PIMSProviderTypeCode: organisation.PIMSProviderTypeCode,
+    PIMSStatusName: organisation.PIMSStatusName,
+    PIMSStatus: organisation.pimsStatus,
+    GIASStatusName: organisation.GIASStatusName,
+    GIASStatus: organisation.GIASStatus,
+    MasterProviderStatusName: organisation.MasterProviderStatusName,
+    MasterProviderStatusCode: organisation.MasterProviderStatusCode,
+    OpenedOn: organisation.OpenedOn,
+    DistrictAdministrativeName: organisation.DistrictAdministrativeName,
+    DistrictAdministrativeCode: organisation.DistrictAdministrativeCode,
+    DistrictAdministrative_code: organisation.DistrictAdministrative_code,
+    IsOnAPAR: organisation.IsOnAPAR
   });
 };
 

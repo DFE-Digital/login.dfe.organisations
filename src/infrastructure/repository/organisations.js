@@ -104,6 +104,10 @@ const define = (db, schema) => {
       type: Sequelize.STRING,
       allowNull: true
     },
+    ProviderTypeCode: {
+      type: Sequelize.INTEGER,
+      allowNull: true
+    },
     SourceSystem: {
       type: Sequelize.STRING,
       allowNull: true

@@ -61,7 +61,7 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.PIMSProviderType = organisation.PIMSProviderType;
   entity.PIMSProviderTypeCode = organisation.PIMSProviderTypeCode;
   entity.PIMSStatusName = organisation.PIMSStatusName;
-  entity.pimsStatus = organisation.pimsStatu;
+  entity.PIMSStatus = organisation.pimsStatus;
   entity.GIASStatusName = organisation.GIASStatusName;
   entity.GIASStatus = organisation.GIASStatus;
   entity.MasterProviderStatusName = organisation.MasterProviderStatusName;
@@ -193,7 +193,7 @@ const mapOrganisationFromEntityWithNewPPFields = entity => {
     PIMSProviderType: entity.PIMSProviderType,
     PIMSProviderTypeCode: entity.PIMSProviderTypeCode,
     PIMSStatusName: entity.PIMSStatusName,
-    pimsStatus: entity.pimsStatus,
+    pimsStatus: entity.PIMSStatus,
     GIASStatusName: entity.GIASStatusName,
     GIASStatus: entity.GIASStatus,
     MasterProviderStatusName: entity.MasterProviderStatusName,
@@ -236,6 +236,7 @@ const list = async(includeAssociations = false) => {
         const organisation = {
           id: serviceEntity.getDataValue('id'),
           name: serviceEntity.getDataValue('name'),
+          LegalName: serviceEntity.getDataValue('LegalName'),
           category: organisationCategory.find(
             c => c.id === serviceEntity.Category
           ),
@@ -248,7 +249,22 @@ const list = async(includeAssociations = false) => {
           status: organisationStatus.find(c => c.id === serviceEntity.Status),
           closedOn: serviceEntity.ClosedOn,
           address: serviceEntity.Address,
-          LegalName: serviceEntity.getDataValue('LegalName')
+          providerTypeName: serviceEntity.ProviderTypeName,
+          ProviderTypeCode: serviceEntity.ProviderTypeCode,
+          GIASProviderType: serviceEntity.GIASProviderType,
+          PIMSProviderType: serviceEntity.PIMSProviderType,
+          PIMSProviderTypeCode: serviceEntity.PIMSProviderTypeCode,
+          PIMSStatusName: serviceEntity.PIMSStatusName,
+          pimsStatus: serviceEntity.PIMSStatus,
+          GIASStatusName: serviceEntity.GIASStatusName,
+          GIASStatus: serviceEntity.GIASStatus,
+          MasterProviderStatusName: serviceEntity.MasterProviderStatusName,
+          MasterProviderStatusCode: serviceEntity.MasterProviderStatusCode,
+          OpenedOn: serviceEntity.OpenedOn,
+          DistrictAdministrativeName: serviceEntity.DistrictAdministrativeName,
+          DistrictAdministrativeCode: serviceEntity.DistrictAdministrativeCode,
+          DistrictAdministrative_code: serviceEntity.DistrictAdministrative_code,
+          IsOnAPAR: serviceEntity.IsOnAPAR
         };
 
         if (serviceEntity.associations) {
@@ -630,37 +646,37 @@ const getOrganisationsForUserIncludingServices = async userId => {
           ),
           companyRegistrationNumber:
             userOrg.Organisation.companyRegistrationNumber,
-          providerTypeName: 
-            userOrg.Organisation.getDataValue('providerTypeName') || undefined,
-          ProviderTypeCode: 
+          providerTypeName:
+            userOrg.Organisation.getDataValue('ProviderTypeName') || undefined,
+          ProviderTypeCode:
             userOrg.Organisation.getDataValue('ProviderTypeCode') || undefined,
-          GIASProviderType: 
+          GIASProviderType:
             userOrg.Organisation.getDataValue('GIASProviderType') || undefined,
-          PIMSProviderType: 
+          PIMSProviderType:
             userOrg.Organisation.getDataValue('PIMSProviderType') || undefined,
-          PIMSProviderTypeCode: 
+          PIMSProviderTypeCode:
             userOrg.Organisation.getDataValue('PIMSProviderTypeCode') || undefined,
-          PIMSStatusName: 
+          PIMSStatusName:
             userOrg.Organisation.getDataValue('PIMSStatusName') || undefined,
-          pimsStatus: 
-            userOrg.Organisation.getDataValue('pimsStatus') || undefined,
-          GIASStatusName: 
+          pimsStatus:
+            userOrg.Organisation.getDataValue('PIMSStatus') || undefined,
+          GIASStatusName:
             userOrg.Organisation.getDataValue('GIASStatusName') || undefined,
-          GIASStatus: 
+          GIASStatus:
             userOrg.Organisation.getDataValue('GIASStatus') || undefined,
-          MasterProviderStatusName: 
+          MasterProviderStatusName:
             userOrg.Organisation.getDataValue('MasterProviderStatusName') || undefined,
-          MasterProviderStatusCode: 
+          MasterProviderStatusCode:
             userOrg.Organisation.getDataValue('MasterProviderStatusCode') || undefined,
-          OpenedOn: 
+          OpenedOn:
             userOrg.Organisation.getDataValue('OpenedOn') || undefined,
-          DistrictAdministrativeName: 
+          DistrictAdministrativeName:
             userOrg.Organisation.getDataValue('DistrictAdministrativeName') || undefined,
-          DistrictAdministrativeCode: 
+          DistrictAdministrativeCode:
             userOrg.Organisation.getDataValue('DistrictAdministrativeCode') || undefined,
-          DistrictAdministrative_code: 
+          DistrictAdministrative_code:
             userOrg.Organisation.getDataValue('DistrictAdministrative_code') || undefined,
-          IsOnAPAR: 
+          IsOnAPAR:
             userOrg.Organisation.getDataValue('IsOnAPAR') || undefined
         },
         role,
