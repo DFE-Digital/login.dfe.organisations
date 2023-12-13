@@ -49,6 +49,7 @@ describe('when listing user organisations', () => {
             address: null,
             legacyId: '1234',
             companyRegistrationNumber: null,
+            SourceSystem: 'TEST VALUE',
             providerTypeName: 'TEST VALUE',
             ProviderTypeCode: 'TEST VALUE',
             GIASProviderType: 'TEST VALUE',
