@@ -190,7 +190,7 @@ const mapOrganisationFromEntityWithNewPPFields = entity => {
     legacyId: entity.legacyId,
     companyRegistrationNumber: entity.companyRegistrationNumber,
     SourceSystem: entity.SourceSystem,
-    providerTypeName: entity.providerTypeName,
+    providerTypeName: entity.ProviderTypeName,
     ProviderTypeCode: entity.ProviderTypeCode,
     GIASProviderType: entity.GIASProviderType,
     PIMSProviderType: entity.PIMSProviderType,
