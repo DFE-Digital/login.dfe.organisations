@@ -34,6 +34,7 @@ const mapOrganisationEntity = async (entity, laCache = undefined) => {
   return {
     id: entity.id,
     name: entity.name,
+    LegalName: entity.LegalName,
     category: organisationCategory.find(c => c.id === entity.Category),
     type: establishmentTypes.find(c => c.id === entity.Type),
     urn: entity.URN,
@@ -50,8 +51,23 @@ const mapOrganisationEntity = async (entity, laCache = undefined) => {
     phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
     statutoryLowAge: entity.statutoryLowAge,
     statutoryHighAge: entity.statutoryHighAge,
+    SourceSystem: entity.SourceSystem,
     providerTypeName: entity.ProviderTypeName,
-    LegalName: entity.LegalName,
+    ProviderTypeCode: entity.ProviderTypeCode,
+    GIASProviderType: entity.GIASProviderType,
+    PIMSProviderType: entity.PIMSProviderType,
+    PIMSProviderTypeCode: entity.PIMSProviderTypeCode,
+    PIMSStatusName: entity.PIMSStatusName,
+    pimsStatus: entity.PIMSStatus,
+    GIASStatusName: entity.GIASStatusName,
+    GIASStatus: entity.GIASStatus,
+    MasterProviderStatusName: entity.MasterProviderStatusName,
+    MasterProviderStatusCode: entity.MasterProviderStatusCode,
+    OpenedOn: entity.OpenedOn,
+    DistrictAdministrativeName: entity.DistrictAdministrativeName,
+    DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
+    DistrictAdministrative_code: entity.DistrictAdministrative_code,
+    IsOnAPAR: entity.IsOnAPAR
   };
 };
 
@@ -85,6 +101,7 @@ const getOrganisationById = async (organisationId) => {
   return {
     id: entity.id,
     name: entity.name,
+    LegalName: entity.LegalName,
     category: organisationCategory.find(c => c.id === entity.Category),
     type: establishmentTypes.find(c => c.id === entity.Type),
     urn: entity.URN,
@@ -101,8 +118,23 @@ const getOrganisationById = async (organisationId) => {
     phaseOfEducation: phasesOfEducation.find(c => c.id === entity.phaseOfEducation),
     statutoryLowAge: entity.statutoryLowAge,
     statutoryHighAge: entity.statutoryHighAge,
+    SourceSystem: entity.SourceSystem,
     providerTypeName: entity.ProviderTypeName,
-    LegalName: entity.LegalName,
+    ProviderTypeCode: entity.ProviderTypeCode,
+    GIASProviderType: entity.GIASProviderType,
+    PIMSProviderType: entity.PIMSProviderType,
+    PIMSProviderTypeCode: entity.PIMSProviderTypeCode,
+    PIMSStatusName: entity.PIMSStatusName,
+    PIMSStatus: entity.PIMSStatus,
+    GIASStatusName: entity.GIASStatusName,
+    GIASStatus: entity.GIASStatus,
+    MasterProviderStatusName: entity.MasterProviderStatusName,
+    MasterProviderStatusCode: entity.MasterProviderStatusCode,
+    OpenedOn: entity.OpenedOn,
+    DistrictAdministrativeName: entity.DistrictAdministrativeName,
+    DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
+    DistrictAdministrative_code: entity.DistrictAdministrative_code,
+    IsOnAPAR: entity.IsOnAPAR
   };
 };
 

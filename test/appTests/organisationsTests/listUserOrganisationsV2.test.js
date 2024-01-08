@@ -1,5 +1,5 @@
 jest.mock('./../../../src/app/organisations/data/organisationsStorage', () => ({
-  getPagedListOfUsersV2: jest.fn(),
+  getPagedListOfUsersV2: jest.fn()
 }));
 
 const { getPagedListOfUsersV2 } = require('./../../../src/app/organisations/data/organisationsStorage');
@@ -9,11 +9,11 @@ const res = {
   json: jest.fn(),
   status: jest.fn(),
   send: jest.fn(),
-  mockResetAll: function () {
+  mockResetAll: function() {
     this.json.mockReset().mockReturnValue(this);
     this.status.mockReset().mockReturnValue(this);
     this.send.mockReset().mockReturnValue(this);
-  },
+  }
 };
 
 describe('when listing user organisations', () => {
@@ -22,7 +22,7 @@ describe('when listing user organisations', () => {
 
   beforeEach(() => {
     req = {
-      query: {},
+      query: {}
     };
 
     res.mockResetAll();
@@ -36,7 +36,7 @@ describe('when listing user organisations', () => {
             name: 'organisation name',
             category: {
               id: '051',
-              name: 'Further Education',
+              name: 'Further Education'
             },
             urn: null,
             uid: null,
@@ -44,26 +44,41 @@ describe('when listing user organisations', () => {
             ukprn: '12345',
             status: {
               id: 1,
-              name: 'Open',
+              name: 'Open'
             },
             address: null,
             legacyId: '1234',
             companyRegistrationNumber: null,
-            DistrictAdministrativeCode: null,
-            DistrictAdministrative_code: null,
+            SourceSystem: 'TEST VALUE',
+            providerTypeName: 'TEST VALUE',
+            ProviderTypeCode: 'TEST VALUE',
+            GIASProviderType: 'TEST VALUE',
+            PIMSProviderType: 'TEST VALUE',
+            PIMSProviderTypeCode: 'TEST VALUE',
+            PIMSStatusName: 'TEST VALUE',
+            pimsStatus: 'TEST VALUE',
+            GIASStatusName: 'TEST VALUE',
+            GIASStatus: 'TEST VALUE',
+            MasterProviderStatusName: 'TEST VALUE',
+            MasterProviderStatusCode: 'TEST VALUE',
+            OpenedOn: 'TEST VALUE',
+            DistrictAdministrativeName: 'TEST VALUE',
+            DistrictAdministrativeCode: 'TEST VALUE',
+            DistrictAdministrative_code: 'TEST VALUE',
+            IsOnAPAR: 'TEST VALUE'
           },
           role: {
             id: 0,
-            name: 'End user',
+            name: 'End user'
           },
           status: 1,
           numericIdentifier: '84',
-          textIdentifier: '77fffdd',
-        },
+          textIdentifier: '77fffdd'
+        }
       ],
       page: 1,
       numberOfPages: 2,
-      totalNumberOfRecords: 20,
+      totalNumberOfRecords: 20
     };
     getPagedListOfUsersV2.mockReset().mockReturnValue(pageOfUsers);
   });
@@ -75,14 +90,14 @@ describe('when listing user organisations', () => {
     expect(res.json).toHaveBeenCalledWith(pageOfUsers);
   });
 
-  it('then it should get page of user organisations from repository using defaults if no options provided', async () => {
+  it('then it should get page of user organisations from repository using defaults if no options provided', async() => {
     await listUserOrganisationsV2(req, res);
 
     expect(getPagedListOfUsersV2).toHaveBeenCalledTimes(1);
     expect(getPagedListOfUsersV2).toHaveBeenCalledWith(1, 100, undefined, [], []);
   });
 
-  it('then it should get page of user organisations from repository using provided options', async () => {
+  it('then it should get page of user organisations from repository using provided options', async() => {
     req.query = {
       page: 2,
       pageSize: 10,
