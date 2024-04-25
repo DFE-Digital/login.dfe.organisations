@@ -1,15 +1,13 @@
 const config = require('./../config')();
-const rp = require('request-promise');
 const { URL } = require('url');
 
 const getFileFromBlob = async (path) => {
   const containerUri = new URL(config.gias.params.containerUrl);
   const uri = `${containerUri.protocol}//${containerUri.host}${containerUri.pathname}/${path}${containerUri.search}`;
-  return await rp({
+  const response = await fetch(uri, {
     method: 'GET',
-    uri,
-    json: false,
   });
+  return await response.text();
 };
 
 const getEstablishmentsFile = async (includeLinks = false) => {
