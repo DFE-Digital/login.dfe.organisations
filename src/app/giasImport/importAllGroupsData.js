@@ -13,7 +13,6 @@ const {
   deleteOrganisation,
   removeAssociations } = require('./../organisations/data/organisationsStorage');
 const uuid = require('uuid');
-const rp = require('request-promise');
 
 const isGroupImportable = (group) => {
   const importableTypes = [
@@ -274,11 +273,10 @@ const getAllGroupsDataFileForDate = async (date) => {
   const uri = `${config.gias.allGroupsDataUrl}`.replace('#date#', date);
   logger.info(`Reading the allGroupsDataUrl ${uri}`);
 
-  return await rp({
+  const response = await fetch(uri, {
     method: 'GET',
-    uri,
-    json: false,
   });
+  return await response.text();
 };
 
 const importAllGroupsData = async () => {
