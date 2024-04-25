@@ -1,19 +1,17 @@
 const config = require('./../config')();
-const rp = require('login.dfe.request-promise-retry');
+const { fetchApi } = require('login.dfe.async-retry');
 const jwtStrategy = require('login.dfe.jwt-strategies');
 
 const getUserById = async (uid, correlationId) => {
   const token = await jwtStrategy(config.directories.service).getBearerToken();
 
   try {
-    const user = await rp({
+    const user = await fetchApi(`${config.directories.service.url}/users/${uid}`, {
       method: 'GET',
-      uri: `${config.directories.service.url}/users/${uid}`,
       headers: {
         authorization: `bearer ${token}`,
         'x-correlation-id': correlationId,
       },
-      json: true,
     });
 
     return user;
@@ -32,14 +30,12 @@ const getUsersByIds = async (ids) => {
   }
   const token = await jwtStrategy(config.directories.service).getBearerToken();
   try {
-    const users = await rp({
+    const users = await fetchApi(`${config.directories.service.url}/users/by-ids`, {
       method: 'POST',
-      uri: `${config.directories.service.url}/users/by-ids`,
       body: { ids },
       headers: {
         authorization: `bearer ${token}`,
       },
-      json: true,
     });
     return users;
   } catch (e) {
