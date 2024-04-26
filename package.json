@@ -14,7 +14,7 @@
     "helmet": "^7.1.0",
     "lodash": "^4.17.21",
     "login.dfe.api.auth": "github:DFE-Digital/login.dfe.api.auth#v2.3.0",
-    "login.dfe.async-retry": "github:DFE-Digital/login.dfe.async-retry#v2.0.1",
+    "login.dfe.async-retry": "github:DFE-Digital/login.dfe.async-retry#v2.0.3",
     "login.dfe.audit.transporter": "^4.0.1",
     "login.dfe.config.schema.common": "github:DFE-Digital/login.dfe.config.schema.common#v2.1.4",
     "login.dfe.express-error-handling": "github:DFE-Digital/login.dfe.express-error-handling#v3.0.1",
