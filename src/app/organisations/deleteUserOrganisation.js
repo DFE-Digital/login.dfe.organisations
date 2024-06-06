@@ -1,11 +1,31 @@
-const { deleteUserOrganisation } = require('./data/organisationsStorage');
+const { deleteUserOrganisation, getServiceAndSubServiceReqForOrgs, updateUserServSubServRequest } = require('./data/organisationsStorage');
 
 const deleteOrg = async (req, res) => {
-  const organisationId = req.params.id;
-  const userId = req.params.uid;
+  const correlationId = req.get('x-correlation-id');
+  const { id: orgId, uid: userId } = req.params;
 
-  await deleteUserOrganisation(organisationId, userId, req.get('x-correlation-id'));
-  return res.status(204).send();
+  try {
+    // Retrieve any service requests that the user has for this organisation
+    const requests = await getServiceAndSubServiceReqForOrgs([orgId]);
+    const requestsForUser = requests.filter(request => request.user_id === userId);
+
+    await Promise.all(
+      requestsForUser.map(async (request) => {
+        request.status = -1;
+        request.reason = 'User has left organisation.';
+        request.actioned_reason = 'Rejected';
+        await updateUserServSubServRequest(request.id, request);
+      })
+    );
+
+    // Delete the user organisation mapping
+    await deleteUserOrganisation(orgId, userId, correlationId);
+
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error processing user requests for deletion:', { error, correlationId, orgId, userId });
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 };
 
 module.exports = deleteOrg;
