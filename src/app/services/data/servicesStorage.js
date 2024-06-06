@@ -772,6 +772,5 @@ module.exports = {
   deleteUserService,
   getAllUsersOfService,
   getUsersOfServiceByUserIds
-  
 };
 
