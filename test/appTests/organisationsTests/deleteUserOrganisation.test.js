@@ -1,6 +1,11 @@
 const httpMocks = require('node-mocks-http');
+const logger = require('./../../../src/infrastructure/logger');
 const { deleteUserOrganisation, getServiceAndSubServiceReqForOrgs, updateUserServSubServRequest } = require('./../../../src/app/organisations/data/organisationsStorage');
 const deleteUserOrg = require('./../../../src/app/organisations/deleteUserOrganisation');
+
+jest.mock('./../../../src/infrastructure/logger', () => ({
+  error: jest.fn()
+}));
 
 jest.mock('./../../../src/app/organisations/data/organisationsStorage', () => ({
   deleteUserOrganisation: jest.fn(),
@@ -31,10 +36,32 @@ describe('when deleting a users access to an organisation', () => {
         uid: 'user1',
       },
     });
+    next = jest.fn();
+
     req.get = jest.fn().mockReturnValue('correlation-id');
     res = httpMocks.createResponse();
 
     jest.clearAllMocks();
+  });
+
+  it('should return 400 if orgId is missing', async () => {
+    req.params.id = undefined;
+
+    await deleteUserOrg(req, res, next);
+
+    expect(logger.error).toHaveBeenCalledWith('Missing required parameter: orgId', { correlationId: 'correlation-id' });
+    expect(res.statusCode).toBe(400);
+    expect(res._getData()).toEqual("Request parameter orgId must be provided");
+  });
+
+  it('should return 400 if userId is missing', async () => {
+    req.params.uid = undefined;
+
+    await deleteUserOrg(req, res, next);
+
+    expect(logger.error).toHaveBeenCalledWith('Missing required parameter: userId', { correlationId: 'correlation-id' });
+    expect(res.statusCode).toBe(400);
+    expect(res._getData()).toEqual("Request parameter userId must be provided");
   });
 
   it('should delete user access in storage', async () => {
