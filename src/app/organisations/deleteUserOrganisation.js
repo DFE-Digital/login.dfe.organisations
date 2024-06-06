@@ -1,3 +1,4 @@
+const logger = require('../../infrastructure/logger');
 const { deleteUserOrganisation, getServiceAndSubServiceReqForOrgs, updateUserServSubServRequest } = require('./data/organisationsStorage');
 
 const deleteOrg = async (req, res) => {
@@ -6,6 +7,12 @@ const deleteOrg = async (req, res) => {
 
   try {
     // Retrieve any service requests that the user has for this organisation
+    if (!orgId || !userId) {
+      const missingParam = !orgId ? 'orgId' : 'userId';
+      logger.error(`Missing required parameter: ${missingParam}`, { correlationId });
+      return res.status(400).send(`Request parameter ${missingParam} must be provided`);
+    }
+
     const requests = await getServiceAndSubServiceReqForOrgs(JSON.stringify([orgId]));
     const requestsForUser = requests.filter(request => request.user_id === userId);
 
