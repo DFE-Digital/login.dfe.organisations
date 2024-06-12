@@ -6,7 +6,7 @@ const deleteOrg = async (req, res) => {
 
   try {
     // Retrieve any service requests that the user has for this organisation
-    const requests = await getServiceAndSubServiceReqForOrgs([orgId]);
+    const requests = await getServiceAndSubServiceReqForOrgs(JSON.stringify([orgId]));
     const requestsForUser = requests.filter(request => request.user_id === userId);
 
     await Promise.all(

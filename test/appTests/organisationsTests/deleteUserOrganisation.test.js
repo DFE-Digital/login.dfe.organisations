@@ -63,7 +63,7 @@ describe('when deleting a users access to an organisation', () => {
 
     await deleteUserOrg(req, res);
 
-    expect(getServiceAndSubServiceReqForOrgs).toHaveBeenCalledWith(['org1']);
+    expect(getServiceAndSubServiceReqForOrgs).toHaveBeenCalledWith("[\"org1\"]");
     expect(updateUserServSubServRequest).toHaveBeenCalledWith('request-id-1', {
       id: "request-id-1",
       user_id: "user1",
@@ -84,7 +84,7 @@ describe('when deleting a users access to an organisation', () => {
 
     await deleteUserOrg(req, res);
 
-    expect(getServiceAndSubServiceReqForOrgs).toHaveBeenCalledWith(['org1']);
+    expect(getServiceAndSubServiceReqForOrgs).toHaveBeenCalledWith("[\"org1\"]");
     expect(updateUserServSubServRequest).not.toHaveBeenCalled();
     expect(deleteUserOrganisation).toHaveBeenCalledWith('org1', 'user1', 'correlation-id');
     expect(res.statusCode).toBe(204);
@@ -97,7 +97,7 @@ describe('when deleting a users access to an organisation', () => {
 
     await deleteUserOrg(req, res);
 
-    expect(getServiceAndSubServiceReqForOrgs).toHaveBeenCalledWith(['org1']);
+    expect(getServiceAndSubServiceReqForOrgs).toHaveBeenCalledWith("[\"org1\"]");
     expect(res.statusCode).toBe(500);
     expect(res._getData()).toEqual('{"error":"Internal Server Error"}');
   });
