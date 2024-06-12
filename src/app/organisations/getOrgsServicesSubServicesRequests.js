@@ -12,7 +12,3 @@ const getOrgsServicesSubServicesRequests = async(req, res) => {
 };
 
 module.exports = getOrgsServicesSubServicesRequests;
-
-// module.exports = {
-//   getOrgsServicesSubServicesRequests
-// };
