@@ -7,7 +7,7 @@
       "name": "Launch Orgs",
       "skipFiles": ["<node_internals>/**"],
       "env": {
-        "settings": "${workspaceFolder}/config/login.dfe.organisations.local.json"
+        "settings": "${workspaceFolder}/config/local-config.json"
       },
       "program": "${workspaceFolder}/src/index.js",
       "outputCapture": "std"
