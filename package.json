@@ -31,7 +31,7 @@
     "pg-hstore": "^2.3.2",
     "sequelize": "^6.3.3",
     "simpl-schema": "^3.4.1",
-    "tedious": "^16.6.0",
+    "tedious": "^18.2.1",
     "unzipper": "^0.10.5",
     "uuid": "^9.0.1",
     "winston": "^3.11.0",
