@@ -30,7 +30,7 @@ const deleteOrg = async (req, res) => {
 
     res.status(204).send();
   } catch (error) {
-    console.error('Error processing user requests for deletion:', { error, correlationId, orgId, userId });
+    logger.error('Error processing user requests for deletion:', { error, correlationId, orgId, userId });
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };

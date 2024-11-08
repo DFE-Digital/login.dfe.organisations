@@ -1050,7 +1050,6 @@ const getAllOrgsByUpin = async(upin, category) => {
       };
     }
     const orgEntities = await organisations.findAll(query);
-    console.log('orgEntities', orgEntities);
     return orgEntities.map(mapOrganisationFromEntity);
   } catch (e) {
     logger.error(`error getting organisation by UPIN - ${e.message}`, e);

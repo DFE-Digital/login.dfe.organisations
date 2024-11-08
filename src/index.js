@@ -37,7 +37,7 @@ app.use(helmet({
   }
 }));
 
-logger.info('set helmet policy defaults');
+logger.debug('set helmet policy defaults');
 
 // Setting helmet Content Security Policy
 const scriptSources = ['\'self\'', '\'unsafe-inline\'', '\'unsafe-eval\'', '*.localhost', '*.signin.education.gov.uk', 'https://code.jquery.com', 'https://rawgit.com'];
@@ -59,13 +59,13 @@ app.use(helmet.contentSecurityPolicy({
   }
 }));
 
-logger.info('Set helmet filters');
+logger.debug('Set helmet filters');
 
 app.use(helmet.xssFilter());
 app.use(helmet.frameguard('false'));
 app.use(helmet.ieNoOpen());
 
-logger.info('helmet setup complete');
+logger.debug('helmet setup complete');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
