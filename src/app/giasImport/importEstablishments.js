@@ -90,7 +90,7 @@ const addEstablishment = async (importing) => {
       saved: true
     };
   } catch (e) {
-    logger.info(`Error adding establishment ${importing.urn} - ${e.message}`);
+    logger.error(`Error adding establishment ${importing.urn} - ${e.message}`);
   }
 };
 const hasBeenUpdated = (updated, existing) => {
@@ -124,7 +124,7 @@ const deleteEstablishment = async (existing) => {
 
   if (!hasUsers && !hasUserRequests) {
     try {
-      // try to delete the organisation if there no user attached. 
+      // try to delete the organisation if there no user attached.
       // Exception thrown when there are child data. Log the information and continue with the next establishment from the GIAS Sync.
       result = {
         organisationId: existing.id,
