@@ -1,6 +1,6 @@
 {
   "name": "login.dfe.organisations",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "dependencies": {
     "agentkeepalive": "^4.5.0",
     "applicationinsights": "^2.9.0",
