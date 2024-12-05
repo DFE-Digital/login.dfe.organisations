@@ -1,6 +1,22 @@
 {
   "name": "login.dfe.organisations",
   "version": "4.0.0",
+  "engines": {
+    "node": "18.x.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DFE-Digital/login.dfe.organisations.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "setup": "./generate-certs.sh",
+    "web": "settings=login.dfe.organisation.dev.json node src/web.js ",
+    "dev": "settings='./config/login.dfe.organisations.dev.json' nodemon src/web.js ",
+    "format": "prettier . --write",
+    "test": "jest --coverage"
+  },
   "dependencies": {
     "agentkeepalive": "^4.5.0",
     "applicationinsights": "^2.9.0",
@@ -51,24 +67,5 @@
     "nodemon": "^3.0.1",
     "prettier": "^3.4.2",
     "sequelize-mock": "^0.10.2"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/DFE-Digital/login.dfe.organisations.git"
-  },
-  "author": "",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/DFE-Digital/login.dfe.organisations/issues"
-  },
-  "scripts": {
-    "setup": "./generate-certs.sh",
-    "web": "settings=login.dfe.organisation.dev.json node src/web.js ",
-    "dev": "settings='./config/login.dfe.organisations.dev.json' nodemon src/web.js ",
-    "format": "prettier . --write",
-    "test": "jest --coverage"
-  },
-  "engines": {
-    "node": "18.x.x"
   }
 }
