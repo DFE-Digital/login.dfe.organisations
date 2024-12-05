@@ -1,7 +1,7 @@
-const logger = require('../../infrastructure/logger');
+const logger = require("../../infrastructure/logger");
 const {
-  pagedListOfAllRequestTypesForOrg
-} = require('./data/organisationsStorage');
+  pagedListOfAllRequestTypesForOrg,
+} = require("./data/organisationsStorage");
 
 const extractPageNumber = (req) => {
   if (!req.query || req.query.page === undefined) {
@@ -20,25 +20,28 @@ const extractPageSize = (req) => {
   return isNaN(pageSize) ? 0 : pageSize;
 };
 
-const getAllRequestsTypesAssociatedWithOrgs = async(req, res) => {
+const getAllRequestsTypesAssociatedWithOrgs = async (req, res) => {
   const pageNumber = extractPageNumber(req);
   if (pageNumber < 1) {
-    return res.status(400).send('Page must be greater than 0');
+    return res.status(400).send("Page must be greater than 0");
   }
 
   const pageSize = extractPageSize(req);
   if (pageSize < 1) {
-    return res.status(400).send('Page size must be greater than 0');
+    return res.status(400).send("Page size must be greater than 0");
   } else if (pageSize > 500) {
-    return res.status(400).send('Page size must not be greater than 500');
+    return res.status(400).send("Page size must not be greater than 500");
   }
   try {
     const orgRequests = await pagedListOfAllRequestTypesForOrg(
-      req.params.orgIds, pageNumber, pageSize
+      req.params.orgIds,
+      pageNumber,
+      pageSize,
     );
     return res.status(200).send(orgRequests);
   } catch (e) {
-    logger.error(`Error getting organisation, service and sub-service access requests for organisations ${req.params.orgIds} - ${e.message}`
+    logger.error(
+      `Error getting organisation, service and sub-service access requests for organisations ${req.params.orgIds} - ${e.message}`,
     );
     return res.status(500).send();
   }

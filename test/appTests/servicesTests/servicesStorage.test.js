@@ -1,11 +1,11 @@
-jest.mock('./../../../src/infrastructure/config');
-jest.mock('assert');
-jest.mock('./../../../src/infrastructure/logger', () => {
+jest.mock("./../../../src/infrastructure/config");
+jest.mock("assert");
+jest.mock("./../../../src/infrastructure/logger", () => {
   return {};
 });
 
-describe('When using servicesStorage Data for a user', () => {
-  describe('and initialising the class', () => {
+describe("When using servicesStorage Data for a user", () => {
+  describe("and initialising the class", () => {
     let assertion;
     let config;
     let configStub;
@@ -15,59 +15,59 @@ describe('When using servicesStorage Data for a user', () => {
       jest.resetModules();
 
       assertion = false;
-      assert = require('assert');
-      assert.mockImplementation(paramVal => {
-        if (paramVal === '') {
+      assert = require("assert");
+      assert.mockImplementation((paramVal) => {
+        if (paramVal === "") {
           assertion = true;
         }
       });
     });
 
-    it('then if the username in config is not supplied the assert is called', () => {
-      config = require('./../../../src/infrastructure/config/index');
+    it("then if the username in config is not supplied the assert is called", () => {
+      config = require("./../../../src/infrastructure/config/index");
       configStub = jest.fn().mockImplementation(() => ({
         database: {
-          username: '',
-          password: '123ABVF',
-          host: 'hostname',
-          dialect: 'postgres'
-        }
+          username: "",
+          password: "123ABVF",
+          host: "hostname",
+          dialect: "postgres",
+        },
       }));
       config.mockImplementation(configStub);
 
-      require('./../../../src/app/services/data/servicesStorage');
+      require("./../../../src/app/services/data/servicesStorage");
 
       expect(assertion).toBe(true);
     });
-    it('then if the password in config is not supplied the assert is called', () => {
-      config = require('./../../../src/infrastructure/config/index');
+    it("then if the password in config is not supplied the assert is called", () => {
+      config = require("./../../../src/infrastructure/config/index");
       configStub = jest.fn().mockImplementation(() => ({
         database: {
-          username: 'username',
-          password: '',
-          host: 'hostname',
-          dialect: 'postgres'
-        }
+          username: "username",
+          password: "",
+          host: "hostname",
+          dialect: "postgres",
+        },
       }));
       config.mockImplementation(configStub);
 
-      require('./../../../src/app/services/data/servicesStorage');
+      require("./../../../src/app/services/data/servicesStorage");
 
       expect(assertion).toBe(true);
     });
-    it('then if the host in config is not supplied the assert is called', () => {
-      config = require('./../../../src/infrastructure/config/index');
+    it("then if the host in config is not supplied the assert is called", () => {
+      config = require("./../../../src/infrastructure/config/index");
       configStub = jest.fn().mockImplementation(() => ({
         database: {
-          username: 'username',
-          password: '123ABVF',
-          host: '',
-          dialect: 'postgres'
-        }
+          username: "username",
+          password: "123ABVF",
+          host: "",
+          dialect: "postgres",
+        },
       }));
       config.mockImplementation(configStub);
 
-      require('./../../../src/app/services/data/servicesStorage');
+      require("./../../../src/app/services/data/servicesStorage");
 
       expect(assertion).toBe(true);
     });

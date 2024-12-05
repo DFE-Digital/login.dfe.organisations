@@ -1,18 +1,22 @@
-const csv = require('csv');
-const moment = require('moment');
+const csv = require("csv");
+const moment = require("moment");
 
 const parseCsv = async (data) => {
   return new Promise((resolve, reject) => {
     try {
-      csv.parse(data, {
-        auto_parse: false,
-      }, (err, rows) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(rows);
-        }
-      });
+      csv.parse(
+        data,
+        {
+          auto_parse: false,
+        },
+        (err, rows) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(rows);
+          }
+        },
+      );
     } catch (e) {
       reject(e);
     }
@@ -20,19 +24,49 @@ const parseCsv = async (data) => {
 };
 const getColumnIndices = (headerRow) => {
   const columns = [
-    { name: 'uid', label: 'Group UID', required: true, index: -1 },
-    { name: 'name', label: 'Group Name', required: true, index: -1 },
-    { name: 'companyRegistrationNumber', label: 'Companies House Number', required: true, index: -1 },
-    { name: 'type', label: 'Group Type (code)', required: true, index: -1 },
-    { name: 'status', label: 'Group Status (code)', required: true, index: -1 },
-    { name: 'closedOn', label: 'Closed Date', required: false, index: -1 },
-    { name: 'address1', label: 'Group Contact Street', required: false, index: -1 },
-    { name: 'address2', label: 'Group Contact Locality', required: false, index: -1 },
-    { name: 'address3', label: 'Group Contact Address 3', required: false, index: -1 },
-    { name: 'town', label: 'Group Contact Town', required: false, index: -1 },
-    { name: 'county', label: 'Group Contact County', required: false, index: -1 },
-    { name: 'postCode', label: 'Group Contact Postcode', required: false, index: -1 },
-    { name: 'ukprn', label: 'UKPRN', required: false, index: -1 },
+    { name: "uid", label: "Group UID", required: true, index: -1 },
+    { name: "name", label: "Group Name", required: true, index: -1 },
+    {
+      name: "companyRegistrationNumber",
+      label: "Companies House Number",
+      required: true,
+      index: -1,
+    },
+    { name: "type", label: "Group Type (code)", required: true, index: -1 },
+    { name: "status", label: "Group Status (code)", required: true, index: -1 },
+    { name: "closedOn", label: "Closed Date", required: false, index: -1 },
+    {
+      name: "address1",
+      label: "Group Contact Street",
+      required: false,
+      index: -1,
+    },
+    {
+      name: "address2",
+      label: "Group Contact Locality",
+      required: false,
+      index: -1,
+    },
+    {
+      name: "address3",
+      label: "Group Contact Address 3",
+      required: false,
+      index: -1,
+    },
+    { name: "town", label: "Group Contact Town", required: false, index: -1 },
+    {
+      name: "county",
+      label: "Group Contact County",
+      required: false,
+      index: -1,
+    },
+    {
+      name: "postCode",
+      label: "Group Contact Postcode",
+      required: false,
+      index: -1,
+    },
+    { name: "ukprn", label: "UKPRN", required: false, index: -1 },
   ];
   const columnIndices = {};
 
@@ -44,7 +78,9 @@ const getColumnIndices = (headerRow) => {
       }
     }
     if (column.required && column.index === -1) {
-      throw new Error(`Column ${column.name} (label: ${column.label}) is required but not found`);
+      throw new Error(
+        `Column ${column.name} (label: ${column.label}) is required but not found`,
+      );
     }
     columnIndices[column.name] = column.index;
   }
@@ -54,13 +90,14 @@ const getColumnIndices = (headerRow) => {
 const mapRow = (row, columnIndices) => {
   let closedOn = null;
   if (row[columnIndices.closedOn]) {
-    closedOn = moment.utc(row[columnIndices.closedOn], 'DD-MM-YYYY').toDate();
+    closedOn = moment.utc(row[columnIndices.closedOn], "DD-MM-YYYY").toDate();
   }
 
   return {
     uid: row[columnIndices.uid] || null,
     name: row[columnIndices.name] || null,
-    companyRegistrationNumber: row[columnIndices.companyRegistrationNumber] || null,
+    companyRegistrationNumber:
+      row[columnIndices.companyRegistrationNumber] || null,
     type: row[columnIndices.type] || null,
     status: row[columnIndices.status] || null,
     closedOn,
@@ -84,7 +121,7 @@ const parse = async (data) => {
 
   const columnIndices = getColumnIndices(rows[0]);
 
-  return rows.slice(1).map(row => mapRow(row, columnIndices));
+  return rows.slice(1).map((row) => mapRow(row, columnIndices));
 };
 
 module.exports = {

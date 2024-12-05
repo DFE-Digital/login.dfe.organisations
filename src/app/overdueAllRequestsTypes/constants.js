@@ -1,13 +1,13 @@
 const requestTypes = {
-  ORGANISATION_ACCESS: 'organisation_access',
-  SERVICE_SUB_SERVICE_ACCESS: 'service_sub_service_access'
+  ORGANISATION_ACCESS: "organisation_access",
+  SERVICE_SUB_SERVICE_ACCESS: "service_sub_service_access",
 };
 
 const actionedReasons = {
-  OVERDUE: 'Overdue'
+  OVERDUE: "Overdue",
 };
 
 module.exports = {
   requestTypes,
-  actionedReasons
+  actionedReasons,
 };

@@ -1,43 +1,50 @@
-const logger = require('./../../infrastructure/logger');
-const config = require('./../../infrastructure/config')();
-const { getGroupsFile } = require('./../../infrastructure/gias');
-const { parse: parseGroups } = require('./groupCsvReader');
-const { parse: parseGroupLinks } = require('./groupLinksCsvReader');
-const { add, update, pagedListOfCategory, addAssociation, removeAssociationsOfType, getNextOrganisationLegacyId } = require('./../organisations/data/organisationsStorage');
-const uuid = require('uuid');
+const logger = require("./../../infrastructure/logger");
+const config = require("./../../infrastructure/config")();
+const { getGroupsFile } = require("./../../infrastructure/gias");
+const { parse: parseGroups } = require("./groupCsvReader");
+const { parse: parseGroupLinks } = require("./groupLinksCsvReader");
+const {
+  add,
+  update,
+  pagedListOfCategory,
+  addAssociation,
+  removeAssociationsOfType,
+  getNextOrganisationLegacyId,
+} = require("./../organisations/data/organisationsStorage");
+const uuid = require("uuid");
 
 const isGroupImportable = (group) => {
   const importableTypes = [
-    '06', // MAT
-    '10', // SAT
+    "06", // MAT
+    "10", // SAT
   ];
-  if (!importableTypes.find(x => x === group.type)) {
+  if (!importableTypes.find((x) => x === group.type)) {
     return false;
   }
 
-  const importableStatuses = ['OPEN', 'CLOSED', 'PROPOSED_TO_OPEN'];
-  if (!importableStatuses.find(x => x === group.status)) {
+  const importableStatuses = ["OPEN", "CLOSED", "PROPOSED_TO_OPEN"];
+  if (!importableStatuses.find((x) => x === group.status)) {
     return false;
   }
 
   return true;
 };
 const mapImportRecordForStorage = (importing) => {
-  const address = importing.address.filter(x => x !== null).join(', ');
+  const address = importing.address.filter((x) => x !== null).join(", ");
 
   let status;
   switch (importing.status) {
-    case 'OPEN':
+    case "OPEN":
       status = {
         id: 1,
       };
       break;
-    case 'CLOSED':
+    case "CLOSED":
       status = {
         id: 2,
       };
       break;
-    case 'PROPOSED_TO_OPEN':
+    case "PROPOSED_TO_OPEN":
       status = {
         id: 4,
       };
@@ -48,10 +55,10 @@ const mapImportRecordForStorage = (importing) => {
   }
 
   let category;
-  if (importing.type === '06') {
-    category = { id: '010', name: 'Multi-Academy Trust' };
-  } else if (importing.type === '10') {
-    category = { id: '013', name: 'Single-Academy Trust' };
+  if (importing.type === "06") {
+    category = { id: "010", name: "Multi-Academy Trust" };
+  } else if (importing.type === "10") {
+    category = { id: "013", name: "Single-Academy Trust" };
   }
 
   return {
@@ -94,13 +101,16 @@ const hasBeenUpdated = (newValue, oldValue) => {
       const nValue = newValue.getTime();
       const oValue = oldValue.getTime();
       return nValue !== oValue;
-    } else if (typeof oldValue === 'string') {
-      const nDate = newValue.toISOString().split('T')[0];
+    } else if (typeof oldValue === "string") {
+      const nDate = newValue.toISOString().split("T")[0];
       return oldValue !== nDate;
     }
   }
 
-  if (newValue instanceof Object && Object.keys(newValue).find(x => x === 'id')) {
+  if (
+    newValue instanceof Object &&
+    Object.keys(newValue).find((x) => x === "id")
+  ) {
     return hasBeenUpdated(newValue.id, oldValue.id);
   }
 
@@ -110,9 +120,17 @@ const updateGroup = async (importing, existing) => {
   const updated = mapImportRecordForStorage(importing);
   updated.id = existing.id;
 
-  if (hasBeenUpdated(updated.name, existing.name) || hasBeenUpdated(updated.category, existing.category)
-    || hasBeenUpdated(updated.status, existing.status) || hasBeenUpdated(updated.closedOn, existing.closedOn)
-    || hasBeenUpdated(updated.address, existing.address) || hasBeenUpdated(updated.companyRegistrationNumber, existing.companyRegistrationNumber)) {
+  if (
+    hasBeenUpdated(updated.name, existing.name) ||
+    hasBeenUpdated(updated.category, existing.category) ||
+    hasBeenUpdated(updated.status, existing.status) ||
+    hasBeenUpdated(updated.closedOn, existing.closedOn) ||
+    hasBeenUpdated(updated.address, existing.address) ||
+    hasBeenUpdated(
+      updated.companyRegistrationNumber,
+      existing.companyRegistrationNumber,
+    )
+  ) {
     await update(updated);
     logger.info(`Updated group ${importing.uid}`);
   } else {
@@ -121,31 +139,52 @@ const updateGroup = async (importing, existing) => {
 
   return updated.id;
 };
-const linkAcademies = async (importing, existing, importingGroupLinks, existingEstablishments, organisationId) => {
-  const importingLinks = importingGroupLinks.filter(x => x.uid === importing.uid);
-  const links = importingLinks.map((link) => {
-    const establishment = existingEstablishments.find(x => x.urn === link.urn);
-    if (!establishment) {
-      return null;
-    }
-    return {
-      organisationId,
-      associatedOrganisationId: establishment.id,
-      linkType: 'ACADEMY',
-    };
-  }).filter(x => x !== null);
+const linkAcademies = async (
+  importing,
+  existing,
+  importingGroupLinks,
+  existingEstablishments,
+  organisationId,
+) => {
+  const importingLinks = importingGroupLinks.filter(
+    (x) => x.uid === importing.uid,
+  );
+  const links = importingLinks
+    .map((link) => {
+      const establishment = existingEstablishments.find(
+        (x) => x.urn === link.urn,
+      );
+      if (!establishment) {
+        return null;
+      }
+      return {
+        organisationId,
+        associatedOrganisationId: establishment.id,
+        linkType: "ACADEMY",
+      };
+    })
+    .filter((x) => x !== null);
 
-  await removeAssociationsOfType(organisationId, 'ACADEMY');
+  await removeAssociationsOfType(organisationId, "ACADEMY");
   for (let i = 0; i < links.length; i += 1) {
     const importingLink = links[i];
-    await addAssociation(importingLink.organisationId, importingLink.associatedOrganisationId, importingLink.linkType);
+    await addAssociation(
+      importingLink.organisationId,
+      importingLink.associatedOrganisationId,
+      importingLink.linkType,
+    );
   }
 };
-const addOrUpdateGroups = async (importingGroups, importingGroupLinks, existingGroups, existingEstablishments) => {
+const addOrUpdateGroups = async (
+  importingGroups,
+  importingGroupLinks,
+  existingGroups,
+  existingEstablishments,
+) => {
   for (let i = 0; i < importingGroups.length; i += 1) {
     const importing = importingGroups[i];
     if (isGroupImportable(importing)) {
-      const existing = existingGroups.find(e => e.uid === importing.uid);
+      const existing = existingGroups.find((e) => e.uid === importing.uid);
       let organisationId;
       if (existing) {
         organisationId = await updateGroup(importing, existing);
@@ -154,9 +193,17 @@ const addOrUpdateGroups = async (importingGroups, importingGroupLinks, existingG
         organisationId = await addGroup(importing);
       }
 
-      await linkAcademies(importing, existing, importingGroupLinks, existingEstablishments, organisationId);
+      await linkAcademies(
+        importing,
+        existing,
+        importingGroupLinks,
+        existingEstablishments,
+        organisationId,
+      );
     } else {
-      logger.info(`Not importing group ${importing.uid} as it does meet importable criteria`);
+      logger.info(
+        `Not importing group ${importing.uid} as it does meet importable criteria`,
+      );
     }
   }
 };
@@ -166,7 +213,12 @@ const listOfCategory = async (category, includeAssociations = false) => {
   let pageNumber = 1;
   let hasMorePages = true;
   while (hasMorePages) {
-    const page = await pagedListOfCategory(category, includeAssociations, pageNumber, 500);
+    const page = await pagedListOfCategory(
+      category,
+      includeAssociations,
+      pageNumber,
+      500,
+    );
     allOrgs.push(...page.organisations);
 
     hasMorePages = pageNumber < page.totalNumberOfPages;
@@ -176,23 +228,28 @@ const listOfCategory = async (category, includeAssociations = false) => {
 };
 
 const importGroups = async () => {
-  logger.debug('Getting group data');
+  logger.debug("Getting group data");
   const groupData = await getGroupsFile(true);
 
-  logger.debug('Parsing group data');
+  logger.debug("Parsing group data");
   const importingGroups = await parseGroups(groupData.groups);
-  logger.debug('Parsing group links');
+  logger.debug("Parsing group links");
   const importingGroupLinks = await parseGroupLinks(groupData.links);
 
-  logger.debug('Getting existing groups');
-  const existingMATs = await listOfCategory('010', true);
-  const existingSATs = await listOfCategory('013', true);
+  logger.debug("Getting existing groups");
+  const existingMATs = await listOfCategory("010", true);
+  const existingSATs = await listOfCategory("013", true);
   const existingGroups = existingMATs.concat(existingSATs);
 
-  logger.debug('Getting existing establishments');
-  const existingEstablishments = await listOfCategory('001', true);
+  logger.debug("Getting existing establishments");
+  const existingEstablishments = await listOfCategory("001", true);
 
-  await addOrUpdateGroups(importingGroups, importingGroupLinks, existingGroups, existingEstablishments);
+  await addOrUpdateGroups(
+    importingGroups,
+    importingGroupLinks,
+    existingGroups,
+    existingEstablishments,
+  );
 };
 
 module.exports = importGroups;

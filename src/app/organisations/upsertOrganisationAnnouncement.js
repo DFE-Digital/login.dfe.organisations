@@ -1,4 +1,4 @@
-const { upsertAnnouncement } = require('./data/organisationsStorage');
+const { upsertAnnouncement } = require("./data/organisationsStorage");
 
 const getAndValidateModel = (req) => {
   const validTypes = [1, 2, 4, 5];
@@ -17,27 +17,32 @@ const getAndValidateModel = (req) => {
     errors: [],
   };
   if (!model.announcement.originId) {
-    model.errors.push('originId must be specified');
+    model.errors.push("originId must be specified");
   }
   if (!model.announcement.type) {
-    model.errors.push('type must be specified');
-  } else if (!validTypes.find(vt => vt === model.announcement.type)) {
-    model.errors.push(`type must be one of 1, 2, 4, 5. Received ${model.announcement.type}`);
+    model.errors.push("type must be specified");
+  } else if (!validTypes.find((vt) => vt === model.announcement.type)) {
+    model.errors.push(
+      `type must be one of 1, 2, 4, 5. Received ${model.announcement.type}`,
+    );
   }
   if (!model.announcement.title) {
-    model.errors.push('title must be specified');
+    model.errors.push("title must be specified");
   }
   if (!model.announcement.summary) {
-    model.errors.push('summary must be specified');
+    model.errors.push("summary must be specified");
   }
   if (!model.announcement.body) {
-    model.errors.push('body must be specified');
+    model.errors.push("body must be specified");
   }
   if (!model.announcement.publishedAt) {
-    model.errors.push('publishedAt must be specified');
+    model.errors.push("publishedAt must be specified");
   }
-  if (model.announcement.published === undefined || model.announcement.published === null) {
-    model.errors.push('published must be specified');
+  if (
+    model.announcement.published === undefined ||
+    model.announcement.published === null
+  ) {
+    model.errors.push("published must be specified");
   }
   return model;
 };
