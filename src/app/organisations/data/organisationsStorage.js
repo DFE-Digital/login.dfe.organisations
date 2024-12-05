@@ -11,7 +11,6 @@ const {
   organisationUserStatus,
   regionCodes,
   phasesOfEducation,
-  counters,
   organisationAnnouncements,
   userOrganisationRequests,
   organisationRequestStatus,

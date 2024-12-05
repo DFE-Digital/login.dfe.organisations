@@ -322,7 +322,7 @@ const getAllGroupsDataFile = async () => {
   const today = moment().format("YYYYMMDD");
   try {
     return await getAllGroupsDataFileForDate(today);
-  } catch (e) {
+  } catch {
     logger.info("Could not find today's file");
   }
 

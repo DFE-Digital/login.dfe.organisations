@@ -23,7 +23,6 @@ const extend = ({
   invitations,
   organisations,
   services,
-  users,
   invitationExternalIdentifiers,
   invitationOrganisations,
   roles,

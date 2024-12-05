@@ -3,7 +3,6 @@ const config = require("./../../infrastructure/config")();
 const { parse } = require("./establishmentCsvReader");
 const {
   getNextOrganisationLegacyId,
-  list,
   add,
   update,
   pagedListOfCategory,
