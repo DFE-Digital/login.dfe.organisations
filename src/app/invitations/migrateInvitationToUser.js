@@ -1,5 +1,3 @@
-"use strict";
-
 const uuid = require("uuid");
 const invitationStorage = require("./data/invitationsStorage");
 const serviceStorage = require("./../services/data/servicesStorage");

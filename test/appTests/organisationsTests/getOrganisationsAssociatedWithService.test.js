@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 jest.mock("./../../../src/app/organisations/data/organisationsStorage", () => {
   return {
     getOrganisationsAssociatedToService: jest.fn(),

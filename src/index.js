@@ -1,5 +1,3 @@
-"use strict";
-
 const config = require("./infrastructure/config")();
 const configSchema = require("./infrastructure/config/schema");
 const logger = require("./infrastructure/logger");

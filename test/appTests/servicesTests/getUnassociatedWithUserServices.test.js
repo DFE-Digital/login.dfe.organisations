@@ -1,7 +1,3 @@
-"use strict";
-
-/* eslint-disable global-require */
-
 jest.mock("./../../../src/app/services/data/servicesStorage", () => {
   const getUserUnassociatedServices = jest.fn();
   return {

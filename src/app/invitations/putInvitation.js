@@ -1,5 +1,3 @@
-"use strict";
-
 const logger = require("./../../infrastructure/logger");
 const uuid = require("uuid");
 const invitationStorage = require("./data/invitationsStorage");

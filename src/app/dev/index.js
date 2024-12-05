@@ -1,5 +1,3 @@
-"use strict";
-
 const express = require("express");
 const listEndpoints = require("express-list-endpoints");
 
