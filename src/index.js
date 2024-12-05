@@ -7,7 +7,6 @@ const http = require("http");
 const https = require("https");
 const expressLayouts = require("express-ejs-layouts");
 const path = require("path");
-const fs = require("fs");
 const services = require("./app/services");
 const organisations = require("./app/organisations");
 const { organisationInvitations, invitations } = require("./app/invitations");

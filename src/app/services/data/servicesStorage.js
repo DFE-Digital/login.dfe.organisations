@@ -5,7 +5,6 @@ const logger = require("./../../../infrastructure/logger");
 const {
   users,
   services,
-  roles,
   organisations,
   userOrganisations,
   externalIdentifiers,

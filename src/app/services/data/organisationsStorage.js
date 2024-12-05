@@ -1,13 +1,4 @@
-const Sequelize = require("sequelize");
-
-const Op = Sequelize.Op;
-const logger = require("./../../../infrastructure/logger");
-const {
-  organisations,
-  organisationCategory,
-  organisationStatus,
-  establishmentTypes,
-} = require("./../../../infrastructure/repository");
+const { organisations } = require("./../../../infrastructure/repository");
 const {
   list,
   getOrgById,

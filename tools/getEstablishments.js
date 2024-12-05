@@ -1,5 +1,4 @@
 const { getEstablishmentsFile } = require("./../src/infrastructure/gias");
-const fs = require("fs");
 
 getEstablishmentsFile(true)
   .then((result) => {

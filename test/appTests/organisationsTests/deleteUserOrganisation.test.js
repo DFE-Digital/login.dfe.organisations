@@ -40,7 +40,6 @@ describe("when deleting a users access to an organisation", () => {
         uid: "user1",
       },
     });
-    next = jest.fn();
 
     req.get = jest.fn().mockReturnValue("correlation-id");
     res = httpMocks.createResponse();
@@ -51,7 +50,7 @@ describe("when deleting a users access to an organisation", () => {
   it("should return 400 if orgId is missing", async () => {
     req.params.id = undefined;
 
-    await deleteUserOrg(req, res, next);
+    await deleteUserOrg(req, res);
 
     expect(logger.error).toHaveBeenCalledWith(
       "Missing required parameter: orgId",
@@ -64,7 +63,7 @@ describe("when deleting a users access to an organisation", () => {
   it("should return 400 if userId is missing", async () => {
     req.params.uid = undefined;
 
-    await deleteUserOrg(req, res, next);
+    await deleteUserOrg(req, res);
 
     expect(logger.error).toHaveBeenCalledWith(
       "Missing required parameter: userId",
