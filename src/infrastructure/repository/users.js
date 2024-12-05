@@ -1,32 +1,46 @@
-const Sequelize = require('sequelize').default;
+const Sequelize = require("sequelize").default;
 const Op = Sequelize.Op;
 
 const define = (db, schema) => {
-  return db.define('user_services', {
-    id: {
-      type: Sequelize.UUID,
-      primaryKey: true,
-      allowNull: false,
+  return db.define(
+    "user_services",
+    {
+      id: {
+        type: Sequelize.UUID,
+        primaryKey: true,
+        allowNull: false,
+      },
+      user_id: {
+        type: Sequelize.UUID,
+        primaryKey: true,
+        allowNull: false,
+      },
+      status: {
+        type: Sequelize.SMALLINT,
+        allowNull: false,
+      },
     },
-    user_id: {
-      type: Sequelize.UUID,
-      primaryKey: true,
-      allowNull: false,
+    {
+      timestamps: true,
+      tableName: "user_services",
+      schema,
     },
-    status: {
-      type: Sequelize.SMALLINT,
-      allowNull: false,
-    },
-  }, {
-    timestamps: true,
-    tableName: 'user_services',
-    schema,
-  });
+  );
 };
 
-const extend = ({ users, organisations, services, externalIdentifiers, userOrganisations, roles }) => {
-  users.belongsTo(organisations, { as: 'Organisation', foreignKey: 'organisation_id' });
-  users.belongsTo(services, { as: 'Service', foreignKey: 'service_id' });
+const extend = ({
+  users,
+  organisations,
+  services,
+  externalIdentifiers,
+  userOrganisations,
+  roles,
+}) => {
+  users.belongsTo(organisations, {
+    as: "Organisation",
+    foreignKey: "organisation_id",
+  });
+  users.belongsTo(services, { as: "Service", foreignKey: "service_id" });
   users.prototype.getApprovers = function () {
     return userOrganisations.findAll({
       where: {
@@ -41,20 +55,17 @@ const extend = ({ users, organisations, services, externalIdentifiers, userOrgan
   };
   users.prototype.getExternalIdentifiers = function () {
     return externalIdentifiers.findAll({
-      where:
-        {
-          user_id:
-            {
-              [Op.eq]: this.user_id,
-            },
-          service_id:
-            {
-              [Op.eq]: this.service_id,
-            },
-          organisation_id: {
-            [Op.eq]: this.organisation_id,
-          },
+      where: {
+        user_id: {
+          [Op.eq]: this.user_id,
         },
+        service_id: {
+          [Op.eq]: this.service_id,
+        },
+        organisation_id: {
+          [Op.eq]: this.organisation_id,
+        },
+      },
     });
   };
   users.prototype.setExternalIdentifier = async function (key, value) {
@@ -81,12 +92,12 @@ const extend = ({ users, organisations, services, externalIdentifiers, userOrgan
       return undefined;
     }
 
-    return roles.find(r => r.id === userOrganisation.role_id);
+    return roles.find((r) => r.id === userOrganisation.role_id);
   };
 };
 
 module.exports = {
-  name: 'users',
+  name: "users",
   define,
   extend,
 };

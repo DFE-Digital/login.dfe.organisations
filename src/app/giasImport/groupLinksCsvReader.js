@@ -1,17 +1,21 @@
-const csv = require('csv');
+const csv = require("csv");
 
 const parseCsv = async (data) => {
   return new Promise((resolve, reject) => {
     try {
-      csv.parse(data, {
-        auto_parse: false,
-      }, (err, rows) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(rows);
-        }
-      });
+      csv.parse(
+        data,
+        {
+          auto_parse: false,
+        },
+        (err, rows) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(rows);
+          }
+        },
+      );
     } catch (e) {
       reject(e);
     }

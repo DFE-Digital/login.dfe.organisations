@@ -1,4 +1,4 @@
-const { getUserOrgRequestById } = require('./data/organisationsStorage');
+const { getUserOrgRequestById } = require("./data/organisationsStorage");
 
 const getUserOrganisationRequest = async (req, res) => {
   const request = await getUserOrgRequestById(req.params.rid);

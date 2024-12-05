@@ -1,11 +1,11 @@
-const { getOrgById } = require('./data/organisationsStorage');
+const { getOrgById } = require("./data/organisationsStorage");
 
 const getOrganisation = async (req, res) => {
   const organisation = await getOrgById(req.params.id);
   if (!organisation) {
     return res.status(404).send();
   }
-  return res.contentType('json').send({
+  return res.contentType("json").send({
     id: organisation.id,
     name: organisation.name,
     LegalName: organisation.LegalName,
@@ -35,7 +35,7 @@ const getOrganisation = async (req, res) => {
     DistrictAdministrativeName: organisation.DistrictAdministrativeName,
     DistrictAdministrativeCode: organisation.DistrictAdministrativeCode,
     DistrictAdministrative_code: organisation.DistrictAdministrative_code,
-    IsOnAPAR: organisation.IsOnAPAR
+    IsOnAPAR: organisation.IsOnAPAR,
   });
 };
 

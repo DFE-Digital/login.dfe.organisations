@@ -1,32 +1,32 @@
-const Sequelize = require('sequelize').default;
+const Sequelize = require("sequelize").default;
 const Op = Sequelize.Op;
 
 const define = (db, schema) => {
   return db.define(
-    'counters',
+    "counters",
     {
       counter_name: {
         type: Sequelize.STRING,
         primaryKey: true,
-        allowNull: false
+        allowNull: false,
       },
       next_value: {
         type: Sequelize.BIGINT,
-        allowNull: false
-      }
+        allowNull: false,
+      },
     },
     {
       timestamps: true,
-      tableName: 'counters',
-      schema
-    }
+      tableName: "counters",
+      schema,
+    },
   );
 };
 
 const extend = () => {};
 
 module.exports = {
-  name: 'counters',
+  name: "counters",
   define,
-  extend
+  extend,
 };

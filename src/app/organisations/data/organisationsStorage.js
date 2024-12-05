@@ -1,4 +1,4 @@
-const logger = require('./../../../infrastructure/logger');
+const logger = require("./../../../infrastructure/logger");
 const {
   organisations,
   organisationStatus,
@@ -19,12 +19,17 @@ const {
   serviceRequestsTypes,
   getNextNumericId,
   getNextLegacyId,
-  userServiceRequests
-} = require('./../../../infrastructure/repository');
-const Sequelize = require('sequelize');
-const { uniq, trim, orderBy } = require('lodash');
-const { mapAsync, mapArrayToProperty, arrayToMapById, mapAndFilterArray } = require('./../../../utils');
-const uuid = require('uuid');
+  userServiceRequests,
+} = require("./../../../infrastructure/repository");
+const Sequelize = require("sequelize");
+const { uniq, trim, orderBy } = require("lodash");
+const {
+  mapAsync,
+  mapArrayToProperty,
+  arrayToMapById,
+  mapAndFilterArray,
+} = require("./../../../utils");
+const uuid = require("uuid");
 
 const Op = Sequelize.Op;
 
@@ -73,61 +78,63 @@ const updateEntityFromOrganisation = (entity, organisation) => {
   entity.DistrictAdministrative_code = organisation.DistrictAdministrative_code;
   entity.IsOnAPAR = organisation.IsOnAPAR;
 };
-const updateOrganisationsWithLocalAuthorityDetails = async orgs => {
+const updateOrganisationsWithLocalAuthorityDetails = async (orgs) => {
   const localAuthorityIds = uniq(
-    orgs.filter(o => o.localAuthority).map(o => o.localAuthority.id)
+    orgs.filter((o) => o.localAuthority).map((o) => o.localAuthority.id),
   );
   const localAuthorityEntities = await organisations.findAll({
     where: {
       id: {
-        [Op.in]: localAuthorityIds
-      }
-    }
+        [Op.in]: localAuthorityIds,
+      },
+    },
   });
-  localAuthorityEntities.forEach(laEntity => {
+  localAuthorityEntities.forEach((laEntity) => {
     const localAuthority = {
       id: laEntity.id,
       name: laEntity.name,
-      code: laEntity.EstablishmentNumber
+      code: laEntity.EstablishmentNumber,
     };
     const laOrgs = orgs.filter(
-      o => o.localAuthority && o.localAuthority.id === localAuthority.id
+      (o) => o.localAuthority && o.localAuthority.id === localAuthority.id,
     );
-    laOrgs.forEach(org => (org.localAuthority = localAuthority));
+    laOrgs.forEach((org) => (org.localAuthority = localAuthority));
   });
 };
-const mapOrganisationFromEntity = entity => {
+const mapOrganisationFromEntity = (entity) => {
   if (!entity) {
     return null;
   }
 
   const laAssociation = entity.associations
-    ? entity.associations.find(a => a.link_type === 'LA')
+    ? entity.associations.find((a) => a.link_type === "LA")
     : undefined;
-  const category = organisationCategory.find(c => c.id === entity.Category) || { id: entity.Category, name: 'Unknown' };
+  const category = organisationCategory.find(
+    (c) => c.id === entity.Category,
+  ) || { id: entity.Category, name: "Unknown" };
   return {
     id: entity.id,
     name: entity.name,
     LegalName: entity.LegalName,
     category,
-    type: establishmentTypes.find(c => c.id === entity.Type),
+    type: establishmentTypes.find((c) => c.id === entity.Type),
     urn: entity.URN,
     uid: entity.UID,
     upin: entity.UPIN,
     ukprn: entity.UKPRN,
     establishmentNumber: entity.EstablishmentNumber,
-    status: organisationStatus.find(c => c.id === entity.Status),
+    status: organisationStatus.find((c) => c.id === entity.Status),
     closedOn: entity.ClosedOn,
     address: entity.Address,
     telephone: entity.telephone,
-    region: regionCodes.find(c => c.id === entity.regionCode),
+    region: regionCodes.find((c) => c.id === entity.regionCode),
     localAuthority: laAssociation
       ? {
-          id: laAssociation.associated_organisation_id
+          id: laAssociation.associated_organisation_id,
         }
       : undefined,
     phaseOfEducation: phasesOfEducation.find(
-      c => c.id === entity.phaseOfEducation
+      (c) => c.id === entity.phaseOfEducation,
     ),
     statutoryLowAge: entity.statutoryLowAge,
     statutoryHighAge: entity.statutoryHighAge,
@@ -149,41 +156,43 @@ const mapOrganisationFromEntity = entity => {
     DistrictAdministrativeName: entity.DistrictAdministrativeName,
     DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
     DistrictAdministrative_code: entity.DistrictAdministrative_code,
-    IsOnAPAR: entity.IsOnAPAR
+    IsOnAPAR: entity.IsOnAPAR,
   };
 };
-const mapOrganisationFromEntityWithNewPPFields = entity => {
+const mapOrganisationFromEntityWithNewPPFields = (entity) => {
   if (!entity) {
     return null;
   }
 
   const laAssociation = entity.associations
-    ? entity.associations.find(a => a.link_type === 'LA')
+    ? entity.associations.find((a) => a.link_type === "LA")
     : undefined;
-  const category = organisationCategory.find(c => c.id === entity.Category) || { id: entity.Category, name: 'Unknown' };
+  const category = organisationCategory.find(
+    (c) => c.id === entity.Category,
+  ) || { id: entity.Category, name: "Unknown" };
   return {
     id: entity.id,
     name: entity.name,
     LegalName: entity.LegalName,
     category,
-    type: establishmentTypes.find(c => c.id === entity.Type),
+    type: establishmentTypes.find((c) => c.id === entity.Type),
     urn: entity.URN,
     uid: entity.UID,
     upin: entity.UPIN,
     ukprn: entity.UKPRN,
     establishmentNumber: entity.EstablishmentNumber,
-    status: organisationStatus.find(c => c.id === entity.Status),
+    status: organisationStatus.find((c) => c.id === entity.Status),
     closedOn: entity.ClosedOn,
     address: entity.Address,
     telephone: entity.telephone,
-    region: regionCodes.find(c => c.id === entity.regionCode),
+    region: regionCodes.find((c) => c.id === entity.regionCode),
     localAuthority: laAssociation
       ? {
-          id: laAssociation.associated_organisation_id
+          id: laAssociation.associated_organisation_id,
         }
       : undefined,
     phaseOfEducation: phasesOfEducation.find(
-      c => c.id === entity.phaseOfEducation
+      (c) => c.id === entity.phaseOfEducation,
     ),
     statutoryLowAge: entity.statutoryLowAge,
     statutoryHighAge: entity.statutoryHighAge,
@@ -205,10 +214,10 @@ const mapOrganisationFromEntityWithNewPPFields = entity => {
     DistrictAdministrativeName: entity.DistrictAdministrativeName,
     DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
     DistrictAdministrative_code: entity.DistrictAdministrative_code,
-    IsOnAPAR: entity.IsOnAPAR
+    IsOnAPAR: entity.IsOnAPAR,
   };
 };
-const mapAnnouncementFromEntity = entity => {
+const mapAnnouncementFromEntity = (entity) => {
   return {
     id: entity.announcement_id,
     originId: entity.origin_id,
@@ -219,15 +228,15 @@ const mapAnnouncementFromEntity = entity => {
     body: entity.body,
     publishedAt: entity.publishedAt,
     expiresAt: entity.expiresAt,
-    published: entity.published
+    published: entity.published,
   };
 };
 
-const list = async(includeAssociations = false) => {
+const list = async (includeAssociations = false) => {
   try {
     const findOrgsOpts = {};
     if (includeAssociations) {
-      findOrgsOpts.include = ['associations'];
+      findOrgsOpts.include = ["associations"];
     }
     const orgEntities = await organisations.findAll(findOrgsOpts);
     if (!orgEntities) {
@@ -235,21 +244,21 @@ const list = async(includeAssociations = false) => {
     }
 
     return await Promise.all(
-      orgEntities.map(async serviceEntity => {
+      orgEntities.map(async (serviceEntity) => {
         const organisation = {
-          id: serviceEntity.getDataValue('id'),
-          name: serviceEntity.getDataValue('name'),
-          LegalName: serviceEntity.getDataValue('LegalName'),
+          id: serviceEntity.getDataValue("id"),
+          name: serviceEntity.getDataValue("name"),
+          LegalName: serviceEntity.getDataValue("LegalName"),
           category: organisationCategory.find(
-            c => c.id === serviceEntity.Category
+            (c) => c.id === serviceEntity.Category,
           ),
-          type: establishmentTypes.find(c => c.id === serviceEntity.Type),
+          type: establishmentTypes.find((c) => c.id === serviceEntity.Type),
           urn: serviceEntity.URN,
           uid: serviceEntity.UID,
           upin: serviceEntity.UPIN,
           ukprn: serviceEntity.UKPRN,
           establishmentNumber: serviceEntity.EstablishmentNumber,
-          status: organisationStatus.find(c => c.id === serviceEntity.Status),
+          status: organisationStatus.find((c) => c.id === serviceEntity.Status),
           closedOn: serviceEntity.ClosedOn,
           address: serviceEntity.Address,
           SourceSystem: serviceEntity.SourceSystem,
@@ -267,21 +276,22 @@ const list = async(includeAssociations = false) => {
           OpenedOn: serviceEntity.OpenedOn,
           DistrictAdministrativeName: serviceEntity.DistrictAdministrativeName,
           DistrictAdministrativeCode: serviceEntity.DistrictAdministrativeCode,
-          DistrictAdministrative_code: serviceEntity.DistrictAdministrative_code,
-          IsOnAPAR: serviceEntity.IsOnAPAR
+          DistrictAdministrative_code:
+            serviceEntity.DistrictAdministrative_code,
+          IsOnAPAR: serviceEntity.IsOnAPAR,
         };
 
         if (serviceEntity.associations) {
           organisation.associations = serviceEntity.associations.map(
-            assEntity => ({
+            (assEntity) => ({
               associatedOrganisationId: assEntity.associated_organisation_id,
-              associationType: assEntity.link_type
-            })
+              associationType: assEntity.link_type,
+            }),
           );
         }
 
         return organisation;
-      })
+      }),
     );
   } catch (e) {
     logger.error(`error getting organisations - ${e.message}`, e);
@@ -289,14 +299,14 @@ const list = async(includeAssociations = false) => {
   }
 };
 
-const getOrgById = async id => {
+const getOrgById = async (id) => {
   const entity = await organisations.findOne({
     where: {
       id: {
-        [Op.eq]: id
-      }
+        [Op.eq]: id,
+      },
     },
-    include: ['associations']
+    include: ["associations"],
   });
   const org = mapOrganisationFromEntity(entity);
   if (org) {
@@ -305,7 +315,7 @@ const getOrgById = async id => {
   return org;
 };
 
-const pagedSearch = async(
+const pagedSearch = async (
   criteria,
   pageNumber = 1,
   pageSize = 25,
@@ -313,16 +323,16 @@ const pagedSearch = async(
   filterStates = [],
   filterOutOrgNames = [],
   sortBy,
-  sortDirection
+  sortDirection,
 ) => {
   const offset = (pageNumber - 1) * pageSize;
   const query = {
     where: { Status: { [Op.not]: 0 } },
-    order: [['name', 'ASC']],
-    include: ['associations'],
+    order: [["name", "ASC"]],
+    include: ["associations"],
     distinct: true,
     limit: pageSize,
-    offset
+    offset,
   };
   if (sortBy && sortBy !== undefined) {
     query.order[0][0] = `${sortBy}`;
@@ -336,50 +346,49 @@ const pagedSearch = async(
     query.where = {
       [Op.or]: {
         name: {
-          [Op.like]: `%${criteria}%`
+          [Op.like]: `%${criteria}%`,
         },
         LegalName: {
-          [Op.like]: `%${criteria}%`
+          [Op.like]: `%${criteria}%`,
         },
         urn: {
-          [Op.like]: `%${criteria}%`
+          [Op.like]: `%${criteria}%`,
         },
         uid: {
-          [Op.like]: `%${criteria}%`
+          [Op.like]: `%${criteria}%`,
         },
         upin: {
-          [Op.like]: `%${criteria}%`
+          [Op.like]: `%${criteria}%`,
         },
         ukprn: {
-          [Op.like]: `%${criteria}%`
+          [Op.like]: `%${criteria}%`,
         },
         establishmentNumber: {
-          [Op.like]: `%${criteria}%`
+          [Op.like]: `%${criteria}%`,
         },
         legacyId: {
-          [Op.like]: `%${criteria}%`
-        }
+          [Op.like]: `%${criteria}%`,
+        },
       },
-      [Op.and]:
-      { Status: { [Op.not]: 0 } }
+      [Op.and]: { Status: { [Op.not]: 0 } },
     };
   }
 
   if (filterOutOrgNames.length > 0) {
     query.where.name = {
-      [Op.notIn]: filterOutOrgNames
+      [Op.notIn]: filterOutOrgNames,
     };
   }
 
   if (filterCategories.length > 0) {
     query.where.Category = {
-      [Op.in]: filterCategories
+      [Op.in]: filterCategories,
     };
   }
 
   if (filterStates.length > 0) {
     query.where.Status = {
-      [Op.in]: filterStates
+      [Op.in]: filterStates,
     };
   }
 
@@ -393,30 +402,30 @@ const pagedSearch = async(
   return {
     organisations: orgs,
     totalNumberOfPages,
-    totalNumberOfRecords
+    totalNumberOfRecords,
   };
 };
 
-const add = async organisation => {
+const add = async (organisation) => {
   const entity = {
-    id: organisation.id
+    id: organisation.id,
   };
   updateEntityFromOrganisation(entity, organisation);
   await organisations.create(entity);
 };
 
-const update = async organisation => {
+const update = async (organisation) => {
   const existing = await organisations.findOne({
     where: {
       id: {
-        [Op.eq]: organisation.id
-      }
-    }
+        [Op.eq]: organisation.id,
+      },
+    },
   });
 
   if (!existing) {
     throw new Error(
-      `Cannot find organisation in database with id ${organisation.id}`
+      `Cannot find organisation in database with id ${organisation.id}`,
     );
   }
 
@@ -424,31 +433,31 @@ const update = async organisation => {
   await existing.save();
 };
 
-const listOfCategory = async(category, includeAssociations = false) => {
+const listOfCategory = async (category, includeAssociations = false) => {
   const query = {
     where: {
       Category: {
-        [Op.eq]: category
-      }
+        [Op.eq]: category,
+      },
     },
-    order: [['name', 'ASC']]
+    order: [["name", "ASC"]],
   };
   if (includeAssociations) {
-    query.include = ['associations'];
+    query.include = ["associations"];
   }
   const orgEntities = await organisations.findAll(query);
-  return orgEntities.map(entity => ({
+  return orgEntities.map((entity) => ({
     id: entity.id,
     name: entity.name,
     LegalName: entity.LegalName,
-    category: organisationCategory.find(c => c.id === entity.Category),
-    type: establishmentTypes.find(c => c.id === entity.Type),
+    category: organisationCategory.find((c) => c.id === entity.Category),
+    type: establishmentTypes.find((c) => c.id === entity.Type),
     urn: entity.URN,
     uid: entity.UID,
     upin: entity.UPIN,
     ukprn: entity.UKPRN,
     establishmentNumber: entity.EstablishmentNumber,
-    status: organisationStatus.find(c => c.id === entity.Status),
+    status: organisationStatus.find((c) => c.id === entity.Status),
     closedOn: entity.ClosedOn,
     address: entity.Address,
     legacyId: entity.legacyId,
@@ -469,55 +478,55 @@ const listOfCategory = async(category, includeAssociations = false) => {
     DistrictAdministrativeName: entity.DistrictAdministrativeName,
     DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
     DistrictAdministrative_code: entity.DistrictAdministrative_code,
-    IsOnAPAR: entity.IsOnAPAR
+    IsOnAPAR: entity.IsOnAPAR,
   }));
 };
 
-const pagedListOfCategory = async(
+const pagedListOfCategory = async (
   category,
   includeAssociations = false,
   pageNumber = 1,
-  pageSize = 25
+  pageSize = 25,
 ) => {
   const offset = (pageNumber - 1) * pageSize;
   const query = {
     where: {
       Category: {
-        [Op.eq]: category
-      }
+        [Op.eq]: category,
+      },
     },
     order: [
-      ['name', 'ASC'],
-      ['id', 'ASC']
+      ["name", "ASC"],
+      ["id", "ASC"],
     ],
     limit: pageSize,
     offset,
-    distinct: true
+    distinct: true,
   };
   if (includeAssociations) {
-    query.include = ['associations'];
+    query.include = ["associations"];
   }
 
   const result = await organisations.findAndCountAll(query);
-  const orgs = result.rows.map(entity => {
+  const orgs = result.rows.map((entity) => {
     const organisation = {
       id: entity.id,
       name: entity.name,
       LegalName: entity.LegalName,
-      category: organisationCategory.find(c => c.id === entity.Category),
-      type: establishmentTypes.find(c => c.id === entity.Type),
+      category: organisationCategory.find((c) => c.id === entity.Category),
+      type: establishmentTypes.find((c) => c.id === entity.Type),
       urn: entity.URN,
       uid: entity.UID,
       upin: entity.UPIN,
       ukprn: entity.UKPRN,
       establishmentNumber: entity.EstablishmentNumber,
-      status: organisationStatus.find(c => c.id === entity.Status),
+      status: organisationStatus.find((c) => c.id === entity.Status),
       closedOn: entity.ClosedOn,
       address: entity.Address,
       telephone: entity.telephone,
-      region: regionCodes.find(c => c.id === entity.regionCode),
+      region: regionCodes.find((c) => c.id === entity.regionCode),
       phaseOfEducation: phasesOfEducation.find(
-        c => c.id === entity.phaseOfEducation
+        (c) => c.id === entity.phaseOfEducation,
       ),
       statutoryLowAge: entity.statutoryLowAge,
       statutoryHighAge: entity.statutoryHighAge,
@@ -539,13 +548,13 @@ const pagedListOfCategory = async(
       DistrictAdministrativeName: entity.DistrictAdministrativeName,
       DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
       DistrictAdministrative_code: entity.DistrictAdministrative_code,
-      IsOnAPAR: entity.IsOnAPAR
+      IsOnAPAR: entity.IsOnAPAR,
     };
 
     if (entity.associations) {
-      organisation.associations = entity.associations.map(assEntity => ({
+      organisation.associations = entity.associations.map((assEntity) => ({
         associatedOrganisationId: assEntity.associated_organisation_id,
-        associationType: assEntity.link_type
+        associationType: assEntity.link_type,
       }));
     }
 
@@ -557,192 +566,207 @@ const pagedListOfCategory = async(
   return {
     organisations: orgs,
     totalNumberOfPages,
-    totalNumberOfRecords
+    totalNumberOfRecords,
   };
 };
 
-const addAssociation = async(
+const addAssociation = async (
   organisationId,
   associatedOrganisationId,
-  linkType
+  linkType,
 ) => {
   const entity = {
     organisation_id: organisationId,
     associated_organisation_id: associatedOrganisationId,
-    link_type: linkType
+    link_type: linkType,
   };
   await organisationAssociations.create(entity);
 };
 
-const removeAssociations = async(organisationId) => {
+const removeAssociations = async (organisationId) => {
   let query = {
     where: {
       organisation_id: {
-        [Op.eq]: organisationId
-      }
-    }
+        [Op.eq]: organisationId,
+      },
+    },
   };
   await organisationAssociations.destroy(query);
 };
 
-const removeAssociationsOfType = async(organisationId, linkType) => {
+const removeAssociationsOfType = async (organisationId, linkType) => {
   await organisationAssociations.destroy({
     where: {
       organisation_id: {
-        [Op.eq]: organisationId
+        [Op.eq]: organisationId,
       },
       link_type: {
-        [Op.eq]: linkType
-      }
-    }
+        [Op.eq]: linkType,
+      },
+    },
   });
 };
 
 // Deprecated
-const getOrganisationsForUserIncludingServices = async userId => {
+const getOrganisationsForUserIncludingServices = async (userId) => {
   const userOrgs = await userOrganisations.findAll({
     where: {
       user_id: {
-        [Op.eq]: userId
-      }
+        [Op.eq]: userId,
+      },
     },
-    include: ['Organisation'],
-    order: [['Organisation', 'name', 'ASC']]
+    include: ["Organisation"],
+    order: [["Organisation", "name", "ASC"]],
   });
   if (!userOrgs || userOrgs.length === 0) {
     return [];
   }
 
   return await Promise.all(
-    userOrgs.map(async userOrg => {
+    userOrgs.map(async (userOrg) => {
       const services = await users.findAll({
         where: {
           user_id: {
-            [Op.eq]: userId
+            [Op.eq]: userId,
           },
           organisation_id: {
-            [Op.eq]: userOrg.organisation_id
-          }
+            [Op.eq]: userOrg.organisation_id,
+          },
         },
-        include: ['Service']
+        include: ["Service"],
       });
       const role = await userOrg.getRole();
-      const approvers = (await userOrg.getApprovers()).map(user => user.user_id);
+      const approvers = (await userOrg.getApprovers()).map(
+        (user) => user.user_id,
+      );
 
       return {
         organisation: {
-          id: userOrg.Organisation.getDataValue('id'),
-          name: userOrg.Organisation.getDataValue('name'),
-          LegalName: userOrg.Organisation.getDataValue('LegalName') || undefined,
-          urn: userOrg.Organisation.getDataValue('URN') || undefined,
-          uid: userOrg.Organisation.getDataValue('UID') || undefined,
-          ukprn: userOrg.Organisation.getDataValue('UKPRN') || undefined,
-          address: userOrg.Organisation.getDataValue('Address') || undefined,
+          id: userOrg.Organisation.getDataValue("id"),
+          name: userOrg.Organisation.getDataValue("name"),
+          LegalName:
+            userOrg.Organisation.getDataValue("LegalName") || undefined,
+          urn: userOrg.Organisation.getDataValue("URN") || undefined,
+          uid: userOrg.Organisation.getDataValue("UID") || undefined,
+          ukprn: userOrg.Organisation.getDataValue("UKPRN") || undefined,
+          address: userOrg.Organisation.getDataValue("Address") || undefined,
           status:
             organisationStatus.find(
-              c => c.id === userOrg.Organisation.getDataValue('Status')
+              (c) => c.id === userOrg.Organisation.getDataValue("Status"),
             ) || undefined,
-          numeric_identifier: userOrg.getDataValue('numeric_identifier') || undefined,
-          text_identifier: userOrg.getDataValue('text_identifier') || undefined,
+          numeric_identifier:
+            userOrg.getDataValue("numeric_identifier") || undefined,
+          text_identifier: userOrg.getDataValue("text_identifier") || undefined,
           category: organisationCategory.find(
-            c => c.id === userOrg.Organisation.getDataValue('Category')
+            (c) => c.id === userOrg.Organisation.getDataValue("Category"),
           ),
           type: establishmentTypes.find(
-            t => t.id === userOrg.Organisation.getDataValue('Type')
+            (t) => t.id === userOrg.Organisation.getDataValue("Type"),
           ),
           companyRegistrationNumber:
             userOrg.Organisation.companyRegistrationNumber,
           SourceSystem:
-            userOrg.Organisation.getDataValue('SourceSystem') || undefined,
+            userOrg.Organisation.getDataValue("SourceSystem") || undefined,
           providerTypeName:
-            userOrg.Organisation.getDataValue('ProviderTypeName') || undefined,
+            userOrg.Organisation.getDataValue("ProviderTypeName") || undefined,
           ProviderTypeCode:
-            userOrg.Organisation.getDataValue('ProviderTypeCode') || undefined,
+            userOrg.Organisation.getDataValue("ProviderTypeCode") || undefined,
           GIASProviderType:
-            userOrg.Organisation.getDataValue('GIASProviderType') || undefined,
+            userOrg.Organisation.getDataValue("GIASProviderType") || undefined,
           PIMSProviderType:
-            userOrg.Organisation.getDataValue('PIMSProviderType') || undefined,
+            userOrg.Organisation.getDataValue("PIMSProviderType") || undefined,
           PIMSProviderTypeCode:
-            userOrg.Organisation.getDataValue('PIMSProviderTypeCode') || undefined,
+            userOrg.Organisation.getDataValue("PIMSProviderTypeCode") ||
+            undefined,
           PIMSStatusName:
-            userOrg.Organisation.getDataValue('PIMSStatusName') || undefined,
+            userOrg.Organisation.getDataValue("PIMSStatusName") || undefined,
           pimsStatus:
-            userOrg.Organisation.getDataValue('PIMSStatus') || undefined,
+            userOrg.Organisation.getDataValue("PIMSStatus") || undefined,
           GIASStatusName:
-            userOrg.Organisation.getDataValue('GIASStatusName') || undefined,
+            userOrg.Organisation.getDataValue("GIASStatusName") || undefined,
           GIASStatus:
-            userOrg.Organisation.getDataValue('GIASStatus') || undefined,
+            userOrg.Organisation.getDataValue("GIASStatus") || undefined,
           MasterProviderStatusName:
-            userOrg.Organisation.getDataValue('MasterProviderStatusName') || undefined,
+            userOrg.Organisation.getDataValue("MasterProviderStatusName") ||
+            undefined,
           MasterProviderStatusCode:
-            userOrg.Organisation.getDataValue('MasterProviderStatusCode') || undefined,
-          OpenedOn:
-            userOrg.Organisation.getDataValue('OpenedOn') || undefined,
+            userOrg.Organisation.getDataValue("MasterProviderStatusCode") ||
+            undefined,
+          OpenedOn: userOrg.Organisation.getDataValue("OpenedOn") || undefined,
           DistrictAdministrativeName:
-            userOrg.Organisation.getDataValue('DistrictAdministrativeName') || undefined,
+            userOrg.Organisation.getDataValue("DistrictAdministrativeName") ||
+            undefined,
           DistrictAdministrativeCode:
-            userOrg.Organisation.getDataValue('DistrictAdministrativeCode') || undefined,
+            userOrg.Organisation.getDataValue("DistrictAdministrativeCode") ||
+            undefined,
           DistrictAdministrative_code:
-            userOrg.Organisation.getDataValue('DistrictAdministrative_code') || undefined,
-          IsOnAPAR:
-            userOrg.Organisation.getDataValue('IsOnAPAR') || undefined
+            userOrg.Organisation.getDataValue("DistrictAdministrative_code") ||
+            undefined,
+          IsOnAPAR: userOrg.Organisation.getDataValue("IsOnAPAR") || undefined,
         },
         role,
         approvers,
         services: await Promise.all(
-          services.map(async service => {
-            const externalIdentifiers = (await service
-              .getExternalIdentifiers())
-              .map(extId => ({
-                key: extId.identifier_key,
-                value: extId.identifier_value
-              }));
+          services.map(async (service) => {
+            const externalIdentifiers = (
+              await service.getExternalIdentifiers()
+            ).map((extId) => ({
+              key: extId.identifier_key,
+              value: extId.identifier_value,
+            }));
 
             return {
-              id: service.Service.getDataValue('id'),
-              name: service.Service.getDataValue('name'),
-              description: service.Service.getDataValue('description'),
+              id: service.Service.getDataValue("id"),
+              name: service.Service.getDataValue("name"),
+              description: service.Service.getDataValue("description"),
               externalIdentifiers,
-              requestDate: service.getDataValue('createdAt'),
-              status: service.getDataValue('status')
+              requestDate: service.getDataValue("createdAt"),
+              status: service.getDataValue("status"),
             };
-          })
+          }),
         ),
         numericIdentifier: userOrg.numeric_identifier || undefined,
-        textIdentifier: userOrg.text_identifier || undefined
+        textIdentifier: userOrg.text_identifier || undefined,
       };
-    })
+    }),
   );
 };
 
-const getOrganisationsAssociatedToUser = async(userId, WithNewPPFields = false) => {
+const getOrganisationsAssociatedToUser = async (
+  userId,
+  WithNewPPFields = false,
+) => {
   const userOrgs = await userOrganisations.findAll({
     where: {
       user_id: {
-        [Op.eq]: userId
-      }
+        [Op.eq]: userId,
+      },
     },
     // include: ['Organisation'],
     include: [
       {
         model: organisations,
-        as: 'Organisation',
-        include: 'associations'
-      }
+        as: "Organisation",
+        include: "associations",
+      },
     ],
-    order: [['Organisation', 'name', 'ASC']]
+    order: [["Organisation", "name", "ASC"]],
   });
   if (!userOrgs || userOrgs.length === 0) {
     return [];
   }
 
-  return mapAsync(userOrgs, async userOrg => {
+  return mapAsync(userOrgs, async (userOrg) => {
     const role = await userOrg.getRole();
-    const approvers = (await userOrg.getApprovers()).map(user => user.user_id);
-    const endUsers = (await userOrg.getEndUsers()).map(user => user.user_id);
+    const approvers = (await userOrg.getApprovers()).map(
+      (user) => user.user_id,
+    );
+    const endUsers = (await userOrg.getEndUsers()).map((user) => user.user_id);
     let organisation;
     if (WithNewPPFields) {
-      organisation = await mapOrganisationFromEntityWithNewPPFields(userOrg.Organisation);
+      organisation = await mapOrganisationFromEntityWithNewPPFields(
+        userOrg.Organisation,
+      );
     } else {
       organisation = await mapOrganisationFromEntity(userOrg.Organisation);
     }
@@ -754,19 +778,19 @@ const getOrganisationsAssociatedToUser = async(userId, WithNewPPFields = false) 
       approvers,
       endUsers,
       numericIdentifier: userOrg.numeric_identifier || undefined,
-      textIdentifier: userOrg.text_identifier || undefined
+      textIdentifier: userOrg.text_identifier || undefined,
     };
   });
 };
 
-const setUserAccessToOrganisation = async(
+const setUserAccessToOrganisation = async (
   organisationId,
   userId,
   roleId,
   status,
   reason,
   numericIdentifier,
-  textIdentifier
+  textIdentifier,
 ) =>
   userOrganisations.upsert({
     user_id: userId.toUpperCase(),
@@ -775,57 +799,57 @@ const setUserAccessToOrganisation = async(
     status,
     reason,
     numeric_identifier: numericIdentifier,
-    text_identifier: textIdentifier
+    text_identifier: textIdentifier,
   });
 
-const deleteUserOrganisation = async(
+const deleteUserOrganisation = async (
   organisationId,
   userId,
-  correlationId
+  correlationId,
 ) => {
   try {
     logger.info(
       `Deleting org ${organisationId} for user ${userId} for ${correlationId}`,
-      { correlationId }
+      { correlationId },
     );
     await userOrganisations.destroy({
       where: {
         user_id: {
-          [Op.eq]: userId
+          [Op.eq]: userId,
         },
         organisation_id: {
-          [Op.eq]: organisationId
-        }
-      }
+          [Op.eq]: organisationId,
+        },
+      },
     });
   } catch (e) {
     logger.error(
       `error deleting organisation for user- ${e.message} (id: ${correlationId})`,
-      { correlationId }
+      { correlationId },
     );
     throw e;
   }
 };
 
-const deleteOrganisation = async(
-  organisationId
-) => {
+const deleteOrganisation = async (organisationId) => {
   try {
     logger.info(`Deleting org ${organisationId}`);
     await organisations.destroy({
       where: {
         id: {
-          [Op.eq]: organisationId
-        }
-      }
+          [Op.eq]: organisationId,
+        },
+      },
     });
   } catch (e) {
-    logger.error(`error deleting organisation - ${e.message} (id: ${organisationId})`);
+    logger.error(
+      `error deleting organisation - ${e.message} (id: ${organisationId})`,
+    );
     throw e;
   }
 };
 
-const getOrganisationCategories = async() => {
+const getOrganisationCategories = async () => {
   const categories = organisationCategory.sort((x, y) => {
     if (x.name < y.name) {
       return -1;
@@ -838,7 +862,7 @@ const getOrganisationCategories = async() => {
   return Promise.resolve(categories);
 };
 
-const getOrganisationStates = async() => {
+const getOrganisationStates = async () => {
   const categories = organisationStatus.sort((x, y) => {
     if (x.name < y.name) {
       return -1;
@@ -851,19 +875,19 @@ const getOrganisationStates = async() => {
   return Promise.resolve(categories);
 };
 
-const getUsersPendingApprovalByUser = async userId => {
+const getUsersPendingApprovalByUser = async (userId) => {
   const userOrgs = await userOrganisations.findAll({
     where: {
       user_id: {
-        [Op.eq]: userId
+        [Op.eq]: userId,
       },
       role_id: {
-        [Op.eq]: 10000
+        [Op.eq]: 10000,
       },
       status: {
-        [Op.eq]: 1
-      }
-    }
+        [Op.eq]: 1,
+      },
+    },
   });
   if (!userOrgs || userOrgs.length === 0) {
     return [];
@@ -872,44 +896,44 @@ const getUsersPendingApprovalByUser = async userId => {
   const associatedUsersForApproval = await userOrganisations.findAll({
     where: {
       organisation_id: {
-        [Op.in]: userOrgs.map(c => c.organisation_id)
+        [Op.in]: userOrgs.map((c) => c.organisation_id),
       },
       status: {
-        [Op.eq]: 0
+        [Op.eq]: 0,
       },
       user_id: {
-        [Op.ne]: userId
-      }
+        [Op.ne]: userId,
+      },
     },
-    include: ['Organisation']
+    include: ["Organisation"],
   });
 
   if (!associatedUsersForApproval || associatedUsersForApproval.length === 0) {
     return [];
   }
 
-  return associatedUsersForApproval.map(entity => ({
-    org_id: entity.Organisation.getDataValue('id'),
-    org_name: entity.Organisation.getDataValue('name'),
-    user_id: entity.getDataValue('user_id'),
-    created_date: entity.getDataValue('createdAt'),
+  return associatedUsersForApproval.map((entity) => ({
+    org_id: entity.Organisation.getDataValue("id"),
+    org_name: entity.Organisation.getDataValue("name"),
+    user_id: entity.getDataValue("user_id"),
+    created_date: entity.getDataValue("createdAt"),
     status: organisationUserStatus.find(
-      c => c.id === entity.getDataValue('status')
-    )
+      (c) => c.id === entity.getDataValue("status"),
+    ),
   }));
 };
 
-const getUsersPendingApproval = async(pageNumber = 1, pageSize = 25) => {
+const getUsersPendingApproval = async (pageNumber = 1, pageSize = 25) => {
   const offset = (pageNumber - 1) * pageSize;
   const associatedUsersForApproval = await userOrganisations.findAndCountAll({
     where: {
       status: {
-        [Op.eq]: 0
-      }
+        [Op.eq]: 0,
+      },
     },
     limit: pageSize,
     offset,
-    include: ['Organisation']
+    include: ["Organisation"],
   });
 
   if (!associatedUsersForApproval || associatedUsersForApproval.length === 0) {
@@ -918,44 +942,44 @@ const getUsersPendingApproval = async(pageNumber = 1, pageSize = 25) => {
   const totalNumberOfRecords = associatedUsersForApproval.count;
   const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
 
-  const usersForApproval = associatedUsersForApproval.rows.map(entity => ({
-    org_id: entity.Organisation.getDataValue('id'),
-    org_name: entity.Organisation.getDataValue('name'),
-    LegalName: entity.Organisation.getDataValue('LegalName'),
-    user_id: entity.getDataValue('user_id'),
-    created_date: entity.getDataValue('createdAt'),
-    org_address: entity.Organisation.getDataValue('Address'),
+  const usersForApproval = associatedUsersForApproval.rows.map((entity) => ({
+    org_id: entity.Organisation.getDataValue("id"),
+    org_name: entity.Organisation.getDataValue("name"),
+    LegalName: entity.Organisation.getDataValue("LegalName"),
+    user_id: entity.getDataValue("user_id"),
+    created_date: entity.getDataValue("createdAt"),
+    org_address: entity.Organisation.getDataValue("Address"),
     category: organisationCategory.find(
-      c => c.id === entity.Organisation.getDataValue('Category')
+      (c) => c.id === entity.Organisation.getDataValue("Category"),
     ),
-    urn: entity.Organisation.getDataValue('URN'),
-    uid: entity.Organisation.getDataValue('UID'),
-    upin: entity.Organisation.getDataValue('UPIN'),
-    ukprn: entity.Organisation.getDataValue('UKPRN'),
+    urn: entity.Organisation.getDataValue("URN"),
+    uid: entity.Organisation.getDataValue("UID"),
+    upin: entity.Organisation.getDataValue("UPIN"),
+    ukprn: entity.Organisation.getDataValue("UKPRN"),
     status: organisationUserStatus.find(
-      c => c.id === entity.getDataValue('status')
-    )
+      (c) => c.id === entity.getDataValue("status"),
+    ),
   }));
 
   return {
     usersForApproval,
     totalNumberOfRecords,
-    totalNumberOfPages
+    totalNumberOfPages,
   };
 };
 
-const getOrgByUrn = async(urn, category) => {
+const getOrgByUrn = async (urn, category) => {
   try {
     const query = {
       where: {
         URN: {
-          [Op.eq]: urn
-        }
-      }
+          [Op.eq]: urn,
+        },
+      },
     };
     if (category) {
       query.where.Category = {
-        [Op.eq]: category
+        [Op.eq]: category,
       };
     }
     const entity = await organisations.findOne(query);
@@ -966,18 +990,18 @@ const getOrgByUrn = async(urn, category) => {
   }
 };
 
-const getOrgByUid = async(uid, category) => {
+const getOrgByUid = async (uid, category) => {
   try {
     const query = {
       where: {
         UID: {
-          [Op.eq]: uid
-        }
-      }
+          [Op.eq]: uid,
+        },
+      },
     };
     if (category) {
       query.where.Category = {
-        [Op.eq]: category
+        [Op.eq]: category,
       };
     }
     const entity = await organisations.findOne(query);
@@ -988,18 +1012,18 @@ const getOrgByUid = async(uid, category) => {
   }
 };
 
-const getOrgByEstablishmentNumber = async(establishmentNumber, category) => {
+const getOrgByEstablishmentNumber = async (establishmentNumber, category) => {
   try {
     const query = {
       where: {
         EstablishmentNumber: {
-          [Op.eq]: establishmentNumber
-        }
-      }
+          [Op.eq]: establishmentNumber,
+        },
+      },
     };
     if (category) {
       query.where.Category = {
-        [Op.eq]: category
+        [Op.eq]: category,
       };
     }
     const entity = await organisations.findOne(query);
@@ -1007,24 +1031,24 @@ const getOrgByEstablishmentNumber = async(establishmentNumber, category) => {
   } catch (e) {
     logger.error(
       `error getting organisation by establishment number - ${e.message}`,
-      e
+      e,
     );
     throw e;
   }
 };
 
-const getOrgByUpin = async(upin, category) => {
+const getOrgByUpin = async (upin, category) => {
   try {
     const query = {
       where: {
         UPIN: {
-          [Op.eq]: upin
-        }
-      }
+          [Op.eq]: upin,
+        },
+      },
     };
     if (category) {
       query.where.Category = {
-        [Op.eq]: category
+        [Op.eq]: category,
       };
     }
     const entity = await organisations.findOne(query);
@@ -1035,18 +1059,18 @@ const getOrgByUpin = async(upin, category) => {
   }
 };
 
-const getAllOrgsByUpin = async(upin, category) => {
+const getAllOrgsByUpin = async (upin, category) => {
   try {
     const query = {
       where: {
         UPIN: {
-          [Op.eq]: upin
-        }
-      }
+          [Op.eq]: upin,
+        },
+      },
     };
     if (category) {
       query.where.Category = {
-        [Op.eq]: category
+        [Op.eq]: category,
       };
     }
     const orgEntities = await organisations.findAll(query);
@@ -1057,18 +1081,18 @@ const getAllOrgsByUpin = async(upin, category) => {
   }
 };
 
-const getOrgByUkprn = async(ukprn, category) => {
+const getOrgByUkprn = async (ukprn, category) => {
   try {
     const query = {
       where: {
         UKPRN: {
-          [Op.eq]: ukprn
-        }
-      }
+          [Op.eq]: ukprn,
+        },
+      },
     };
     if (category) {
       query.where.Category = {
-        [Op.eq]: category
+        [Op.eq]: category,
       };
     }
     const entity = await organisations.findOne(query);
@@ -1079,18 +1103,18 @@ const getOrgByUkprn = async(ukprn, category) => {
   }
 };
 
-const getAllOrgsByUkprn = async(ukprn, category) => {
+const getAllOrgsByUkprn = async (ukprn, category) => {
   try {
     const query = {
       where: {
         UKPRN: {
-          [Op.eq]: ukprn
-        }
-      }
+          [Op.eq]: ukprn,
+        },
+      },
     };
     if (category) {
       query.where.Category = {
-        [Op.eq]: category
+        [Op.eq]: category,
       };
     }
     const orgEntities = await organisations.findAll(query);
@@ -1101,18 +1125,18 @@ const getAllOrgsByUkprn = async(ukprn, category) => {
   }
 };
 
-const getAllOrgsByIsOnAPAR = async(IsOnAPAR, category) => {
+const getAllOrgsByIsOnAPAR = async (IsOnAPAR, category) => {
   try {
     const query = {
       where: {
         IsOnAPAR: {
-          [Op.eq]: IsOnAPAR
-        }
-      }
+          [Op.eq]: IsOnAPAR,
+        },
+      },
     };
     if (category) {
       query.where.Category = {
-        [Op.eq]: category
+        [Op.eq]: category,
       };
     }
     const orgEntities = await organisations.findAll(query);
@@ -1123,18 +1147,18 @@ const getAllOrgsByIsOnAPAR = async(IsOnAPAR, category) => {
   }
 };
 
-const getOrgByLegacyId = async(legacyId, category) => {
+const getOrgByLegacyId = async (legacyId, category) => {
   try {
     const query = {
       where: {
         legacyId: {
-          [Op.eq]: legacyId
-        }
-      }
+          [Op.eq]: legacyId,
+        },
+      },
     };
     if (category) {
       query.where.Category = {
-        [Op.eq]: category
+        [Op.eq]: category,
       };
     }
     const entity = await organisations.findOne(query);
@@ -1145,20 +1169,20 @@ const getOrgByLegacyId = async(legacyId, category) => {
   }
 };
 
-const getUsersAssociatedWithOrganisation = async(
+const getUsersAssociatedWithOrganisation = async (
   orgId,
   pageNumber = 1,
-  pageSize = 25
+  pageSize = 25,
 ) => {
   const offset = (pageNumber - 1) * pageSize;
   const userOrgs = await userOrganisations.findAndCountAll({
     where: {
       organisation_id: {
-        [Op.eq]: orgId
-      }
+        [Op.eq]: orgId,
+      },
     },
     limit: pageSize,
-    offset
+    offset,
   });
   if (!userOrgs || userOrgs.length === 0) {
     return [];
@@ -1167,25 +1191,25 @@ const getUsersAssociatedWithOrganisation = async(
   const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
 
   return await Promise.all(
-    userOrgs.rows.map(async userOrgEntity => {
+    userOrgs.rows.map(async (userOrgEntity) => {
       const role = await userOrgEntity.getRole();
       return {
-        id: userOrgEntity.getDataValue('user_id'),
-        status: userOrgEntity.getDataValue('status'),
+        id: userOrgEntity.getDataValue("user_id"),
+        status: userOrgEntity.getDataValue("status"),
         role,
         numericIdentifier: userOrgEntity.numeric_identifier || undefined,
         textIdentifier: userOrgEntity.text_identifier || undefined,
-        totalNumberOfPages
+        totalNumberOfPages,
       };
-    })
+    }),
   );
 };
 
-const pagedListOfUsers = async(pageNumber = 1, pageSize = 25) => {
+const pagedListOfUsers = async (pageNumber = 1, pageSize = 25) => {
   const recordset = await userOrganisations.findAndCountAll({
     limit: pageSize,
     offset: (pageNumber - 1) * pageSize,
-    include: ['Organisation']
+    include: ["Organisation"],
   });
   const mappings = [];
   for (let i = 0; i < recordset.rows.length; i += 1) {
@@ -1200,7 +1224,7 @@ const pagedListOfUsers = async(pageNumber = 1, pageSize = 25) => {
       role,
       status: entity.status,
       numericIdentifier: entity.numeric_identifier || undefined,
-      textIdentifier: entity.text_identifier || undefined
+      textIdentifier: entity.text_identifier || undefined,
     });
   }
 
@@ -1209,38 +1233,38 @@ const pagedListOfUsers = async(pageNumber = 1, pageSize = 25) => {
   return {
     userOrganisations: mappings,
     totalNumberOfRecords,
-    totalNumberOfPages
+    totalNumberOfPages,
   };
 };
 
-const getPagedListOfUsersV2 = async(
+const getPagedListOfUsersV2 = async (
   pageNumber = 1,
   pageSize = 25,
   roleId = undefined,
   filterTypes = undefined,
-  filterStatus = undefined
+  filterStatus = undefined,
 ) => {
   const query = {
     where: {},
     limit: pageSize,
     offset: (pageNumber - 1) * pageSize,
-    include: ['Organisation']
+    include: ["Organisation"],
   };
 
   if (roleId !== undefined) {
     query.where.role_id = {
-      [Op.eq]: roleId
+      [Op.eq]: roleId,
     };
   }
   if (filterTypes && filterTypes.length > 0) {
-    query.where['$Organisation.type$'] = {
-      [Op.in]: filterTypes
+    query.where["$Organisation.type$"] = {
+      [Op.in]: filterTypes,
     };
   }
 
   if (filterStatus && filterStatus.length > 0) {
-    query.where['$Organisation.status$'] = {
-      [Op.in]: filterStatus
+    query.where["$Organisation.status$"] = {
+      [Op.in]: filterStatus,
     };
   }
 
@@ -1258,7 +1282,7 @@ const getPagedListOfUsersV2 = async(
       role,
       status: entity.status,
       numericIdentifier: entity.numeric_identifier || undefined,
-      textIdentifier: entity.text_identifier || undefined
+      textIdentifier: entity.text_identifier || undefined,
     });
   }
 
@@ -1268,26 +1292,26 @@ const getPagedListOfUsersV2 = async(
     users: mappings,
     page: pageNumber,
     totalNumberOfRecords,
-    totalNumberOfPages
+    totalNumberOfPages,
   };
 };
 
-const getPagedListOfUsersV3 = async(
+const getPagedListOfUsersV3 = async (
   pageNumber = 1,
   pageSize = 25,
   roleId = undefined,
-  policies = undefined
+  policies = undefined,
 ) => {
   const query = {
     where: {},
     limit: pageSize,
     offset: (pageNumber - 1) * pageSize,
-    include: ['Organisation']
+    include: ["Organisation"],
   };
 
   if (roleId !== undefined) {
     query.where.role_id = {
-      [Op.eq]: roleId
+      [Op.eq]: roleId,
     };
   }
 
@@ -1303,26 +1327,26 @@ const getPagedListOfUsersV3 = async(
 
         // get the actual field based on the condition
         switch (condition.field) {
-          case 'organisation.type.id':
-            fieldForQuery = '$Organisation.type$';
+          case "organisation.type.id":
+            fieldForQuery = "$Organisation.type$";
             break;
-          case 'organisation.status.id':
-            fieldForQuery = '$Organisation.status$';
+          case "organisation.status.id":
+            fieldForQuery = "$Organisation.status$";
             break;
-          case 'organisation.category.id':
-            fieldForQuery = '$Organisation.category$';
+          case "organisation.category.id":
+            fieldForQuery = "$Organisation.category$";
             break;
-          case 'organisation.phaseOfEducation.id':
-            fieldForQuery = '$Organisation.phaseOfEducation$';
+          case "organisation.phaseOfEducation.id":
+            fieldForQuery = "$Organisation.phaseOfEducation$";
             break;
-          case 'organisation.ukprn':
-            fieldForQuery = '$Organisation.ukprn$';
+          case "organisation.ukprn":
+            fieldForQuery = "$Organisation.ukprn$";
             break;
-          case 'id':
-            fieldForQuery = '$user_id$';
+          case "id":
+            fieldForQuery = "$user_id$";
             break;
-          case 'organisation.IsOnAPAR':
-            fieldForQuery = '$Organisation.IsOnAPAR$';
+          case "organisation.IsOnAPAR":
+            fieldForQuery = "$Organisation.IsOnAPAR$";
             break;
           default:
             break;
@@ -1330,10 +1354,10 @@ const getPagedListOfUsersV3 = async(
 
         // get the operator based on the condition
         switch (condition.operator) {
-          case 'is':
+          case "is":
             operator = Op.in;
             break;
-          case 'is not':
+          case "is not":
             operator = Op.notIn;
             break;
           default:
@@ -1342,7 +1366,9 @@ const getPagedListOfUsersV3 = async(
 
         // build the query for this condition
         if (fieldForQuery && operator) {
-          singlePolicyQueries.push({ [fieldForQuery]: { [operator]: condition.value } });
+          singlePolicyQueries.push({
+            [fieldForQuery]: { [operator]: condition.value },
+          });
         }
       });
 
@@ -1369,7 +1395,7 @@ const getPagedListOfUsersV3 = async(
       role,
       status: entity.status,
       numericIdentifier: entity.numeric_identifier || undefined,
-      textIdentifier: entity.text_identifier || undefined
+      textIdentifier: entity.text_identifier || undefined,
     });
   }
 
@@ -1379,15 +1405,15 @@ const getPagedListOfUsersV3 = async(
     users: mappings,
     page: pageNumber,
     totalNumberOfRecords,
-    totalNumberOfPages
+    totalNumberOfPages,
   };
 };
 
-const pagedListOfInvitations = async(pageNumber = 1, pageSize = 25) => {
+const pagedListOfInvitations = async (pageNumber = 1, pageSize = 25) => {
   const recordset = await invitationOrganisations.findAndCountAll({
     limit: pageSize,
     offset: (pageNumber - 1) * pageSize,
-    include: ['Organisation']
+    include: ["Organisation"],
   });
   const mappings = [];
   for (let i = 0; i < recordset.rows.length; i += 1) {
@@ -1399,7 +1425,7 @@ const pagedListOfInvitations = async(pageNumber = 1, pageSize = 25) => {
     mappings.push({
       invitationId: entity.invitation_id,
       organisation,
-      role
+      role,
     });
   }
 
@@ -1408,80 +1434,80 @@ const pagedListOfInvitations = async(pageNumber = 1, pageSize = 25) => {
   return {
     invitationOrganisations: mappings,
     totalNumberOfRecords,
-    totalNumberOfPages
+    totalNumberOfPages,
   };
 };
 
-const getUserOrganisationByTextIdentifier = async textIdentifier => {
+const getUserOrganisationByTextIdentifier = async (textIdentifier) => {
   const entity = await userOrganisations.findOne({
     where: {
       text_identifier: {
-        [Op.eq]: textIdentifier
-      }
-    }
+        [Op.eq]: textIdentifier,
+      },
+    },
   });
   return entity || undefined;
 };
 
-const hasUserOrganisationsByOrgId = async orgId => {
+const hasUserOrganisationsByOrgId = async (orgId) => {
   const entity = await userOrganisations.findOne({
     where: {
       organisation_id: {
-        [Op.eq]: orgId
-      }
-    }
+        [Op.eq]: orgId,
+      },
+    },
   });
   return !!entity || undefined;
 };
 
-const hasUserOrganisationRequestsByOrgId = async orgId => {
+const hasUserOrganisationRequestsByOrgId = async (orgId) => {
   const entity = await userOrganisationRequests.findOne({
     where: {
       organisation_id: {
-        [Op.eq]: orgId
-      }
-    }
+        [Op.eq]: orgId,
+      },
+    },
   });
   return !!entity || undefined;
 };
 
-const getNextUserOrgNumericIdentifier = async() => {
+const getNextUserOrgNumericIdentifier = async () => {
   const NUMERIC_ID = await getNextNumericId();
   return NUMERIC_ID;
 };
 
-const getNextOrganisationLegacyId = async() => {
+const getNextOrganisationLegacyId = async () => {
   const LEGACY_ID = await getNextLegacyId();
   return LEGACY_ID;
 };
 
-const listAnnouncements = async(
+const listAnnouncements = async (
   organisationId = undefined,
   originId = undefined,
   onlyPublishedAnnouncements = true,
   pageNumber = 1,
-  pageSize = 25
+  pageSize = 25,
 ) => {
   const where = {};
   if (onlyPublishedAnnouncements) {
     where.published = {
-      [Op.eq]: true
+      [Op.eq]: true,
     };
   }
   if (organisationId) {
     where.organisation_id = {
-      [Op.eq]: organisationId
+      [Op.eq]: organisationId,
     };
   }
   if (originId) {
     where.origin_id = {
-      [Op.eq]: originId
+      [Op.eq]: originId,
     };
   }
   const recordset = await organisationAnnouncements.findAndCountAll({
     where,
     limit: pageSize,
-    offset: (pageNumber - 1) * pageSize
+    offset: (pageNumber - 1) * pageSize,
   });
 
   const totalNumberOfRecords = recordset.count;
@@ -1490,11 +1516,11 @@ const listAnnouncements = async(
     announcements: recordset.rows.map(mapAnnouncementFromEntity),
     page: pageNumber,
     numberOfPages,
-    totalNumberOfRecords
+    totalNumberOfRecords,
   };
 };
 
-const upsertAnnouncement = async(
+const upsertAnnouncement = async (
   originId,
   organisationId,
   type,
@@ -1503,14 +1529,14 @@ const upsertAnnouncement = async(
   body,
   publishedAt,
   expiresAt,
-  published
+  published,
 ) => {
   let entity = await organisationAnnouncements.findOne({
     where: {
       origin_id: {
-        [Op.eq]: originId
-      }
-    }
+        [Op.eq]: originId,
+      },
+    },
   });
   if (entity) {
     entity.type = type;
@@ -1534,76 +1560,76 @@ const upsertAnnouncement = async(
     body,
     publishedAt,
     expiresAt,
-    published
+    published,
   };
   await organisationAnnouncements.create(entity);
   return mapAnnouncementFromEntity(entity);
 };
 
-const getApproversForOrg = async organisationId => {
+const getApproversForOrg = async (organisationId) => {
   const entites = await userOrganisations.findAll({
     where: {
       organisation_id: {
-        [Op.eq]: organisationId
+        [Op.eq]: organisationId,
       },
       role_id: {
-        [Op.eq]: 10000
-      }
-    }
+        [Op.eq]: 10000,
+      },
+    },
   });
   return await Promise.all(
-    entites.map(async approver => approver.getDataValue('user_id'))
+    entites.map(async (approver) => approver.getDataValue("user_id")),
   );
 };
 
-const createUserOrgRequest = async request => {
+const createUserOrgRequest = async (request) => {
   const id = uuid.v4();
   const entity = {
     id,
     user_id: request.userId.toUpperCase(),
     organisation_id: request.organisationId,
     reason: request.reason,
-    status: request.status || 0
+    status: request.status || 0,
   };
   await userOrganisationRequests.create(entity);
   return id;
 };
 
-const getUserOrgRequestById = async rid => {
+const getUserOrgRequestById = async (rid) => {
   const entity = await userOrganisationRequests.findOne({
     where: {
       id: {
-        [Op.eq]: rid
-      }
+        [Op.eq]: rid,
+      },
     },
-    include: ['Organisation']
+    include: ["Organisation"],
   });
   return {
-    id: entity.get('id'),
-    org_id: entity.Organisation.getDataValue('id'),
-    org_name: entity.Organisation.getDataValue('name'),
-    user_id: entity.getDataValue('user_id'),
-    created_date: entity.getDataValue('createdAt'),
-    actioned_date: entity.getDataValue('actioned_at'),
-    actioned_by: entity.getDataValue('actioned_by'),
-    actioned_reason: entity.getDataValue('actioned_reason'),
-    reason: entity.getDataValue('reason'),
+    id: entity.get("id"),
+    org_id: entity.Organisation.getDataValue("id"),
+    org_name: entity.Organisation.getDataValue("name"),
+    user_id: entity.getDataValue("user_id"),
+    created_date: entity.getDataValue("createdAt"),
+    actioned_date: entity.getDataValue("actioned_at"),
+    actioned_by: entity.getDataValue("actioned_by"),
+    actioned_reason: entity.getDataValue("actioned_reason"),
+    reason: entity.getDataValue("reason"),
     status: organisationRequestStatus.find(
-      c => c.id === entity.getDataValue('status')
-    )
+      (c) => c.id === entity.getDataValue("status"),
+    ),
   };
 };
 
-const getAllPendingRequestsForApprover = async userId => {
+const getAllPendingRequestsForApprover = async (userId) => {
   const userApproverOrgs = await userOrganisations.findAll({
     where: {
       user_id: {
-        [Op.eq]: userId
+        [Op.eq]: userId,
       },
       role_id: {
-        [Op.eq]: 10000
-      }
-    }
+        [Op.eq]: 10000,
+      },
+    },
   });
   if (!userApproverOrgs || userApproverOrgs.length === 0) {
     return [];
@@ -1612,127 +1638,139 @@ const getAllPendingRequestsForApprover = async userId => {
   const requestsForUsersOrgs = await userOrganisationRequests.findAll({
     where: {
       organisation_id: {
-        [Op.in]: userApproverOrgs.map(c => c.organisation_id)
+        [Op.in]: userApproverOrgs.map((c) => c.organisation_id),
       },
       status: {
-        [Op.or]: [0, 2, 3]
-      }
+        [Op.or]: [0, 2, 3],
+      },
     },
-    include: ['Organisation']
+    include: ["Organisation"],
   });
 
   if (!requestsForUsersOrgs || requestsForUsersOrgs.length === 0) {
     return [];
   }
-  return requestsForUsersOrgs.map(entity => ({
-    id: entity.get('id'),
-    org_id: entity.Organisation.getDataValue('id'),
-    org_name: entity.Organisation.getDataValue('name'),
-    user_id: entity.getDataValue('user_id'),
-    created_date: entity.getDataValue('createdAt'),
+  return requestsForUsersOrgs.map((entity) => ({
+    id: entity.get("id"),
+    org_id: entity.Organisation.getDataValue("id"),
+    org_name: entity.Organisation.getDataValue("name"),
+    user_id: entity.getDataValue("user_id"),
+    created_date: entity.getDataValue("createdAt"),
     status: organisationRequestStatus.find(
-      c => c.id === entity.getDataValue('status')
-    )
+      (c) => c.id === entity.getDataValue("status"),
+    ),
   }));
 };
-const getAllPendingRequestTypesForApprover = async(userId, pageNumber = 1, pageSize = 25, filterDateStart = undefined, filterDateEnd = undefined) => {
+const getAllPendingRequestTypesForApprover = async (
+  userId,
+  pageNumber = 1,
+  pageSize = 25,
+  filterDateStart = undefined,
+  filterDateEnd = undefined,
+) => {
   const userApproverOrgs = await userOrganisations.findAll({
     where: {
       user_id: {
-        [Op.eq]: userId
+        [Op.eq]: userId,
       },
       role_id: {
-        [Op.eq]: 10000
-      }
-    }
+        [Op.eq]: 10000,
+      },
+    },
   });
 
   if (!userApproverOrgs || userApproverOrgs.length === 0) {
     return [];
   }
 
-  const orgIds = userApproverOrgs.map(c => c.organisation_id);
-  const pagedResults = await pagedListOfAllRequestTypesForOrg(JSON.stringify(orgIds), pageNumber, pageSize, filterDateStart, filterDateEnd);
+  const orgIds = userApproverOrgs.map((c) => c.organisation_id);
+  const pagedResults = await pagedListOfAllRequestTypesForOrg(
+    JSON.stringify(orgIds),
+    pageNumber,
+    pageSize,
+    filterDateStart,
+    filterDateEnd,
+  );
   if (!pagedResults || pagedResults.length === 0) {
     return [];
   }
   return pagedResults;
 };
 
-const getRequestsAssociatedWithOrganisation = async orgId => {
+const getRequestsAssociatedWithOrganisation = async (orgId) => {
   const userOrgRequests = await userOrganisationRequests.findAll({
     where: {
       organisation_id: {
-        [Op.eq]: orgId
+        [Op.eq]: orgId,
       },
       status: {
-        [Op.or]: [0, 2, 3]
-      }
+        [Op.or]: [0, 2, 3],
+      },
     },
-    include: ['Organisation']
+    include: ["Organisation"],
   });
   if (!userOrgRequests || userOrgRequests.length === 0) {
     return [];
   }
 
-  return userOrgRequests.map(entity => ({
-    id: entity.get('id'),
-    org_id: entity.Organisation.getDataValue('id'),
-    org_name: entity.Organisation.getDataValue('name'),
-    user_id: entity.getDataValue('user_id'),
-    created_date: entity.getDataValue('createdAt'),
+  return userOrgRequests.map((entity) => ({
+    id: entity.get("id"),
+    org_id: entity.Organisation.getDataValue("id"),
+    org_name: entity.Organisation.getDataValue("name"),
+    user_id: entity.getDataValue("user_id"),
+    created_date: entity.getDataValue("createdAt"),
     status: organisationRequestStatus.find(
-      c => c.id === entity.getDataValue('status')
-    )
+      (c) => c.id === entity.getDataValue("status"),
+    ),
   }));
 };
 
-const getRequestsAssociatedWithOrganisations = async orgIds => {
+const getRequestsAssociatedWithOrganisations = async (orgIds) => {
   const ids = JSON.parse(decodeURIComponent(orgIds));
   const userOrgRequests = await userOrganisationRequests.findAll({
     where: {
       organisation_id: {
-        [Op.in]: ids
+        [Op.in]: ids,
       },
       status: {
-        [Op.or]: [0, 2, 3]
-      }
+        [Op.or]: [0, 2, 3],
+      },
     },
-    include: ['Organisation']
+    include: ["Organisation"],
   });
   if (!userOrgRequests || userOrgRequests.length === 0) {
     return [];
   }
 
-  return userOrgRequests.map(entity => ({
-    id: entity.get('id'),
-    org_id: entity.Organisation.getDataValue('id'),
-    org_name: entity.Organisation.getDataValue('name'),
-    user_id: entity.getDataValue('user_id'),
-    created_date: entity.getDataValue('createdAt'),
+  return userOrgRequests.map((entity) => ({
+    id: entity.get("id"),
+    org_id: entity.Organisation.getDataValue("id"),
+    org_name: entity.Organisation.getDataValue("name"),
+    user_id: entity.getDataValue("user_id"),
+    created_date: entity.getDataValue("createdAt"),
     status: organisationRequestStatus.find(
-      c => c.id === entity.getDataValue('status')
-    )
+      (c) => c.id === entity.getDataValue("status"),
+    ),
   }));
 };
 
-const pagedListOfRequests = async(
+const pagedListOfRequests = async (
   pageNumber = 1,
   pageSize = 25,
-  filterStates = undefined
+  filterStates = undefined,
 ) => {
   const offset = (pageNumber - 1) * pageSize;
   const query = {
     where: {},
     limit: pageSize,
     offset,
-    order: [['createdAt', 'ASC']],
-    include: ['Organisation']
+    order: [["createdAt", "ASC"]],
+    include: ["Organisation"],
   };
 
   if (filterStates && filterStates.length > 0) {
     query.where.status = {
-      [Op.in]: filterStates
+      [Op.in]: filterStates,
     };
   }
   const userOrgRequests = await userOrganisationRequests.findAndCountAll(query);
@@ -1742,32 +1780,32 @@ const pagedListOfRequests = async(
   const totalNumberOfRecords = userOrgRequests.count;
   const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
 
-  const requests = userOrgRequests.rows.map(entity => ({
-    id: entity.get('id'),
-    org_id: entity.Organisation.getDataValue('id'),
-    org_name: entity.Organisation.getDataValue('name'),
-    user_id: entity.getDataValue('user_id'),
-    created_date: entity.getDataValue('createdAt'),
+  const requests = userOrgRequests.rows.map((entity) => ({
+    id: entity.get("id"),
+    org_id: entity.Organisation.getDataValue("id"),
+    org_name: entity.Organisation.getDataValue("name"),
+    user_id: entity.getDataValue("user_id"),
+    created_date: entity.getDataValue("createdAt"),
     status: organisationRequestStatus.find(
-      c => c.id === entity.getDataValue('status')
+      (c) => c.id === entity.getDataValue("status"),
     ),
-    reason: entity.getDataValue('reason')
+    reason: entity.getDataValue("reason"),
   }));
 
   return {
     requests,
     totalNumberOfRecords,
-    totalNumberOfPages
+    totalNumberOfPages,
   };
 };
 
-const updateUserOrgRequest = async(requestId, request) => {
+const updateUserOrgRequest = async (requestId, request) => {
   const existingRequest = await userOrganisationRequests.findOne({
     where: {
       id: {
-        [Op.eq]: requestId
-      }
-    }
+        [Op.eq]: requestId,
+      },
+    },
   });
 
   if (!existingRequest) {
@@ -1780,99 +1818,125 @@ const updateUserOrgRequest = async(requestId, request) => {
     status: updatedRequest.status,
     actioned_by: updatedRequest.actioned_by,
     actioned_reason: updatedRequest.actioned_reason,
-    actioned_at: updatedRequest.actioned_at
+    actioned_at: updatedRequest.actioned_at,
   });
 };
 
-const getRequestsAssociatedWithUser = async userId => {
+const getRequestsAssociatedWithUser = async (userId) => {
   const userRequests = await userOrganisationRequests.findAll({
     where: {
       user_id: {
-        [Op.eq]: userId
+        [Op.eq]: userId,
       },
       status: {
-        [Op.or]: [0, 2, 3]
-      }
+        [Op.or]: [0, 2, 3],
+      },
     },
-    include: ['Organisation']
+    include: ["Organisation"],
   });
   if (!userRequests || userRequests.length === 0) {
     return [];
   }
-  return userRequests.map(entity => ({
-    id: entity.get('id'),
-    org_id: entity.Organisation.getDataValue('id'),
-    org_name: entity.Organisation.getDataValue('name'),
-    LegalName: entity.Organisation.getDataValue('LegalName'),
-    urn: entity.Organisation.getDataValue('URN'),
-    uid: entity.Organisation.getDataValue('UID'),
-    upin: entity.Organisation.getDataValue('UPIN'),
-    ukprn: entity.Organisation.getDataValue('UKPRN'),
+  return userRequests.map((entity) => ({
+    id: entity.get("id"),
+    org_id: entity.Organisation.getDataValue("id"),
+    org_name: entity.Organisation.getDataValue("name"),
+    LegalName: entity.Organisation.getDataValue("LegalName"),
+    urn: entity.Organisation.getDataValue("URN"),
+    uid: entity.Organisation.getDataValue("UID"),
+    upin: entity.Organisation.getDataValue("UPIN"),
+    ukprn: entity.Organisation.getDataValue("UKPRN"),
     org_status:
       organisationStatus.find(
-        c => c.id === entity.Organisation.getDataValue('Status')
+        (c) => c.id === entity.Organisation.getDataValue("Status"),
       ) || undefined,
-    user_id: entity.getDataValue('user_id'),
-    created_date: entity.getDataValue('createdAt'),
+    user_id: entity.getDataValue("user_id"),
+    created_date: entity.getDataValue("createdAt"),
     status: organisationRequestStatus.find(
-      c => c.id === entity.getDataValue('status')
-    )
+      (c) => c.id === entity.getDataValue("status"),
+    ),
   }));
 };
 
-const getLatestActionedRequestAssociated = async userId => {
+const getLatestActionedRequestAssociated = async (userId) => {
   const entity = await userOrganisationRequests.findOne({
     where: {
       user_id: {
-        [Op.eq]: userId
+        [Op.eq]: userId,
       },
       status: {
-        [Op.or]: [-1, 0, 2, 3, 1]
-      }
+        [Op.or]: [-1, 0, 2, 3, 1],
+      },
     },
-    order: [['actioned_at', 'DESC']],
-    include: ['Organisation']
+    order: [["actioned_at", "DESC"]],
+    include: ["Organisation"],
   });
   if (!entity) {
     return null;
   }
   return {
-    id: entity.get('id'),
-    org_id: entity.Organisation.getDataValue('id'),
-    org_name: entity.Organisation.getDataValue('name'),
-    LegalName: entity.Organisation.getDataValue('LegalName'),
-    urn: entity.Organisation.getDataValue('URN'),
-    uid: entity.Organisation.getDataValue('UID'),
-    upin: entity.Organisation.getDataValue('UPIN'),
-    ukprn: entity.Organisation.getDataValue('UKPRN'),
+    id: entity.get("id"),
+    org_id: entity.Organisation.getDataValue("id"),
+    org_name: entity.Organisation.getDataValue("name"),
+    LegalName: entity.Organisation.getDataValue("LegalName"),
+    urn: entity.Organisation.getDataValue("URN"),
+    uid: entity.Organisation.getDataValue("UID"),
+    upin: entity.Organisation.getDataValue("UPIN"),
+    ukprn: entity.Organisation.getDataValue("UKPRN"),
     org_status:
       organisationStatus.find(
-        c => c.id === entity.Organisation.getDataValue('Status')
+        (c) => c.id === entity.Organisation.getDataValue("Status"),
       ) || undefined,
-    user_id: entity.getDataValue('user_id'),
-    created_date: entity.getDataValue('createdAt'),
+    user_id: entity.getDataValue("user_id"),
+    created_date: entity.getDataValue("createdAt"),
     status: organisationRequestStatus.find(
-      c => c.id === entity.getDataValue('status')
-    )
+      (c) => c.id === entity.getDataValue("status"),
+    ),
   };
 };
 
-const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize, sortBy, sortDirection, filterCategories = [],
-  filterStates = []) => {
+const getOrganisationsAssociatedToService = async (
+  sid,
+  criteria,
+  page,
+  pageSize,
+  sortBy,
+  sortDirection,
+  filterCategories = [],
+  filterStates = [],
+) => {
   try {
-    const orderDirection = sortDirection ? sortDirection.toUpperCase() : 'ASC';
-    const orderBy = sortBy || 'name';
+    const orderDirection = sortDirection ? sortDirection.toUpperCase() : "ASC";
+    const orderBy = sortBy || "name";
 
-    const fieldsToSearch = ['name', 'LegalName', 'URN', 'UID', 'UPIN', 'UKPRN', 'EstablishmentNumber', 'legacyId'];
-    const fieldsToDisplay = [...fieldsToSearch, 'id', 'Status', 'Type', 'Category'];
+    const fieldsToSearch = [
+      "name",
+      "LegalName",
+      "URN",
+      "UID",
+      "UPIN",
+      "UKPRN",
+      "EstablishmentNumber",
+      "legacyId",
+    ];
+    const fieldsToDisplay = [
+      ...fieldsToSearch,
+      "id",
+      "Status",
+      "Type",
+      "Category",
+    ];
 
-    const transformedFieldsToDisplay = fieldsToDisplay.map(field => [Sequelize.col(`Organisation.${field}`), field]);
+    const transformedFieldsToDisplay = fieldsToDisplay.map((field) => [
+      Sequelize.col(`Organisation.${field}`),
+      field,
+    ]);
 
     const searchQuery = {};
 
     if (criteria) {
-      const likeQueries = fieldsToSearch.map(field => ({
-        [field]: { [Op.like]: `%${criteria}%` }
+      const likeQueries = fieldsToSearch.map((field) => ({
+        [field]: { [Op.like]: `%${criteria}%` },
       }));
 
       searchQuery[Op.or] = likeQueries;
@@ -1891,137 +1955,180 @@ const getOrganisationsAssociatedToService = async(sid, criteria, page, pageSize,
     const query = {
       where: { service_id: sid },
       attributes: [
-        [Sequelize.fn('DISTINCT', Sequelize.col('Organisation.id')), 'id'],
-        ...transformedFieldsToDisplay
+        [Sequelize.fn("DISTINCT", Sequelize.col("Organisation.id")), "id"],
+        ...transformedFieldsToDisplay,
       ],
-      include: [{
-        model: organisations,
-        as: 'Organisation',
-        where: searchQuery,
-        attributes: []
-      }],
-      order: [['Organisation', orderBy, orderDirection]],
-      raw: true
+      include: [
+        {
+          model: organisations,
+          as: "Organisation",
+          where: searchQuery,
+          attributes: [],
+        },
+      ],
+      order: [["Organisation", orderBy, orderDirection]],
+      raw: true,
     };
 
     const orgCategoriesQuery = {
       where: { service_id: sid },
       attributes: [
-        [Sequelize.fn('DISTINCT', Sequelize.col('Organisation.Category')), 'Category'],
-        [Sequelize.fn('COUNT', Sequelize.col('Organisation.Category')), 'CategoryCount']
+        [
+          Sequelize.fn("DISTINCT", Sequelize.col("Organisation.Category")),
+          "Category",
+        ],
+        [
+          Sequelize.fn("COUNT", Sequelize.col("Organisation.Category")),
+          "CategoryCount",
+        ],
       ],
-      include: [{
-        model: organisations,
-        as: 'Organisation',
-        attributes: []
-      }],
-      group: ['Organisation.Category'],
-      order: [[Sequelize.fn('COUNT', Sequelize.col('Organisation.Category')), 'DESC']],
-      raw: true
+      include: [
+        {
+          model: organisations,
+          as: "Organisation",
+          attributes: [],
+        },
+      ],
+      group: ["Organisation.Category"],
+      order: [
+        [Sequelize.fn("COUNT", Sequelize.col("Organisation.Category")), "DESC"],
+      ],
+      raw: true,
     };
 
     const orgStatusesQuery = {
       where: { service_id: sid },
       attributes: [
-        [Sequelize.fn('DISTINCT', Sequelize.col('Organisation.Status')), 'Status'],
-        [Sequelize.fn('COUNT', Sequelize.col('Organisation.Status')), 'StatusCount']
+        [
+          Sequelize.fn("DISTINCT", Sequelize.col("Organisation.Status")),
+          "Status",
+        ],
+        [
+          Sequelize.fn("COUNT", Sequelize.col("Organisation.Status")),
+          "StatusCount",
+        ],
       ],
-      include: [{
-        model: organisations,
-        as: 'Organisation',
-        attributes: []
-      }],
-      group: ['Organisation.Status'],
-      order: [[Sequelize.fn('COUNT', Sequelize.col('Organisation.Status')), 'DESC']],
-      raw: true
+      include: [
+        {
+          model: organisations,
+          as: "Organisation",
+          attributes: [],
+        },
+      ],
+      group: ["Organisation.Status"],
+      order: [
+        [Sequelize.fn("COUNT", Sequelize.col("Organisation.Status")), "DESC"],
+      ],
+      raw: true,
     };
 
-    const [organisationEntities, allAvailableCategories, allAvailableStatuses] = await Promise.all([
-      users.findAll(query),
-      users.findAll(orgCategoriesQuery),
-      users.findAll(orgStatusesQuery)
-    ]);
+    const [organisationEntities, allAvailableCategories, allAvailableStatuses] =
+      await Promise.all([
+        users.findAll(query),
+        users.findAll(orgCategoriesQuery),
+        users.findAll(orgStatusesQuery),
+      ]);
 
     const offset = (page - 1) * pageSize;
     const pagedResults = organisationEntities.slice(offset, offset + pageSize);
 
     const totalNumberOfRecords = organisationEntities.length;
-    const organistationsList = pagedResults.map(o => mapOrganisationFromEntity(o));
-    const availableCategories = mapArrayToProperty(allAvailableCategories, 'Category');
-    const availableStatuses = mapArrayToProperty(allAvailableStatuses, 'Status');
+    const organistationsList = pagedResults.map((o) =>
+      mapOrganisationFromEntity(o),
+    );
+    const availableCategories = mapArrayToProperty(
+      allAvailableCategories,
+      "Category",
+    );
+    const availableStatuses = mapArrayToProperty(
+      allAvailableStatuses,
+      "Status",
+    );
     const organisationCategoryMap = arrayToMapById(organisationCategory);
     const organisationStatusesMap = arrayToMapById(organisationStatus);
 
-    const organisationCategories = mapAndFilterArray(availableCategories, organisationCategoryMap);
-    const organisationStatuses = mapAndFilterArray(availableStatuses, organisationStatusesMap);
+    const organisationCategories = mapAndFilterArray(
+      availableCategories,
+      organisationCategoryMap,
+    );
+    const organisationStatuses = mapAndFilterArray(
+      availableStatuses,
+      organisationStatusesMap,
+    );
     return {
       organisations: organistationsList,
       page,
       totalNumberOfPages: Math.ceil(totalNumberOfRecords / pageSize),
       totalNumberOfRecords,
       organisationCategories,
-      organisationStatuses
+      organisationStatuses,
     };
   } catch (e) {
-    logger.error(`error getting organisations associated with service ${sid} - ${e.message} - error: ${e}`);
+    logger.error(
+      `error getting organisations associated with service ${sid} - ${e.message} - error: ${e}`,
+    );
     throw e;
   }
 };
 
-const getServiceAndSubServiceReqForOrgs = async orgIds => {
+const getServiceAndSubServiceReqForOrgs = async (orgIds) => {
   const organisationsIds = JSON.parse(decodeURIComponent(orgIds));
   const userServiceAndSubServiceReq = await userServiceRequests.findAll({
     where: {
       organisation_id: {
-        [Op.in]: organisationsIds
+        [Op.in]: organisationsIds,
       },
       status: {
-        [Op.or]: [0, 2, 3]
-      }
+        [Op.or]: [0, 2, 3],
+      },
     },
-    include: ['Organisation']
+    include: ["Organisation"],
   });
-  if (!userServiceAndSubServiceReq || userServiceAndSubServiceReq.length === 0) {
+  if (
+    !userServiceAndSubServiceReq ||
+    userServiceAndSubServiceReq.length === 0
+  ) {
     return [];
   }
 
-  return userServiceAndSubServiceReq.map(entity => ({
-    id: entity.get('id'),
-    org_id: entity.Organisation.getDataValue('id'),
-    org_name: entity.Organisation.getDataValue('name'),
-    user_id: entity.getDataValue('user_id'),
-    created_date: entity.getDataValue('createdAt'),
-    request_type: serviceRequestsTypes.find(e => e.id === entity.getDataValue('request_type')),
+  return userServiceAndSubServiceReq.map((entity) => ({
+    id: entity.get("id"),
+    org_id: entity.Organisation.getDataValue("id"),
+    org_name: entity.Organisation.getDataValue("name"),
+    user_id: entity.getDataValue("user_id"),
+    created_date: entity.getDataValue("createdAt"),
+    request_type: serviceRequestsTypes.find(
+      (e) => e.id === entity.getDataValue("request_type"),
+    ),
     status: serviceRequestStatus.find(
-      c => c.id === entity.getDataValue('status')
-    )
+      (c) => c.id === entity.getDataValue("status"),
+    ),
   }));
 };
 
-const pagedListOfAllRequestTypesForOrg = async(
+const pagedListOfAllRequestTypesForOrg = async (
   orgIds,
   pageNumber = 1,
   pageSize = 25,
   filterDateStart = undefined,
-  filterDateEnd = undefined
+  filterDateEnd = undefined,
 ) => {
   const organisationsIds = JSON.parse(decodeURIComponent(orgIds));
 
   const query = {
     where: {
       organisation_id: {
-        [Op.in]: organisationsIds
+        [Op.in]: organisationsIds,
       },
       status: {
-        [Op.or]: [0, 2, 3]
-      }
+        [Op.or]: [0, 2, 3],
+      },
     },
-    include: ['Organisation']
+    include: ["Organisation"],
   };
   if (filterDateStart !== undefined && filterDateEnd !== undefined) {
     query.where.createdAt = {
-      [Op.between]: [filterDateStart, filterDateEnd]
-
+      [Op.between]: [filterDateStart, filterDateEnd],
     };
   }
 
@@ -2031,38 +2138,44 @@ const pagedListOfAllRequestTypesForOrg = async(
   let orgsAccessRequests = [];
   let orgsServiceSubServiceRequests = [];
   if (userOrgRequests || userOrgRequests.length !== 0) {
-    orgsAccessRequests = userOrgRequests.rows.map(entity => ({
-      id: entity.get('id'),
-      org_id: entity.Organisation.getDataValue('id'),
-      org_name: entity.Organisation.getDataValue('name'),
-      user_id: entity.getDataValue('user_id'),
-      created_date: entity.getDataValue('createdAt'),
-      request_type: { id: 'organisation', name: 'Organisation access' },
+    orgsAccessRequests = userOrgRequests.rows.map((entity) => ({
+      id: entity.get("id"),
+      org_id: entity.Organisation.getDataValue("id"),
+      org_name: entity.Organisation.getDataValue("name"),
+      user_id: entity.getDataValue("user_id"),
+      created_date: entity.getDataValue("createdAt"),
+      request_type: { id: "organisation", name: "Organisation access" },
       status: organisationRequestStatus.find(
-        c => c.id === entity.getDataValue('status')
-      )
+        (c) => c.id === entity.getDataValue("status"),
+      ),
     }));
   }
   if (userServRequests || userOrgRequests.length !== 0) {
     orgsServiceSubServiceRequests = userServRequests.rows.map((entity) => ({
-      id: entity.get('id'),
-      org_id: entity.Organisation.getDataValue('id'),
-      org_name: entity.Organisation.getDataValue('name'),
-      service_id: entity.getDataValue('service_id'),
-      role_ids: entity.getDataValue('role_ids'),
-      user_id: entity.getDataValue('user_id'),
-      created_date: entity.getDataValue('createdAt'),
+      id: entity.get("id"),
+      org_id: entity.Organisation.getDataValue("id"),
+      org_name: entity.Organisation.getDataValue("name"),
+      service_id: entity.getDataValue("service_id"),
+      role_ids: entity.getDataValue("role_ids"),
+      user_id: entity.getDataValue("user_id"),
+      created_date: entity.getDataValue("createdAt"),
       request_type: serviceRequestsTypes.find(
-        (e) => e.id === entity.getDataValue('request_type')
+        (e) => e.id === entity.getDataValue("request_type"),
       ),
       status: serviceRequestStatus.find(
-        (c) => c.id === entity.getDataValue('status')
-      )
+        (c) => c.id === entity.getDataValue("status"),
+      ),
     }));
   }
 
-  const allAccessRequestsforOrgs = orgsAccessRequests.concat(orgsServiceSubServiceRequests);
-  const orderedRequests = orderBy(allAccessRequestsforOrgs, 'created_date', 'desc');
+  const allAccessRequestsforOrgs = orgsAccessRequests.concat(
+    orgsServiceSubServiceRequests,
+  );
+  const orderedRequests = orderBy(
+    allAccessRequestsforOrgs,
+    "created_date",
+    "desc",
+  );
   const offset = pageSize * (pageNumber - 1);
   const totalNumberOfPages = Math.ceil(orderedRequests.length / pageSize);
   const paginatedItems = orderedRequests.slice(offset, pageSize * pageNumber);
@@ -2072,70 +2185,70 @@ const pagedListOfAllRequestTypesForOrg = async(
     requests: paginatedItems,
     pageNumber,
     totalNumberOfPages,
-    totalNumberOfRecords
+    totalNumberOfRecords,
   };
 };
 
-const pagedListOfServSubServRequests = async(
+const pagedListOfServSubServRequests = async (
   pageNumber = 1,
   pageSize = 25,
-  filterStates = undefined
+  filterStates = undefined,
 ) => {
   const offset = (pageNumber - 1) * pageSize;
   const query = {
     where: {},
     limit: pageSize,
     offset,
-    order: [['createdAt', 'ASC']],
-    include: ['Organisation']
+    order: [["createdAt", "ASC"]],
+    include: ["Organisation"],
   };
 
   if (filterStates && filterStates.length > 0) {
     query.where.status = {
-      [Op.in]: filterStates
+      [Op.in]: filterStates,
     };
   }
-  const userServSubServRequests = await userServiceRequests.findAndCountAll(query);
+  const userServSubServRequests =
+    await userServiceRequests.findAndCountAll(query);
   if (!userServSubServRequests || userServSubServRequests.length === 0) {
     return [];
   }
   const totalNumberOfRecords = userServSubServRequests.count;
   const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
 
-  const requests = userServSubServRequests.rows.map(entity => ({
-
-    id: entity.get('id'),
-    org_id: entity.Organisation.getDataValue('id'),
-    org_name: entity.Organisation.getDataValue('name'),
-    service_id: entity.getDataValue('service_id'),
-    role_ids: entity.getDataValue('role_ids'),
-    user_id: entity.getDataValue('user_id'),
-    created_date: entity.getDataValue('createdAt'),
+  const requests = userServSubServRequests.rows.map((entity) => ({
+    id: entity.get("id"),
+    org_id: entity.Organisation.getDataValue("id"),
+    org_name: entity.Organisation.getDataValue("name"),
+    service_id: entity.getDataValue("service_id"),
+    role_ids: entity.getDataValue("role_ids"),
+    user_id: entity.getDataValue("user_id"),
+    created_date: entity.getDataValue("createdAt"),
     request_type: serviceRequestsTypes.find(
-      (e) => e.id === entity.getDataValue('request_type')
+      (e) => e.id === entity.getDataValue("request_type"),
     ),
     status: serviceRequestStatus.find(
-      (c) => c.id === entity.getDataValue('status')
-    )
+      (c) => c.id === entity.getDataValue("status"),
+    ),
   }));
 
   return {
     requests,
     totalNumberOfRecords,
-    totalNumberOfPages
+    totalNumberOfPages,
   };
 };
 
-const updateUserServSubServRequest = async(requestId, request) => {
+const updateUserServSubServRequest = async (requestId, request) => {
   const existingRequest = await userServiceRequests.findOne({
     where: {
       id: {
-        [Op.eq]: requestId
+        [Op.eq]: requestId,
       },
       status: {
-        [Op.eq]: 0
-      }
-    }
+        [Op.eq]: 0,
+      },
+    },
   });
 
   if (!existingRequest) {
@@ -2148,7 +2261,7 @@ const updateUserServSubServRequest = async(requestId, request) => {
     status: updatedRequest.status,
     actioned_by: updatedRequest.actioned_by,
     actioned_reason: updatedRequest.actioned_reason,
-    actioned_at: updatedRequest.actioned_at
+    actioned_at: updatedRequest.actioned_at,
   });
 };
 
@@ -2208,5 +2321,5 @@ module.exports = {
   getAllPendingRequestTypesForApprover,
   pagedListOfServSubServRequests,
   updateUserServSubServRequest,
-  getAllOrgsByUpin
+  getAllOrgsByUpin,
 };

@@ -1,4 +1,4 @@
-const { pagedListOfUsers } = require('./data/organisationsStorage');
+const { pagedListOfUsers } = require("./data/organisationsStorage");
 
 const getPageNumber = (req) => {
   if (!req.query.page) {
@@ -30,7 +30,7 @@ const listUserOrganisations = async (req, res) => {
   const pageSize = getPageSize(req);
 
   const page = await pagedListOfUsers(pageNumber, pageSize);
-  return res.contentType('json').send(page);
+  return res.contentType("json").send(page);
 };
 
 module.exports = listUserOrganisations;

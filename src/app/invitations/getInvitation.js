@@ -1,7 +1,10 @@
-const invitationStorage = require('./data/invitationsStorage');
+const invitationStorage = require("./data/invitationsStorage");
 
 const action = async (req, res) => {
-  const organisationsWithServices = await invitationStorage.getForInvitationId(req.params.inv_id, req.header('x-correlation-id'));
+  const organisationsWithServices = await invitationStorage.getForInvitationId(
+    req.params.inv_id,
+    req.header("x-correlation-id"),
+  );
   if (!organisationsWithServices) {
     res.status(404).send();
     return;

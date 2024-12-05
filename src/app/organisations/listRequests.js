@@ -1,4 +1,4 @@
-const { pagedListOfRequests } = require('./data/organisationsStorage');
+const { pagedListOfRequests } = require("./data/organisationsStorage");
 
 const pageSize = 25;
 
@@ -31,7 +31,7 @@ const listRequests = async (req, res) => {
 
   const page = await pagedListOfRequests(pageNumber, pageSize, filterStates);
 
-  return res.contentType('json').send({
+  return res.contentType("json").send({
     requests: page.requests,
     page: pageNumber,
     totalNumberOfPages: page.totalNumberOfPages,

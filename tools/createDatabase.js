@@ -1,4 +1,4 @@
-const schema = require('./../src/infrastructure/repository');
+const schema = require("./../src/infrastructure/repository");
 
 const run = async () => {
   try {
@@ -12,6 +12,5 @@ const run = async () => {
     process.exit(1);
   }
 };
-
 
 run();
