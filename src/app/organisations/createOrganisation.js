@@ -1,7 +1,19 @@
-const config = require('./../../infrastructure/config')();
-const { add, update, getOrgByUrn, getOrgByUid, getOrgByEstablishmentNumber, getOrgByUkprn, getOrgByLegacyId, getOrganisationCategories, getNextOrganisationLegacyId } = require('./data/organisationsStorage');
-const { raiseNotificationThatOrganisationHasChanged } = require('./notifications');
-const uuid = require('uuid');
+const config = require("./../../infrastructure/config")();
+const {
+  add,
+  update,
+  getOrgByUrn,
+  getOrgByUid,
+  getOrgByEstablishmentNumber,
+  getOrgByUkprn,
+  getOrgByLegacyId,
+  getOrganisationCategories,
+  getNextOrganisationLegacyId,
+} = require("./data/organisationsStorage");
+const {
+  raiseNotificationThatOrganisationHasChanged,
+} = require("./notifications");
+const uuid = require("uuid");
 
 const mapOrg = (req) => {
   return {
@@ -9,9 +21,11 @@ const mapOrg = (req) => {
     category: {
       id: req.body.category.id,
     },
-    type: req.body.type ? {
-      id: req.body.type.id,
-    } : undefined,
+    type: req.body.type
+      ? {
+          id: req.body.type.id,
+        }
+      : undefined,
     urn: req.body.urn,
     uid: req.body.uid,
     ukprn: req.body.ukprn,
@@ -22,12 +36,16 @@ const mapOrg = (req) => {
     closedOn: req.body.closedOn,
     address: req.body.address,
     telephone: req.body.telephone,
-    region: req.body.region ? {
-      id: req.body.region.id,
-    } : undefined,
-    phaseOfEducation: req.body.phaseOfEducation ? {
-      id: req.body.phaseOfEducation.id,
-    } : undefined,
+    region: req.body.region
+      ? {
+          id: req.body.region.id,
+        }
+      : undefined,
+    phaseOfEducation: req.body.phaseOfEducation
+      ? {
+          id: req.body.phaseOfEducation.id,
+        }
+      : undefined,
     statutoryLowAge: req.body.statutoryLowAge,
     statutoryHighAge: req.body.statutoryHighAge,
     legacyId: req.body.legacyId,
@@ -35,11 +53,13 @@ const mapOrg = (req) => {
 };
 const validateOrg = async (organisation) => {
   if (!organisation.category || !organisation.category.id) {
-    return 'Category is required';
+    return "Category is required";
   }
 
   const validCategories = await getOrganisationCategories();
-  const validCategory = validCategories.find(x => x.id === organisation.category.id);
+  const validCategory = validCategories.find(
+    (x) => x.id === organisation.category.id,
+  );
   if (!validCategory) {
     return `Unrecognised category ${organisation.category.id}`;
   }
@@ -59,8 +79,15 @@ const getExistingOrg = async (organisation) => {
   if (!existing && organisation.uid) {
     existing = await getOrgByUid(organisation.uid, category);
   }
-  if (!existing && organisation.category.id === '002' && organisation.establishmentNumber) {
-    existing = await getOrgByEstablishmentNumber(organisation.establishmentNumber, category);
+  if (
+    !existing &&
+    organisation.category.id === "002" &&
+    organisation.establishmentNumber
+  ) {
+    existing = await getOrgByEstablishmentNumber(
+      organisation.establishmentNumber,
+      category,
+    );
   }
   if (!existing && organisation.ukprn) {
     existing = await getOrgByUkprn(organisation.ukprn, category);
@@ -86,7 +113,10 @@ const action = async (req, res) => {
   const existingOrg = await getExistingOrg(organisation);
   if (existingOrg) {
     existingOrg.name = organisation.name;
-    existingOrg.legacyId = organisation.legacyId || existingOrg.legacyId || await generateLegacyId();
+    existingOrg.legacyId =
+      organisation.legacyId ||
+      existingOrg.legacyId ||
+      (await generateLegacyId());
     await update(existingOrg);
     await raiseNotificationThatOrganisationHasChanged(existingOrg.id);
 

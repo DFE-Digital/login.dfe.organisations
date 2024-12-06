@@ -1,5 +1,5 @@
-const logger = require('./../../infrastructure/logger');
-const servicesStorage = require('./data/servicesStorage');
+const logger = require("./../../infrastructure/logger");
+const servicesStorage = require("./data/servicesStorage");
 
 const action = async (req, res) => {
   try {
@@ -8,7 +8,10 @@ const action = async (req, res) => {
       return;
     }
 
-    const services = await servicesStorage.getUserUnassociatedServices(req.params.uid, req.header('x-correlation-id'));
+    const services = await servicesStorage.getUserUnassociatedServices(
+      req.params.uid,
+      req.header("x-correlation-id"),
+    );
 
     if (!services) {
       res.status(404);

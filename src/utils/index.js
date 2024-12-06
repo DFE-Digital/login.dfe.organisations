@@ -1,7 +1,11 @@
-const deprecate = require('./deprecateMiddleware');
-const encodeNumberToString = require('./encodeNumberToString');
-const { mapAsync, forEachAsync } = require('./asyncHelpers');
-const { mapArrayToProperty, arrayToMapById, mapAndFilterArray } = require('./helperFunctions');
+const deprecate = require("./deprecateMiddleware");
+const encodeNumberToString = require("./encodeNumberToString");
+const { mapAsync, forEachAsync } = require("./asyncHelpers");
+const {
+  mapArrayToProperty,
+  arrayToMapById,
+  mapAndFilterArray,
+} = require("./helperFunctions");
 
 module.exports = {
   deprecate,
@@ -10,5 +14,5 @@ module.exports = {
   forEachAsync,
   mapArrayToProperty,
   arrayToMapById,
-  mapAndFilterArray
+  mapAndFilterArray,
 };

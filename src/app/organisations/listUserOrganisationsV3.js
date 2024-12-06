@@ -1,4 +1,4 @@
-const { getPagedListOfUsersV3 } = require('./data/organisationsStorage');
+const { getPagedListOfUsersV3 } = require("./data/organisationsStorage");
 
 const getPageNumber = (req) => {
   if (!req.body.page) {
@@ -44,13 +44,18 @@ const getPolicies = (req) => {
   return req.body.policies;
 };
 
-const listUserOrganisationsV3 = async(req, res) => {
+const listUserOrganisationsV3 = async (req, res) => {
   const pageNumber = getPageNumber(req);
   const pageSize = getPageSize(req);
   const roleId = getRoleId(req);
   const policies = getPolicies(req);
 
-  const page = await getPagedListOfUsersV3(pageNumber, pageSize, roleId, policies);
+  const page = await getPagedListOfUsersV3(
+    pageNumber,
+    pageSize,
+    roleId,
+    policies,
+  );
   return res.json(page);
 };
 

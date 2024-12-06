@@ -1,7 +1,15 @@
-const { getUserOrgRequestById, updateUserOrgRequest } = require('./data/organisationsStorage');
-const logger = require('./../../infrastructure/logger');
+const {
+  getUserOrgRequestById,
+  updateUserOrgRequest,
+} = require("./data/organisationsStorage");
+const logger = require("./../../infrastructure/logger");
 
-const patchableProperties = ['status', 'actioned_by', 'actioned_reason', 'actioned_at'];
+const patchableProperties = [
+  "status",
+  "actioned_by",
+  "actioned_reason",
+  "actioned_at",
+];
 
 const validate = (req) => {
   const keys = Object.keys(req.body);
@@ -9,16 +17,16 @@ const validate = (req) => {
     return `Must specify at least one property. Patchable properties ${patchableProperties}`;
   }
   const errorMessages = keys.map((key) => {
-    if (!patchableProperties.find(x => x === key)) {
+    if (!patchableProperties.find((x) => x === key)) {
       return `Unpatchable property ${key}. Allowed properties ${patchableProperties}`;
     }
     return null;
   });
-  return errorMessages.find(x => x !== null);
+  return errorMessages.find((x) => x !== null);
 };
 
 const updateUserOrganisationRequest = async (req, res) => {
-  const correlationId = req.header('x-correlation-id');
+  const correlationId = req.header("x-correlation-id");
   const requestId = req.params.rid;
 
   try {
@@ -35,7 +43,9 @@ const updateUserOrganisationRequest = async (req, res) => {
     await updateUserOrgRequest(request.id, req.body);
     return res.status(202).send();
   } catch (e) {
-    logger.error(`Error updating request ${requestId} (correlation id: ${correlationId} - ${e.message}`);
+    logger.error(
+      `Error updating request ${requestId} (correlation id: ${correlationId} - ${e.message}`,
+    );
     throw e;
   }
 };

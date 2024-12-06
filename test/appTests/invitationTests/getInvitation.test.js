@@ -1,10 +1,10 @@
-jest.mock('./../../../src/infrastructure/logger', () => {
+jest.mock("./../../../src/infrastructure/logger", () => {
   return {
     error: jest.fn(),
     info: jest.fn(),
   };
 });
-jest.mock('./../../../src/app/invitations/data/invitationsStorage', () => {
+jest.mock("./../../../src/app/invitations/data/invitationsStorage", () => {
   const getForInvitationId = jest.fn();
   return {
     getForInvitationId: jest.fn().mockImplementation(getForInvitationId),
@@ -28,40 +28,40 @@ jest.mock('./../../../src/app/invitations/data/invitationsStorage', () => {
 // };
 
 const invitationDetails = {
-  invitationId: 'sdafsadfsdf',
+  invitationId: "sdafsadfsdf",
   organisation: {
-    id: 'org1',
-    name: 'organisation 1',
+    id: "org1",
+    name: "organisation 1",
   },
   role: {
     id: 0,
-    name: 'end user',
+    name: "end user",
   },
   approvers: [],
   services: [
     {
-      id: 'svc1',
-      name: 'service 1',
+      id: "svc1",
+      name: "service 1",
     },
   ],
 };
 
-const invitationsStorage = require('./../../../src/app/invitations/data/invitationsStorage');
-const httpMocks = require('node-mocks-http');
-const getInvitation = require('./../../../src/app/invitations/getInvitation');
+const invitationsStorage = require("./../../../src/app/invitations/data/invitationsStorage");
+const httpMocks = require("node-mocks-http");
+const getInvitation = require("./../../../src/app/invitations/getInvitation");
 
-describe('when getting an invitation', () => {
+describe("when getting an invitation", () => {
   let req;
   let res;
-  const expectedRequestCorrelationId = '3bd43d3b-7ead-40f0-b6b5-b31a64e9547d';
+  const expectedRequestCorrelationId = "3bd43d3b-7ead-40f0-b6b5-b31a64e9547d";
 
   beforeEach(() => {
     req = {
       params: {
-        inv_id: 'inv1',
+        inv_id: "inv1",
       },
       headers: {
-        'x-correlation-id': expectedRequestCorrelationId,
+        "x-correlation-id": expectedRequestCorrelationId,
       },
       header(header) {
         return this.headers[header];
@@ -74,7 +74,7 @@ describe('when getting an invitation', () => {
     invitationsStorage.getForInvitationId.mockReturnValue([invitationDetails]);
   });
 
-  it('then it should map services from storage', async () => {
+  it("then it should map services from storage", async () => {
     await getInvitation(req, res);
 
     expect(res._isEndCalled()).toBe(true);
@@ -95,7 +95,7 @@ describe('when getting an invitation', () => {
     });
   });
 
-  it('then it should return 404 response if invitation service not found', async () => {
+  it("then it should return 404 response if invitation service not found", async () => {
     invitationsStorage.getForInvitationId.mockReturnValue(null);
 
     await getInvitation(req, res);
@@ -103,10 +103,12 @@ describe('when getting an invitation', () => {
     expect(res._isEndCalled()).toBe(true);
     expect(res.statusCode).toBe(404);
   });
-  it('then the params are passed to the storage provider', async () => {
+  it("then the params are passed to the storage provider", async () => {
     await getInvitation(req, res);
 
-    expect(invitationsStorage.getForInvitationId.mock.calls[0][0]).toBe('inv1');
-    expect(invitationsStorage.getForInvitationId.mock.calls[0][1]).toBe(expectedRequestCorrelationId);
+    expect(invitationsStorage.getForInvitationId.mock.calls[0][0]).toBe("inv1");
+    expect(invitationsStorage.getForInvitationId.mock.calls[0][1]).toBe(
+      expectedRequestCorrelationId,
+    );
   });
 });

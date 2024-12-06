@@ -1,4 +1,4 @@
-const { pagedSearch } = require('./data/organisationsStorage');
+const { pagedSearch } = require("./data/organisationsStorage");
 
 const pageSize = 25;
 
@@ -25,7 +25,7 @@ const getPageNumber = (req) => {
   return page;
 };
 
-const listOrganisations = async(req, res) => {
+const listOrganisations = async (req, res) => {
   const pageNumber = getPageNumber(req);
   const criteria = req.query.search;
   const filterOutOrgNames = fixMultiSelect(req.query.filterOutOrgNames);
@@ -34,13 +34,22 @@ const listOrganisations = async(req, res) => {
   const sortBy = req.query.sortBy;
   const sortDirection = req.query.sortDirection;
 
-  const page = await pagedSearch(criteria, pageNumber, pageSize, filterCategories, filterStates, filterOutOrgNames, sortBy, sortDirection);
+  const page = await pagedSearch(
+    criteria,
+    pageNumber,
+    pageSize,
+    filterCategories,
+    filterStates,
+    filterOutOrgNames,
+    sortBy,
+    sortDirection,
+  );
 
-  return res.contentType('json').send({
+  return res.contentType("json").send({
     organisations: page.organisations,
     page: pageNumber,
     totalNumberOfPages: page.totalNumberOfPages,
-    totalNumberOfRecords: page.totalNumberOfRecords
+    totalNumberOfRecords: page.totalNumberOfRecords,
   });
 };
 
