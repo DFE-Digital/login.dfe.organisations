@@ -1,30 +1,39 @@
-const moment = require('moment');
-const logger = require('./../../infrastructure/logger');
-const config = require('./../../infrastructure/config')();
-const { getGroupsFile } = require('./../../infrastructure/gias');
-const { parse: parseGroups } = require('./groupCsvReader');
-const { parse: parseGroupLinks } = require('./groupLinksCsvReader');
+const moment = require("moment");
+const logger = require("./../../infrastructure/logger");
+const config = require("./../../infrastructure/config")();
+const { getGroupsFile } = require("./../../infrastructure/gias");
+const { parse: parseGroups } = require("./groupCsvReader");
+const { parse: parseGroupLinks } = require("./groupLinksCsvReader");
 const {
-  add, update, pagedListOfCategory, addAssociation,
+  add,
+  update,
+  pagedListOfCategory,
+  addAssociation,
   removeAssociationsOfType,
   getNextOrganisationLegacyId,
   hasUserOrganisationsByOrgId,
   hasUserOrganisationRequestsByOrgId,
   deleteOrganisation,
-  removeAssociations } = require('./../organisations/data/organisationsStorage');
-const uuid = require('uuid');
+  removeAssociations,
+} = require("./../organisations/data/organisationsStorage");
+const uuid = require("uuid");
 
 const isGroupImportable = (group) => {
   const importableTypes = [
-    '06', // MAT
-    '10', // SAT
+    "06", // MAT
+    "10", // SAT
   ];
-  if (!importableTypes.find(x => x === group.type)) {
+  if (!importableTypes.find((x) => x === group.type)) {
     return false;
   }
 
-  const importableStatuses = ['OPEN', 'CLOSED', 'PROPOSED_TO_OPEN','CREATED_IN_ERROR'];
-  if (!importableStatuses.find(x => x === group.status)) {
+  const importableStatuses = [
+    "OPEN",
+    "CLOSED",
+    "PROPOSED_TO_OPEN",
+    "CREATED_IN_ERROR",
+  ];
+  if (!importableStatuses.find((x) => x === group.status)) {
     return false;
   }
 
@@ -32,21 +41,21 @@ const isGroupImportable = (group) => {
 };
 
 const mapImportRecordForStorage = (importing) => {
-  const address = importing.address.filter(x => x !== null).join(', ');
+  const address = importing.address.filter((x) => x !== null).join(", ");
 
   let status;
   switch (importing.status) {
-    case 'OPEN':
+    case "OPEN":
       status = {
         id: 1,
       };
       break;
-    case 'CLOSED':
+    case "CLOSED":
       status = {
         id: 2,
       };
       break;
-    case 'PROPOSED_TO_OPEN':
+    case "PROPOSED_TO_OPEN":
       status = {
         id: 4,
       };
@@ -57,10 +66,10 @@ const mapImportRecordForStorage = (importing) => {
   }
 
   let category;
-  if (importing.type === '06') {
-    category = { id: '010', name: 'Multi-Academy Trust' };
-  } else if (importing.type === '10') {
-    category = { id: '013', name: 'Single-Academy Trust' };
+  if (importing.type === "06") {
+    category = { id: "010", name: "Multi-Academy Trust" };
+  } else if (importing.type === "10") {
+    category = { id: "013", name: "Single-Academy Trust" };
   }
 
   return {
@@ -103,13 +112,16 @@ const hasBeenUpdated = (newValue, oldValue) => {
       const nValue = newValue.getTime();
       const oValue = oldValue.getTime();
       return nValue !== oValue;
-    } else if (typeof oldValue === 'string') {
-      const nDate = newValue.toISOString().split('T')[0];
+    } else if (typeof oldValue === "string") {
+      const nDate = newValue.toISOString().split("T")[0];
       return oldValue !== nDate;
     }
   }
 
-  if (newValue instanceof Object && Object.keys(newValue).find(x => x === 'id')) {
+  if (
+    newValue instanceof Object &&
+    Object.keys(newValue).find((x) => x === "id")
+  ) {
     return hasBeenUpdated(newValue.id, oldValue.id);
   }
 
@@ -119,10 +131,18 @@ const updateGroup = async (importing, existing) => {
   const updated = mapImportRecordForStorage(importing);
   updated.id = existing.id;
 
-  if (hasBeenUpdated(updated.name, existing.name) || hasBeenUpdated(updated.category, existing.category)
-    || hasBeenUpdated(updated.status, existing.status) || hasBeenUpdated(updated.closedOn, existing.closedOn)
-    || hasBeenUpdated(updated.address, existing.address) || hasBeenUpdated(updated.companyRegistrationNumber, existing.companyRegistrationNumber)
-    || hasBeenUpdated(updated.ukprn, existing.ukprn)) {
+  if (
+    hasBeenUpdated(updated.name, existing.name) ||
+    hasBeenUpdated(updated.category, existing.category) ||
+    hasBeenUpdated(updated.status, existing.status) ||
+    hasBeenUpdated(updated.closedOn, existing.closedOn) ||
+    hasBeenUpdated(updated.address, existing.address) ||
+    hasBeenUpdated(
+      updated.companyRegistrationNumber,
+      existing.companyRegistrationNumber,
+    ) ||
+    hasBeenUpdated(updated.ukprn, existing.ukprn)
+  ) {
     await update(updated);
     logger.info(`Updated group ${importing.uid}`);
   } else {
@@ -132,61 +152,81 @@ const updateGroup = async (importing, existing) => {
   return updated.id;
 };
 
-const linkAcademies = async (importing, existing, importingGroupLinks, existingEstablishments, organisationId) => {
-  const importingLinks = importingGroupLinks.filter(x => x.uid === importing.uid);
-  const links = importingLinks.map((link) => {
-    const establishment = existingEstablishments.find(x => x.urn === link.urn);
-    if (!establishment) {
-      return null;
-    }
-    return {
-      organisationId,
-      associatedOrganisationId: establishment.id,
-      linkType: 'ACADEMY',
-    };
-  }).filter(x => x !== null);
+const linkAcademies = async (
+  importing,
+  existing,
+  importingGroupLinks,
+  existingEstablishments,
+  organisationId,
+) => {
+  const importingLinks = importingGroupLinks.filter(
+    (x) => x.uid === importing.uid,
+  );
+  const links = importingLinks
+    .map((link) => {
+      const establishment = existingEstablishments.find(
+        (x) => x.urn === link.urn,
+      );
+      if (!establishment) {
+        return null;
+      }
+      return {
+        organisationId,
+        associatedOrganisationId: establishment.id,
+        linkType: "ACADEMY",
+      };
+    })
+    .filter((x) => x !== null);
 
-  await removeAssociationsOfType(organisationId, 'ACADEMY');
+  await removeAssociationsOfType(organisationId, "ACADEMY");
   for (let i = 0; i < links.length; i += 1) {
     const importingLink = links[i];
-    await addAssociation(importingLink.organisationId, importingLink.associatedOrganisationId, importingLink.linkType);
+    await addAssociation(
+      importingLink.organisationId,
+      importingLink.associatedOrganisationId,
+      importingLink.linkType,
+    );
   }
 };
 
 const verifyAndDeleteGroup = async (existing) => {
-
   const hasUsers = await hasUserOrganisationsByOrgId(existing.id);
   const hasUserRequests = await hasUserOrganisationRequestsByOrgId(existing.id);
 
   if (!hasUsers && !hasUserRequests) {
     try {
-      // try to delete the organisation if there no user attached. 
+      // try to delete the organisation if there no user attached.
       // Exception thrown when there are child data. Log the information and continue with the next establishment from the GIAS Sync.
 
       await removeAssociations(existing.id);
 
       try {
         await deleteGroup(existing);
-        
-        logger.info(`Successfully deleted the group with status Created-In-Error. Group(uid): ${existing.uid}`);
+
+        logger.info(
+          `Successfully deleted the group with status Created-In-Error. Group(uid): ${existing.uid}`,
+        );
       } catch (e) {
         logger.warn(`Error deleting group ${existing.uid} - ${e.message}`);
       }
-      
     } catch (error) {
-      logger.info(`Unable to delete the group with status Created-In-Error. There are exception while deleting the child records for the group(uid) ${existing.uid}, Exception Message ${error}`);
+      logger.info(
+        `Unable to delete the group with status Created-In-Error. There are exception while deleting the child records for the group(uid) ${existing.uid}, Exception Message ${error}`,
+      );
     }
   } else {
-    logger.info(`unable to delete the group with status Created-In-Error. Group(uid) ${existing.uid}, There are associated users with it`);
+    logger.info(
+      `unable to delete the group with status Created-In-Error. Group(uid) ${existing.uid}, There are associated users with it`,
+    );
   }
 
   return existing.id;
-}
+};
 
 const isRestrictedStatus = (importing) => {
-  const RestrictedStatuses = ['CREATED_IN_ERROR'];
+  const RestrictedStatuses = ["CREATED_IN_ERROR"];
 
-  if (RestrictedStatuses.find(s => s === importing.status)) {
+  if (RestrictedStatuses.find((s) => s === importing.status)) {
     return true;
   }
 
@@ -197,7 +237,7 @@ const deleteGroup = async (existing) => {
   let orgUpdated = false;
 
   try {
-    await deleteOrganisation(existing.id)
+    await deleteOrganisation(existing.id);
     orgUpdated = true;
     logger.info(`Deleted Group ${existing.uid}`);
   } catch (e) {
@@ -210,36 +250,52 @@ const deleteGroup = async (existing) => {
   };
 };
 
-const addOrUpdateGroups = async (importingGroups, importingGroupLinks, existingGroups, existingEstablishments) => {
+const addOrUpdateGroups = async (
+  importingGroups,
+  importingGroupLinks,
+  existingGroups,
+  existingEstablishments,
+) => {
   for (let i = 0; i < importingGroups.length; i += 1) {
     const importing = importingGroups[i];
 
     if (isGroupImportable(importing)) {
-      const existing = existingGroups.find(e => e.uid === importing.uid);
+      const existing = existingGroups.find((e) => e.uid === importing.uid);
       const isRestricted = isRestrictedStatus(importing);
 
       let organisationId;
       // Delete the organisation only when it exists with restricted status.
       if (existing && isRestricted) {
         organisationId = await verifyAndDeleteGroup(existing);
-      } else if (existing) { // update if exists with non-restrictive status.
+      } else if (existing) {
+        // update if exists with non-restrictive status.
         organisationId = await updateGroup(importing, existing);
-      } else if (!isRestricted) { // add only non-restrictive status organisation.
+      } else if (!isRestricted) {
+        // add only non-restrictive status organisation.
         importing.legacyId = await generateLegacyId();
         organisationId = await addGroup(importing);
       }
 
       if (isRestricted) {
-        logger.info(`Not importing group ${importing.uid} as it does meet importable status`);
+        logger.info(
+          `Not importing group ${importing.uid} as it does meet importable status`,
+        );
         continue;
       }
 
-      await linkAcademies(importing, existing, importingGroupLinks, existingEstablishments, organisationId);
-
+      await linkAcademies(
+        importing,
+        existing,
+        importingGroupLinks,
+        existingEstablishments,
+        organisationId,
+      );
     } else {
-      logger.info(`Not importing group ${importing.uid} as it does meet importable criteria`);
+      logger.info(
+        `Not importing group ${importing.uid} as it does meet importable criteria`,
+      );
     }
-  };
+  }
 };
 
 const listOfCategory = async (category, includeAssociations = false) => {
@@ -247,7 +303,12 @@ const listOfCategory = async (category, includeAssociations = false) => {
   let pageNumber = 1;
   let hasMorePages = true;
   while (hasMorePages) {
-    const page = await pagedListOfCategory(category, includeAssociations, pageNumber, 500);
+    const page = await pagedListOfCategory(
+      category,
+      includeAssociations,
+      pageNumber,
+      500,
+    );
     allOrgs.push(...page.organisations);
 
     hasMorePages = pageNumber < page.totalNumberOfPages;
@@ -258,46 +319,49 @@ const listOfCategory = async (category, includeAssociations = false) => {
 
 const getAllGroupsDataFile = async () => {
   // Try to get today's file if you can't find it then read yesterday's file.
-  const today = moment().format('YYYYMMDD');
+  const today = moment().format("YYYYMMDD");
   try {
     return await getAllGroupsDataFileForDate(today);
-  } catch (e) {
-    logger.info('Could not find today\'s file');
+  } catch {
+    logger.info("Could not find today's file");
   }
 
-  const yesterday = moment().subtract(1, 'days').format('YYYYMMDD');
+  const yesterday = moment().subtract(1, "days").format("YYYYMMDD");
   return await getAllGroupsDataFileForDate(yesterday);
 };
 
 const getAllGroupsDataFileForDate = async (date) => {
-  const uri = `${config.gias.allGroupsDataUrl}`.replace('#date#', date);
+  const uri = `${config.gias.allGroupsDataUrl}`.replace("#date#", date);
   logger.info(`Reading the allGroupsDataUrl ${uri}`);
 
   const response = await fetch(uri, {
-    method: 'GET',
+    method: "GET",
   });
   return await response.text();
 };
 
 const importAllGroupsData = async () => {
-  logger.debug('Getting all group data');
+  logger.debug("Getting all group data");
   const groupData = await getGroupsFile(true);
   const getAllGroupsDataFromFile = await getAllGroupsDataFile();
-  logger.debug('Parsing all group data');
+  logger.debug("Parsing all group data");
   const importingGroups = await parseGroups(getAllGroupsDataFromFile);
-  logger.debug('Parsing group links');
+  logger.debug("Parsing group links");
   const importingGroupLinks = await parseGroupLinks(groupData.links);
-  logger.debug('Getting existing groups');
+  logger.debug("Getting existing groups");
 
-  const existingMATs = await listOfCategory('010', true);
-  const existingSATs = await listOfCategory('013', true);
+  const existingMATs = await listOfCategory("010", true);
+  const existingSATs = await listOfCategory("013", true);
   const existingGroups = existingMATs.concat(existingSATs);
 
-  logger.debug('Getting existing establishments');
-  const existingEstablishments = await listOfCategory('001', true);
-  await addOrUpdateGroups(importingGroups, importingGroupLinks, existingGroups, existingEstablishments);
+  logger.debug("Getting existing establishments");
+  const existingEstablishments = await listOfCategory("001", true);
+  await addOrUpdateGroups(
+    importingGroups,
+    importingGroupLinks,
+    existingGroups,
+    existingEstablishments,
+  );
 };
-
-
 
 module.exports = importAllGroupsData;

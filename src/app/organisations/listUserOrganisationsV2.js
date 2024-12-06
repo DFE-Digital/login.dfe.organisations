@@ -1,4 +1,4 @@
-const { getPagedListOfUsersV2 } = require('./data/organisationsStorage');
+const { getPagedListOfUsersV2 } = require("./data/organisationsStorage");
 
 const getPageNumber = (req) => {
   if (!req.query.page) {
@@ -52,7 +52,13 @@ const listUserOrganisationsV2 = async (req, res) => {
   const filterTypes = fixMultiSelect(req.query.filtertype);
   const filterStates = fixMultiSelect(req.query.filterstatus);
 
-  const page = await getPagedListOfUsersV2(pageNumber, pageSize, roleId, filterTypes, filterStates);
+  const page = await getPagedListOfUsersV2(
+    pageNumber,
+    pageSize,
+    roleId,
+    filterTypes,
+    filterStates,
+  );
   return res.json(page);
 };
 

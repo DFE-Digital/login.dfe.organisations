@@ -1,5 +1,5 @@
-const importEstablishments = require('./importEstablishments');
-const  importAllGroupsData = require('./importAllGroupsData');
+const importEstablishments = require("./importEstablishments");
+const importAllGroupsData = require("./importAllGroupsData");
 
 module.exports = {
   importEstablishments,

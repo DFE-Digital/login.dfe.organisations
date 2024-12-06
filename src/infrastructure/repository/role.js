@@ -1,50 +1,51 @@
-const Sequelize = require('sequelize').default;
-const Op = Sequelize.Op;
+const Sequelize = require("sequelize").default;
 
 const define = (db, schema) => {
-  return db.define('role', {
-    id: {
-      type: Sequelize.UUID,
-      primaryKey: true,
-      allowNull: false,
+  return db.define(
+    "role",
+    {
+      id: {
+        type: Sequelize.UUID,
+        primaryKey: true,
+        allowNull: false,
+      },
+      name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      code: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      applicationId: {
+        type: Sequelize.UUID,
+        allowNull: false,
+      },
+      status: {
+        type: Sequelize.SMALLINT,
+        allowNull: false,
+      },
+      numericId: {
+        type: Sequelize.BIGINT,
+        allowNull: false,
+      },
+      parentId: {
+        type: Sequelize.UUID,
+        allowNull: true,
+      },
     },
-    name: {
-      type: Sequelize.STRING,
-      allowNull: false,
+    {
+      timestamps: true,
+      tableName: "role",
+      schema,
     },
-    code: {
-      type: Sequelize.STRING,
-      allowNull: false,
-    },
-    applicationId: {
-      type: Sequelize.UUID,
-      allowNull: false,
-    },
-    status: {
-      type: Sequelize.SMALLINT,
-      allowNull: false,
-    },
-    numericId: {
-      type: Sequelize.BIGINT,
-      allowNull: false,
-    },
-    parentId: {
-      type: Sequelize.UUID,
-      allowNull: true,
-    },
-  }, {
-    timestamps: true,
-    tableName: 'role',
-    schema,
-  });
+  );
 };
 
-const extend = () => {
-
-};
+const extend = () => {};
 
 module.exports = {
-  name: 'role',
+  name: "role",
   define,
   extend,
 };

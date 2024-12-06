@@ -1,6 +1,6 @@
 const mapAsync = async (col, iteratee) => {
   if (col.length === undefined) {
-    throw new Error('col is not iterable');
+    throw new Error("col is not iterable");
   }
 
   const result = [];
@@ -12,7 +12,7 @@ const mapAsync = async (col, iteratee) => {
 
 const forEachAsync = async (col, iteratee) => {
   if (col.length === undefined) {
-    throw new Error('col is not iterable');
+    throw new Error("col is not iterable");
   }
 
   for (let i = 0; i < col.length; i += 1) {
