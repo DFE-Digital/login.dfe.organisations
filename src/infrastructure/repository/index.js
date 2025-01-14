@@ -48,15 +48,16 @@ const defineStatic = (model) => {
   ];
 
   model.organisationStatus = [
-    { id: 0, name: "Hidden" },
-    { id: 1, name: "Open" },
-    { id: 2, name: "Closed" },
-    { id: 3, name: "Proposed to close" },
-    { id: 4, name: "Proposed to open" },
-    { id: 5, name: "Dissolved" },
-    { id: 6, name: "In Liquidation" },
-    { id: 8, name: "Locked Duplicate" },
-    { id: 10, name: "Locked Restructure" },
+    { id: 0, name: "Hidden", tagColor: "grey" },
+    { id: 1, name: "Open", tagColor: "green" },
+    { id: 2, name: "Closed", tagColor: "red" },
+    { id: 3, name: "Proposed to close", tagColor: "orange" },
+    { id: 4, name: "Proposed to open", tagColor: "blue" },
+    { id: 5, name: "Dissolved", tagColor: "red" },
+    { id: 6, name: "In Liquidation", tagColor: "red" },
+    { id: 8, name: "Locked Duplicate", tagColor: "purple" },
+    { id: 9, name: "Created in error", tagColor: "red" },
+    { id: 10, name: "Locked Restructure", tagColor: "purple" },
   ];
 
   model.organisationCategory = [
