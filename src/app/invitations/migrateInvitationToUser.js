@@ -4,7 +4,7 @@ const serviceStorage = require("./../services/data/servicesStorage");
 const organisationsStorage = require("./../organisations/data/organisationsStorage");
 const { getUserOrganisationIdentifiers } = require("./../organisations/utils");
 const config = require("./../../infrastructure/config")();
-const NotificationClient = require("login.dfe.notifications.client");
+const { NotificationClient } = require("login.dfe.jobs-client");
 const { getUserById } = require("./../../infrastructure/directories");
 
 const APPROVED_STATUS = 1;
