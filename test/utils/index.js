@@ -50,6 +50,9 @@ const mockConfig = (customConfig) => {
     directories: {
       type: "static",
     },
+    organisationRequests: {
+      numberOfDaysUntilOverdue: 5,
+    },
   };
   return customConfig
     ? Object.assign(defaultConfig, customConfig)
