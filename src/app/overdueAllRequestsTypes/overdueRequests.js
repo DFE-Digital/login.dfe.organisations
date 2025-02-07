@@ -57,6 +57,22 @@ const listApproversReqToOverdue = async (
   return result.totalNumberOfRecords;
 };
 
+/**
+ *
+ * @param {Array} outstandingRequests
+ * @param {*} requestType
+ * @param {Map} orgIdsByRequestCount
+ * @param {*} dateNow
+ * @param {number} numberOfDaysUntilOverdue
+ * @param {string} actionedReason
+ *
+ * Takes an array of outstanding requests and loops over them.
+ * If overdue (based on comparing created_date against the `numberOfDaysUntilOverdue` variable)
+ * then it updates the request to an overdue state (status 2).
+ *
+ * If not overdue, it adds it to the `orgIdsByRequestCount` Map as a side effect (as in, it doesn't
+ * return the map, it just modifes the object which is then used elsewhere in the code)
+ */
 const overdueRequests = async (
   outstandingRequests,
   requestType,
@@ -148,7 +164,7 @@ const overdueAllRequestsTypes = async () => {
 
   if (orgIdsByRequestCount && orgIdsByRequestCount.size > 0) {
     let approversIds = [];
-    let approversDetails = [];
+    let activeApprovers = [];
     for (const [orgId] of orgIdsByRequestCount) {
       approversIds = [...approversIds, ...(await getApproversForOrg(orgId))];
       if (!approversIds) {
@@ -158,10 +174,14 @@ const overdueAllRequestsTypes = async () => {
 
     if (approversIds.length > 0) {
       const uniqueApproversIds = [...new Set(approversIds)];
-      approversDetails = await getUsersByIds(uniqueApproversIds.join(","));
+      const approversDetails = await getUsersByIds(
+        uniqueApproversIds.join(","),
+      );
+      activeApprovers = approversDetails.filter((user) => user.status === 1);
+      // filter in users who status is 1
     }
 
-    for (const approver of approversDetails) {
+    for (const approver of activeApprovers) {
       const emailReminderDateStart = dateNow
         .clone()
         .utc()
