@@ -1,6 +1,6 @@
 const { NotificationClient } = require("login.dfe.jobs-client");
 const logger = require("./../../infrastructure/logger");
-const config = require("./../../infrastructure/config")();
+const config = require("./../../infrastructure/config");
 const { getUsersByIds } = require("./../../infrastructure/directories");
 const {
   pagedListOfRequests,
@@ -177,8 +177,8 @@ const overdueAllRequestsTypes = async () => {
       const approversDetails = await getUsersByIds(
         uniqueApproversIds.join(","),
       );
+      // Filters out all approvers who have inactive accounts
       activeApprovers = approversDetails.filter((user) => user.status === 1);
-      // filter in users who status is 1
     }
 
     for (const approver of activeApprovers) {
