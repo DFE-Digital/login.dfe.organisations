@@ -1,6 +1,6 @@
 const { NotificationClient } = require("login.dfe.jobs-client");
 const logger = require("./../../infrastructure/logger");
-const config = require("./../../infrastructure/config");
+const config = require("./../../infrastructure/config")();
 const { getUsersByIds } = require("./../../infrastructure/directories");
 const {
   pagedListOfRequests,
@@ -60,9 +60,9 @@ const listApproversReqToOverdue = async (
 /**
  *
  * @param {Array} outstandingRequests
- * @param {*} requestType
+ * @param {string} requestType
  * @param {Map} orgIdsByRequestCount
- * @param {*} dateNow
+ * @param {moment.Moment} dateNow
  * @param {number} numberOfDaysUntilOverdue
  * @param {string} actionedReason
  *
@@ -70,8 +70,10 @@ const listApproversReqToOverdue = async (
  * If overdue (based on comparing created_date against the `numberOfDaysUntilOverdue` variable)
  * then it updates the request to an overdue state (status 2).
  *
- * If not overdue, it adds it to the `orgIdsByRequestCount` Map as a side effect (as in, it doesn't
+ * If it will be overdue in 1 days time, it adds it to the `orgIdsByRequestCount` Map as a side effect (as in, it doesn't
  * return the map, it just modifes the object which is then used elsewhere in the code)
+ *
+ * If it will be overdue in more than 2 days, nothing happens.
  */
 const overdueRequests = async (
   outstandingRequests,
@@ -105,7 +107,7 @@ const overdueRequests = async (
         await updateUserServSubServRequest(request.id, updatedRequest);
       }
     } else if (differenceInDays === numberOfDaysUntilOverdue - 1) {
-      logger.debug(
+      logger.info(
         `Requests for ${requestType} come in here, if  request overdue in following day [if overdue day limit is 5 then it should come here on 4th day]`,
       );
       if (orgIdsByRequestCount && orgIdsByRequestCount.get(request.org_id)) {
@@ -126,14 +128,14 @@ const overdueAllRequestsTypes = async () => {
     config.organisationRequests.numberOfDaysUntilOverdue || 5;
 
   // get all outstanding requests
-  logger.debug("Getting outstanding organisation request data");
+  logger.info("Getting organisation request data with status of 0");
   const allOutstandingOrgRequests = await listRequests(
     500,
     [0],
     requestTypes.ORGANISATION_ACCESS,
   );
 
-  logger.debug("Getting outstanding service and sub-service request data");
+  logger.info("Getting service and sub-service request data with status of 0");
   const allOutstandingServSubServRequests = await listRequests(
     500,
     [0],
@@ -141,7 +143,10 @@ const overdueAllRequestsTypes = async () => {
   );
   const orgIdsByRequestCount = new Map();
 
-  logger.debug("Overdue organisation access requests older than 5 days");
+  logger.info(
+    "Putting org requests that are 1 day until overdue into orgIdsByRequestCount for an email reminder",
+  );
+  logger.info("Updating org requests are overdue to the overdue status 2");
   await overdueRequests(
     allOutstandingOrgRequests,
     requestTypes.ORGANISATION_ACCESS,
@@ -150,8 +155,11 @@ const overdueAllRequestsTypes = async () => {
     numberOfDaysUntilOverdue,
   );
 
-  logger.debug(
-    "Overdue service and sub-service access requests older than 5 days",
+  logger.info(
+    "Putting service and sub-service requests that are 1 day until overdue into orgIdsByRequestCount for an email reminder",
+  );
+  logger.info(
+    "Updating service and sub-service requests are overdue to the overdue status 2",
   );
   await overdueRequests(
     allOutstandingServSubServRequests,
@@ -162,11 +170,14 @@ const overdueAllRequestsTypes = async () => {
     actionedReasons.OVERDUE,
   );
 
+  // Everything in orgIdsByRequestCount will become overdue in 1 day, so we send a reminder.
   if (orgIdsByRequestCount && orgIdsByRequestCount.size > 0) {
     let approversIds = [];
     let activeApprovers = [];
     for (const [orgId] of orgIdsByRequestCount) {
       approversIds = [...approversIds, ...(await getApproversForOrg(orgId))];
+
+      // This if statement seems unecessary...can be removed?
       if (!approversIds) {
         continue;
       }

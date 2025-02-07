@@ -1,5 +1,6 @@
-jest.mock("./../../../src/infrastructure/config", () =>
-  require("../../utils").mockConfig(),
+jest.mock(
+  "./../../../src/infrastructure/config",
+  () => () => require("../../utils").mockConfig(),
 );
 jest.mock("./../../../src/infrastructure/logger", () => {
   return {
@@ -11,8 +12,14 @@ jest.mock("./../../../src/infrastructure/logger", () => {
 jest.mock("../../../src/infrastructure/directories");
 jest.mock("./../../../src/app/organisations/data/organisationsStorage", () => {
   const pagedListOfRequests = jest.fn();
+  const updateUserOrgRequest = jest.fn();
   const pagedListOfServSubServRequests = jest.fn();
+  const updateUserServSubServRequest = jest.fn();
   return {
+    updateUserOrgRequest: jest.fn().mockImplementation(updateUserOrgRequest),
+    updateUserServSubServRequest: jest
+      .fn()
+      .mockImplementation(updateUserServSubServRequest),
     pagedListOfRequests: jest.fn().mockImplementation(pagedListOfRequests),
     pagedListOfServSubServRequests: jest
       .fn()
@@ -22,6 +29,7 @@ jest.mock("./../../../src/app/organisations/data/organisationsStorage", () => {
 
 const {
   pagedListOfRequests,
+  pagedListOfServSubServRequests,
 } = require("./../../../src/app/organisations/data/organisationsStorage");
 const { getUsersByIds } = require("../../../src/infrastructure/directories");
 
@@ -40,7 +48,27 @@ describe("when calling the overdueAllRequestsTypes function", () => {
           org_id: "org1",
           org_name: "org name",
           user_id: "user 1",
-          created_at: "12/12/2019",
+          created_date: "2021-06-27 14:10:08.4870000",
+          status: {
+            id: 2,
+            name: "escalated",
+          },
+        },
+      ],
+      page: 1,
+      totalNumberOfPages: 2,
+      totalNumberOfRecords: 30,
+    });
+
+    pagedListOfServSubServRequests.mockReset();
+    pagedListOfServSubServRequests.mockReturnValue({
+      requests: [
+        {
+          id: "requestId",
+          org_id: "org1",
+          org_name: "org name",
+          user_id: "user 1",
+          created_date: "2022-06-27 14:10:08.4870000",
           status: {
             id: 2,
             name: "escalated",
@@ -56,9 +84,8 @@ describe("when calling the overdueAllRequestsTypes function", () => {
   // it("then it should map services from storage", async () => {
   //   await overdueAllRequestsTypes();
 
-  //   expect(res._isEndCalled()).toBe(true);
-  //   expect(res.statusCode).toBe(200);
-
+  //   const result = true;
+  //   expect(result).toBe(true);
   // });
 
   it("then it raise an exception if an exception is raised on any api call", async () => {
