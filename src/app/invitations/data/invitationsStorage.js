@@ -136,6 +136,7 @@ const getForInvitationId = async (id, correlationId) => {
             name: invitationOrg.Organisation.getDataValue("name"),
             urn: invitationOrg.Organisation.getDataValue("URN") || undefined,
             uid: invitationOrg.Organisation.getDataValue("UID") || undefined,
+            // status: invitationOrg.Organisation.getDataValue("Status"),
             ukprn:
               invitationOrg.Organisation.getDataValue("UKPRN") || undefined,
             category: organisationCategory.find(
