@@ -10,6 +10,11 @@ const getUserById = async () => {
   };
 };
 
+const getUsersByIds = async () => {
+  return Promise.resolve();
+};
+
 module.exports = {
   getUserById,
+  getUsersByIds,
 };

@@ -16,6 +16,18 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Launch Org worker",
+      "skipFiles": ["<node_internals>/**"],
+      "env": {
+        "settings": "${workspaceFolder}/config/worker-local-config.json",
+        "NODE_TLS_REJECT_UNAUTHORIZED": "0"
+      },
+      "program": "${workspaceFolder}/src/worker.js",
+      "outputCapture": "std"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Launch Orgs Tests",
       "skipFiles": ["<node_internals>/**"],
       "env": {

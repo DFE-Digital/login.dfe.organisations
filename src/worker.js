@@ -7,6 +7,7 @@ const express = require("express");
 const healthCheck = require("login.dfe.healthcheck");
 
 const runSchedule = (name, cronInterval, action) => {
+  logger.info(`Scheduling [${name}] job at [${cronInterval}] interval`);
   const job = schedule.scheduleJob(cronInterval, () => {
     logger.info(`Starting invocation of ${name}`);
     try {
