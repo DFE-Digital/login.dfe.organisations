@@ -67,11 +67,12 @@ const listApproversReqToOverdue = async (
  * @param {string} actionedReason
  *
  * Takes an array of outstanding requests and loops over them.
- * If overdue (based on comparing created_date against the `numberOfDaysUntilOverdue` variable)
+ * If overdue (based on comparing created_date against `numberOfDaysUntilOverdue`)
  * then it updates the request to an overdue state (status 2).
  *
- * If it will be overdue in 1 days time, it adds it to the `orgIdsByRequestCount` Map as a side effect (as in, it doesn't
- * return the map, it just modifes the object which is then used elsewhere in the code)
+ * If it will be overdue in 1 days time, it adds it to the `orgIdsByRequestCount` Map
+ * as a side effect (as in, it doesn't return the map, it just modifies the object
+ * which is then used elsewhere in the code)
  *
  * If it will be overdue in more than 2 days, nothing happens.
  */
@@ -83,6 +84,9 @@ const overdueRequests = async (
   numberOfDaysUntilOverdue,
   actionedReason = undefined,
 ) => {
+  logger.info(
+    `Looping over [${outstandingRequests.length}] outstanding requests of type [${requestType}]`,
+  );
   for (let i = 0; i < outstandingRequests.length; i += 1) {
     const request = outstandingRequests[i];
 
@@ -107,9 +111,6 @@ const overdueRequests = async (
         await updateUserServSubServRequest(request.id, updatedRequest);
       }
     } else if (differenceInDays === numberOfDaysUntilOverdue - 1) {
-      logger.info(
-        `Requests for ${requestType} come in here, if  request overdue in following day [if overdue day limit is 5 then it should come here on 4th day]`,
-      );
       if (orgIdsByRequestCount && orgIdsByRequestCount.get(request.org_id)) {
         orgIdsByRequestCount.set(
           request.org_id,
@@ -144,9 +145,8 @@ const overdueAllRequestsTypes = async () => {
   const orgIdsByRequestCount = new Map();
 
   logger.info(
-    "Putting org requests that are 1 day until overdue into orgIdsByRequestCount for an email reminder",
+    "Updating overdue org requests to status 2 and nearly overdue ones into a list to send reminders",
   );
-  logger.info("Updating org requests are overdue to the overdue status 2");
   await overdueRequests(
     allOutstandingOrgRequests,
     requestTypes.ORGANISATION_ACCESS,
@@ -156,10 +156,7 @@ const overdueAllRequestsTypes = async () => {
   );
 
   logger.info(
-    "Putting service and sub-service requests that are 1 day until overdue into orgIdsByRequestCount for an email reminder",
-  );
-  logger.info(
-    "Updating service and sub-service requests are overdue to the overdue status 2",
+    "Updating overdue service and sub-service requests to status 2 and nearly overdue ones into a list to send reminders",
   );
   await overdueRequests(
     allOutstandingServSubServRequests,
@@ -172,15 +169,13 @@ const overdueAllRequestsTypes = async () => {
 
   // Everything in orgIdsByRequestCount will become overdue in 1 day, so we send a reminder.
   if (orgIdsByRequestCount && orgIdsByRequestCount.size > 0) {
+    logger.info(
+      `[${orgIdsByRequestCount.size}] orgs with requests that become overdue in 1 day`,
+    );
     let approversIds = [];
     let activeApprovers = [];
     for (const [orgId] of orgIdsByRequestCount) {
       approversIds = [...approversIds, ...(await getApproversForOrg(orgId))];
-
-      // This if statement seems unecessary...can be removed?
-      if (!approversIds) {
-        continue;
-      }
     }
 
     if (approversIds.length > 0) {
@@ -191,6 +186,9 @@ const overdueAllRequestsTypes = async () => {
       // Filters out all approvers who have inactive accounts
       activeApprovers = approversDetails.filter((user) => user.status === 1);
     }
+    logger.info(
+      `[${activeApprovers.length}] approvers will be sent reminder emails`,
+    );
 
     for (const approver of activeApprovers) {
       const emailReminderDateStart = dateNow
@@ -209,6 +207,9 @@ const overdueAllRequestsTypes = async () => {
         emailReminderDateEnd,
       );
       if (approversReminderReq > 0) {
+        logger.info(
+          `User with id [${approver.sub}] will be sent an email reminder`,
+        );
         await notificationClient.sendSupportOverdueRequest(
           `${approver.given_name} ${approver.family_name}`,
           approversReminderReq,
