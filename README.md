@@ -28,6 +28,16 @@ npm run dev
 
 You will also need postgres installed which can be
 
+### Getting started with organisations worker (vscode)
+
+There is an organisations worker that runs tasks on a cron schedule. To run it locally in vscode:
+
+- Ensure you have the `organisationsWorker` version of the config located in `config/worker-local-config.json`
+- Run `Launch Org worker` from the Run and debug tab in vscode.
+
+You may need to modify how often it runs in the `schedules` part of the config as some of them are set to run
+very infrequently.
+
 ### Purpose
 
 The purpose of this project is to provide user service information at an organisation level.
