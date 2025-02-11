@@ -37,6 +37,18 @@ const updateIfValid = (oldValue, newValue) => {
   return trimmedNewValue || oldValue;
 };
 
+const updateEntityFromOtherStakeholdersOrganisation = (
+  entity,
+  organisation,
+) => {
+  if (organisation.name) {
+    entity.name = organisation.name;
+  }
+  if (organisation.address) {
+    entity.Address = organisation.address;
+  }
+};
+
 const updateEntityFromOrganisation = (entity, organisation) => {
   entity.name = organisation.name;
   entity.LegalName = organisation.LegalName;
@@ -429,6 +441,25 @@ const update = async (organisation) => {
   }
 
   updateEntityFromOrganisation(existing, organisation);
+  await existing.save();
+};
+
+const updateOtherStakeholders = async (organisation) => {
+  const existing = await organisations.findOne({
+    where: {
+      id: {
+        [Op.eq]: organisation.id,
+      },
+    },
+  });
+
+  if (!existing) {
+    throw new Error(
+      `Cannot find organisation in database with id ${organisation.id}`,
+    );
+  }
+
+  updateEntityFromOtherStakeholdersOrganisation(existing, organisation);
   await existing.save();
 };
 
@@ -2270,6 +2301,7 @@ module.exports = {
   pagedSearch,
   add,
   update,
+  updateOtherStakeholders,
   listOfCategory,
   addAssociation,
   removeAssociationsOfType,
