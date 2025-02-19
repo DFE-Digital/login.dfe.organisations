@@ -64,7 +64,7 @@ const routes = () => {
   router.post("/v3/users", asyncWrapper(listUserOrganisationsV3));
   router.get("/invitations", asyncWrapper(listInvitationOrganisations));
   router.post("/", asyncWrapper(createOrganisation));
-  router.patch("/:id/edit", asyncWrapper(editOrganisation));
+  router.patch("/:id", asyncWrapper(editOrganisation));
   router.get("/announcements", asyncWrapper(listAllAnnouncements));
   router.get("/requests", asyncWrapper(listRequests));
 
