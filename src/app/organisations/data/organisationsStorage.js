@@ -37,10 +37,8 @@ const updateIfValid = (oldValue, newValue) => {
   return trimmedNewValue || oldValue;
 };
 
-const updateEntityFromOtherStakeholdersOrganisation = (
-  entity,
-  organisation,
-) => {
+/* takes an existing organisation, and an organisation object that can contain either a new org name, a new org address or both. The existing 'entity' is updated with the new fields contained in the object */
+const updateEntityWithUpdatedFields = (entity, organisation) => {
   if (organisation.name) {
     entity.name = organisation.name;
   }
@@ -49,6 +47,7 @@ const updateEntityFromOtherStakeholdersOrganisation = (
   }
 };
 
+/* takes an existing entity and an object with every field that makes up an organisation record filled in and then overlays the entire new object over the old one */
 const updateEntityFromOrganisation = (entity, organisation) => {
   entity.name = organisation.name;
   entity.LegalName = organisation.LegalName;
@@ -459,7 +458,7 @@ const updateOtherStakeholders = async (organisation) => {
     );
   }
 
-  updateEntityFromOtherStakeholdersOrganisation(existing, organisation);
+  updateEntityWithUpdatedFields(existing, organisation);
   await existing.save();
 };
 
