@@ -57,9 +57,11 @@ const validateOrg = async (organisation) => {
   }
 
   const validCategories = await getOrganisationCategories();
+  console.log("validCategories: ", validCategories);
   const validCategory = validCategories.find(
     (x) => x.id === organisation.category.id,
   );
+  console.log("validCategory: ", validCategory);
   if (!validCategory) {
     return `Unrecognised category ${organisation.category.id}`;
   }
@@ -92,7 +94,7 @@ const getExistingOrg = async (organisation) => {
   if (!existing && organisation.ukprn) {
     existing = await getOrgByUkprn(organisation.ukprn, category);
   }
-
+  console.log("getExistingOrg: ", existing);
   return existing;
 };
 const generateLegacyId = async () => {
@@ -103,12 +105,15 @@ const generateLegacyId = async () => {
 };
 
 const action = async (req, res) => {
+  console.log("req: ", req);
   const organisation = mapOrg(req);
+  console.log("organisation: ", organisation);
 
   const validationReason = await validateOrg(organisation);
   if (validationReason) {
     return res.status(400).send(validationReason);
   }
+  console.log("validationReason: ", validationReason);
 
   const existingOrg = await getExistingOrg(organisation);
   if (existingOrg) {
@@ -117,15 +122,18 @@ const action = async (req, res) => {
       organisation.legacyId ||
       existingOrg.legacyId ||
       (await generateLegacyId());
+    console.log("existingOrg!: ", existingOrg);
     await update(existingOrg);
     await raiseNotificationThatOrganisationHasChanged(existingOrg.id);
 
     return res.status(202).send();
   }
+  console.log("existingOrg: ", existingOrg);
 
   organisation.id = uuid.v4();
   if (!organisation.legacyId) {
     organisation.legacyId = await generateLegacyId();
+    console.log("organisation.legacyId: ", organisation.legacyId);
   }
   await add(organisation);
   await raiseNotificationThatOrganisationHasChanged(organisation.id);
@@ -133,4 +141,9 @@ const action = async (req, res) => {
   return res.status(201).send();
 };
 
-module.exports = action;
+module.exports = {
+  createOrganisation: action,
+  validateOrg,
+  getExistingOrg,
+  generateLegacyId,
+};
