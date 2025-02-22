@@ -37,6 +37,17 @@ const updateIfValid = (oldValue, newValue) => {
   return trimmedNewValue || oldValue;
 };
 
+/* takes an existing organisation, and an organisation object that can contain either a new org name, a new org address or both. The existing 'entity' is updated with the new fields contained in the object */
+const updateEntityWithUpdatedFields = (entity, organisation) => {
+  if (organisation.name) {
+    entity.name = organisation.name;
+  }
+  if (organisation.address) {
+    entity.Address = organisation.address;
+  }
+};
+
+/* takes an existing entity and an object with every field that makes up an organisation record filled in and then overlays the entire new object over the old one */
 const updateEntityFromOrganisation = (entity, organisation) => {
   entity.name = organisation.name;
   entity.LegalName = organisation.LegalName;
@@ -429,6 +440,25 @@ const update = async (organisation) => {
   }
 
   updateEntityFromOrganisation(existing, organisation);
+  await existing.save();
+};
+
+const updateOtherStakeholders = async (organisation) => {
+  const existing = await organisations.findOne({
+    where: {
+      id: {
+        [Op.eq]: organisation.id,
+      },
+    },
+  });
+
+  if (!existing) {
+    throw new Error(
+      `Cannot find organisation in database with id ${organisation.id}`,
+    );
+  }
+
+  updateEntityWithUpdatedFields(existing, organisation);
   await existing.save();
 };
 
@@ -2270,6 +2300,7 @@ module.exports = {
   pagedSearch,
   add,
   update,
+  updateOtherStakeholders,
   listOfCategory,
   addAssociation,
   removeAssociationsOfType,
