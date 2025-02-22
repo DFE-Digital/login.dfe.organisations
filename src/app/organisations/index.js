@@ -10,6 +10,7 @@ const listStates = require("./listStates");
 const listUserOrganisations = require("./listUserOrganisations");
 const listInvitationOrganisations = require("./listInvitationOrganisations");
 const { createOrganisation } = require("./createOrganisation");
+const editOrganisation = require("./editOrganisation");
 const getOrganisation = require("./getOrganisation");
 const getOrganisationV2 = require("./getOrganisationV2");
 const getOrganisationByExternalId = require("./getOrganisationByExternalId");
@@ -63,6 +64,7 @@ const routes = () => {
   router.post("/v3/users", asyncWrapper(listUserOrganisationsV3));
   router.get("/invitations", asyncWrapper(listInvitationOrganisations));
   router.post("/", asyncWrapper(createOrganisation));
+  router.patch("/:id", asyncWrapper(editOrganisation));
   router.get("/announcements", asyncWrapper(listAllAnnouncements));
   router.get("/requests", asyncWrapper(listRequests));
 
