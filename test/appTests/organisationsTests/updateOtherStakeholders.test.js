@@ -39,8 +39,8 @@ describe("when calling updateOtherStakeholders", () => {
   beforeEach(() => {
     orgUpdate = {
       id: "1234",
-      name: "Org-2", // new name to update
-      address: "11 Downing St", // new address to update
+      name: "Org-2",
+      address: "11 Downing St",
     };
 
     organisations.findOne.mockReset();
