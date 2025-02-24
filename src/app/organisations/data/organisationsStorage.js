@@ -458,7 +458,13 @@ const updateOtherStakeholders = async (organisation) => {
     );
   }
 
+  console.log(
+    "Calling updateEntityWithUpdatedFields with:",
+    existing,
+    organisation,
+  );
   updateEntityWithUpdatedFields(existing, organisation);
+  console.log("existing after: ", existing);
   await existing.save();
 };
 
@@ -2301,6 +2307,7 @@ module.exports = {
   add,
   update,
   updateOtherStakeholders,
+  updateEntityWithUpdatedFields,
   listOfCategory,
   addAssociation,
   removeAssociationsOfType,
