@@ -20,11 +20,9 @@ const {
   createOrganisation,
   validateOrg,
   getExistingOrg,
-  // generateLegacyId,
 } = require("./../../../src/app/organisations/createOrganisation");
 const organisationStorage = require("./../../../src/app/organisations/data/organisationsStorage");
 const notifications = require("./../../../src/app/organisations/notifications");
-// const uuid = require("uuid");
 const httpMocks = require("node-mocks-http");
 
 const res = {
@@ -108,10 +106,8 @@ describe("when creating a new organisation", () => {
 
   test("should add a new organisation if none exists and generate a new legacyId", async () => {
     await createOrganisation(req, res);
-    // const result = await generateLegacyId();
 
     expect(organisationStorage.add).toHaveBeenCalled();
-    // expect(generateLegacyId).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(201);
     expect(
       notifications.raiseNotificationThatOrganisationHasChanged,

@@ -117,7 +117,6 @@ const action = async (req, res) => {
       organisation.legacyId ||
       existingOrg.legacyId ||
       (await generateLegacyId());
-
     await update(existingOrg);
     await raiseNotificationThatOrganisationHasChanged(existingOrg.id);
 

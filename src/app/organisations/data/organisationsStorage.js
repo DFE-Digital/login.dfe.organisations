@@ -441,6 +441,7 @@ const update = async (organisation) => {
 
   updateEntityFromOrganisation(existing, organisation);
   await existing.save();
+  return existing;
 };
 
 const updateOtherStakeholders = async (organisation) => {
@@ -458,14 +459,9 @@ const updateOtherStakeholders = async (organisation) => {
     );
   }
 
-  console.log(
-    "Calling updateEntityWithUpdatedFields with:",
-    existing,
-    organisation,
-  );
   updateEntityWithUpdatedFields(existing, organisation);
-  console.log("existing after: ", existing);
   await existing.save();
+  return existing;
 };
 
 const listOfCategory = async (category, includeAssociations = false) => {
