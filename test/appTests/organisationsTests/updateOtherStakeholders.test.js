@@ -3,10 +3,6 @@ jest.mock(
   () => () => require("../../utils").mockConfig(),
 );
 
-jest.mock("./../../../src/app/organisations/data/organisationsStorage", () => ({
-  updateEntityWithUpdatedFields: jest.fn(),
-}));
-
 jest.mock("./../../../src/infrastructure/repository", () => {
   const { createJestMockForSequelizeEntity } = require("./../../utils/mocks");
 
@@ -27,7 +23,6 @@ jest.mock("./../../../src/infrastructure/repository", () => {
 
 const {
   updateOtherStakeholders,
-  updateEntityWithUpdatedFields,
 } = require("./../../../src/app/organisations/data/organisationsStorage");
 
 const { Op } = require("sequelize");
@@ -50,13 +45,11 @@ describe("when calling updateOtherStakeholders", () => {
       Address: "10 Downing St",
       save: jest.fn().mockResolvedValue(true),
     });
-
-    updateEntityWithUpdatedFields.mockReset();
-    updateEntityWithUpdatedFields.mockResolvedValue(() => {});
   });
 
   it("should update and save the organisation when found", async () => {
-    await updateOtherStakeholders(orgUpdate);
+    const updateOtherStakeholdersResult =
+      await updateOtherStakeholders(orgUpdate);
 
     expect(organisations.findOne).toHaveBeenCalledWith({
       where: {
@@ -65,5 +58,16 @@ describe("when calling updateOtherStakeholders", () => {
         },
       },
     });
+    expect(updateOtherStakeholdersResult.name).toBe("Org-2");
+    expect(updateOtherStakeholdersResult.Address).toBe("11 Downing St");
+    expect(updateOtherStakeholdersResult.save).toHaveBeenCalled();
+  });
+
+  it("should throw an error if no existing organisation is found", async () => {
+    organisations.findOne.mockResolvedValue(null);
+
+    await expect(updateOtherStakeholders(orgUpdate)).rejects.toThrow(
+      `Cannot find organisation in database with id ${orgUpdate.id}`,
+    );
   });
 });
