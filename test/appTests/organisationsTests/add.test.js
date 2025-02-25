@@ -4,8 +4,6 @@ jest.mock(
 );
 
 jest.mock("./../../../src/infrastructure/repository", () => {
-  //   const { createJestMockForSequelizeEntity } = require("./../../utils/mocks");
-
   return {
     organisations: {
       create: jest.fn(),
@@ -16,9 +14,7 @@ jest.mock("./../../../src/infrastructure/repository", () => {
 const {
   add,
 } = require("./../../../src/app/organisations/data/organisationsStorage");
-// const { createJestMockForSequelizeEntity } = require("./../../../utils/mocks");
 
-const { Op } = require("sequelize");
 const { organisations } = require("./../../../src/infrastructure/repository");
 
 describe("when calling add", () => {
