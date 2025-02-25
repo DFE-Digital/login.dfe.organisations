@@ -422,6 +422,7 @@ const add = async (organisation) => {
   };
   updateEntityFromOrganisation(entity, organisation);
   await organisations.create(entity);
+  return entity;
 };
 
 const update = async (organisation) => {
