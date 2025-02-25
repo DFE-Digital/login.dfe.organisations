@@ -2303,7 +2303,6 @@ module.exports = {
   add,
   update,
   updateOtherStakeholders,
-  updateEntityWithUpdatedFields,
   listOfCategory,
   addAssociation,
   removeAssociationsOfType,
