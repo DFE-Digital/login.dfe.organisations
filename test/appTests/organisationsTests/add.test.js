@@ -32,7 +32,7 @@ describe("when calling add", () => {
     organisations.create.mockReset();
   });
 
-  it("should add new org when existing record found", async () => {
+  it("should add a new organisation", async () => {
     const addResult = await add(org);
 
     expect(organisations.create).toHaveBeenCalledWith(addResult);
