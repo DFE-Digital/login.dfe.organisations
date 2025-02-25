@@ -422,6 +422,7 @@ const add = async (organisation) => {
   };
   updateEntityFromOrganisation(entity, organisation);
   await organisations.create(entity);
+  return entity;
 };
 
 const update = async (organisation) => {
@@ -441,6 +442,7 @@ const update = async (organisation) => {
 
   updateEntityFromOrganisation(existing, organisation);
   await existing.save();
+  return existing;
 };
 
 const updateOtherStakeholders = async (organisation) => {
@@ -460,6 +462,7 @@ const updateOtherStakeholders = async (organisation) => {
 
   updateEntityWithUpdatedFields(existing, organisation);
   await existing.save();
+  return existing;
 };
 
 const listOfCategory = async (category, includeAssociations = false) => {

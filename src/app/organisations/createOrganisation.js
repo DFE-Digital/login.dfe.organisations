@@ -133,4 +133,9 @@ const action = async (req, res) => {
   return res.status(201).send();
 };
 
-module.exports = action;
+module.exports = {
+  createOrganisation: action,
+  validateOrg,
+  getExistingOrg,
+  generateLegacyId,
+};
