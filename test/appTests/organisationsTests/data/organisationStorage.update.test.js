@@ -1,10 +1,10 @@
 jest.mock(
-  "./../../../src/infrastructure/config",
-  () => () => require("../../utils").mockConfig(),
+  "./../../../../src/infrastructure/config",
+  () => () => require("../../../utils").mockConfig(),
 );
 
-jest.mock("./../../../src/infrastructure/repository", () => {
-  const { createJestMockForSequelizeEntity } = require("./../../utils/mocks");
+jest.mock("./../../../../src/infrastructure/repository", () => {
+  const { createJestMockForSequelizeEntity } = require("../../../utils/mocks");
 
   const mockExistingOrg = createJestMockForSequelizeEntity({
     id: "1234",
@@ -23,10 +23,10 @@ jest.mock("./../../../src/infrastructure/repository", () => {
 
 const {
   update,
-} = require("./../../../src/app/organisations/data/organisationsStorage");
+} = require("../../../../src/app/organisations/data/organisationsStorage");
 
 const { Op } = require("sequelize");
-const { organisations } = require("./../../../src/infrastructure/repository");
+const { organisations } = require("../../../../src/infrastructure/repository");
 
 describe("when calling update", () => {
   let orgUpdate;
