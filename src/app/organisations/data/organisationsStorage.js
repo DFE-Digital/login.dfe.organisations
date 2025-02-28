@@ -421,8 +421,8 @@ const add = async (organisation) => {
     id: organisation.id,
   };
   updateEntityFromOrganisation(entity, organisation);
+  console.log(entity);
   await organisations.create(entity);
-  return entity;
 };
 
 const update = async (organisation) => {
