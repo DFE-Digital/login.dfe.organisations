@@ -134,7 +134,4 @@ const action = async (req, res) => {
   return res.status(201).send();
 };
 
-module.exports = {
-  createOrganisation: action,
-  validateOrg,
-};
+module.exports = action;

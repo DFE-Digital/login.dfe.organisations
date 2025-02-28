@@ -16,10 +16,7 @@ jest.mock("../../../src/app/organisations/data/organisationsStorage", () => ({
 }));
 jest.mock("./../../../src/app/organisations/notifications");
 
-const {
-  createOrganisation,
-  validateOrg,
-} = require("./../../../src/app/organisations/createOrganisation");
+const createOrganisation = require("./../../../src/app/organisations/createOrganisation");
 const organisationStorage = require("./../../../src/app/organisations/data/organisationsStorage");
 const notifications = require("./../../../src/app/organisations/notifications");
 const httpMocks = require("node-mocks-http");
@@ -186,20 +183,18 @@ describe("when creating a new organisation", () => {
     req.body.category = { id: "" };
 
     await createOrganisation(req, res);
-    const validateOrgResult = await validateOrg(req.body);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(validateOrgResult).toBe("Category is required");
+    expect(res.send).toHaveBeenCalledWith("Category is required");
   });
 
   test("should return 400 if organisation category does not exist", async () => {
     req.body.category = { id: "321" };
 
     await createOrganisation(req, res);
-    const validateOrgResult = await validateOrg(req.body);
 
     expect(res.status).toHaveBeenCalledWith(400);
-    expect(validateOrgResult).toBe("Unrecognised category 321");
+    expect(res.send).toHaveBeenCalledWith("Unrecognised category 321");
   });
 
   test("should update establishment organisation if category 002 is selected and establishmentNumber provided", async () => {
