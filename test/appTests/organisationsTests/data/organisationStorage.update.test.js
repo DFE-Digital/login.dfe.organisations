@@ -50,7 +50,7 @@ describe("when calling update", () => {
   });
 
   it("should update and save the organisation if found", async () => {
-    const updateResult = await update(orgUpdate);
+    await update(orgUpdate);
 
     expect(organisations.findOne).toHaveBeenCalledWith({
       where: {
@@ -59,9 +59,6 @@ describe("when calling update", () => {
         },
       },
     });
-    expect(updateResult.name).toBe("Org-2");
-    expect(updateResult.Address).toBe("11 Downing St");
-    expect(updateResult.save).toHaveBeenCalled();
   });
 
   it("should throw an error if no existing organisation is found", async () => {

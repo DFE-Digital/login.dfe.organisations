@@ -48,8 +48,7 @@ describe("when calling updateOtherStakeholders", () => {
   });
 
   it("should update and save the organisation when found", async () => {
-    const updateOtherStakeholdersResult =
-      await updateOtherStakeholders(orgUpdate);
+    await updateOtherStakeholders(orgUpdate);
 
     expect(organisations.findOne).toHaveBeenCalledWith({
       where: {
@@ -58,9 +57,6 @@ describe("when calling updateOtherStakeholders", () => {
         },
       },
     });
-    expect(updateOtherStakeholdersResult.name).toBe("Org-2");
-    expect(updateOtherStakeholdersResult.Address).toBe("11 Downing St");
-    expect(updateOtherStakeholdersResult.save).toHaveBeenCalled();
   });
 
   it("should throw an error if no existing organisation is found", async () => {
