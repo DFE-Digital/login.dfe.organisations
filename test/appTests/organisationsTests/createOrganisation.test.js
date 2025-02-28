@@ -19,7 +19,6 @@ jest.mock("./../../../src/app/organisations/notifications");
 const {
   createOrganisation,
   validateOrg,
-  getExistingOrg,
 } = require("./../../../src/app/organisations/createOrganisation");
 const organisationStorage = require("./../../../src/app/organisations/data/organisationsStorage");
 const notifications = require("./../../../src/app/organisations/notifications");
@@ -208,7 +207,6 @@ describe("when creating a new organisation", () => {
     req.body.establishmentNumber = "212121";
 
     await createOrganisation(req, res);
-    const getExistingOrgResult = await getExistingOrg(req.body);
 
     expect(organisationStorage.update).toHaveBeenCalledWith({
       name: "Test org 999",
@@ -217,14 +215,6 @@ describe("when creating a new organisation", () => {
       establishmentNumber: "212121",
       legacyId: undefined,
     });
-
     expect(res.status).toHaveBeenCalledWith(202);
-    expect(getExistingOrgResult).toStrictEqual({
-      address: "Test org 111 address",
-      category: { id: "002" },
-      establishmentNumber: "212121",
-      legacyId: undefined,
-      name: "Test org 999",
-    });
   });
 });

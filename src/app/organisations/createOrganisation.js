@@ -107,6 +107,7 @@ const action = async (req, res) => {
 
   const validationReason = await validateOrg(organisation);
   if (validationReason) {
+    console.log(res.status(400).send(validationReason));
     return res.status(400).send(validationReason);
   }
 
@@ -129,13 +130,11 @@ const action = async (req, res) => {
   }
   await add(organisation);
   await raiseNotificationThatOrganisationHasChanged(organisation.id);
-
+  console.log("RES: ", res);
   return res.status(201).send();
 };
 
 module.exports = {
   createOrganisation: action,
   validateOrg,
-  getExistingOrg,
-  generateLegacyId,
 };
