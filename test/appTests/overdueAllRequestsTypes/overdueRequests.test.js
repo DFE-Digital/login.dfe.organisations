@@ -40,6 +40,61 @@ describe("when calling the overdueAllRequestsTypes function", () => {
     getUsersByIds.mockReset();
     getUsersByIds.mockReturnValue([{}]);
 
+    // request
+    // {
+    //   id: '558910BF-172D-4405-9276-4A3650B9E2B3',
+    //   org_id: 'E41782FC-1A18-4E30-A315-CCC624AD7516',
+    //   org_name: 'Abbeywood Community School',
+    //   user_id: '6BEA40AE-947D-4767-9A97-C52FCED78B33',
+    //   created_date: 2025-03-11T16:33:16.492Z,
+    //   status: { id: 0, name: 'Pending' },
+    //   reason: 'Another reason'
+    // }
+
+    // approversForOrg
+    // [
+    //   '089B72CD-7C80-4348-9C2A-395213B7ECAD',
+    //   '727A9392-63A4-4B91-BAAF-6D9CA675DFE0',
+    //   'CA518CBE-83E0-4271-8327-7C09D0A641C7',
+    //   '3BDAD46B-D9AD-44B6-9D27-B5FF14CD945E',
+    //   '5A5C8CDE-1535-48B5-A5DB-D75360DFBB63'
+    // ]
+
+    //approversDetails
+    // [
+    //   {
+    //     sub: '089B72CD-7C80-4348-9C2A-395213B7ECAD',
+    //     given_name: 'Eoin',
+    //     family_name: 'Corr',
+    //     email: 'eoincorr021+17@gmail.com',
+    //     job_title: null,
+    //     status: 0,
+    //     phone_number: null,
+    //     last_login: '2020-02-19T08:53:00.000Z',
+    //     prev_login: null,
+    //     isEntra: false,
+    //     entraOid: null,
+    //     entraLinked: null,
+    //     isInternalUser: false,
+    //     entraDeferUntil: null
+    //   },
+    //   {
+    //     sub: '727A9392-63A4-4B91-BAAF-6D9CA675DFE0',
+    //     given_name: 'Test2505',
+    //     family_name: 'user6',
+    //     email: 'Test2505user6@yopmail.com',
+    //     job_title: null,
+    //     status: 1,
+    //     phone_number: null,
+    //     last_login: '2021-06-14T13:49:00.000Z',
+    //     prev_login: null,
+    //     isEntra: false,
+    //     entraOid: null,
+    //     entraLinked: null,
+    //     isInternalUser: false,
+    //     entraDeferUntil: null
+    //   }]
+
     pagedListOfRequests.mockReset();
     pagedListOfRequests.mockReturnValue({
       requests: [

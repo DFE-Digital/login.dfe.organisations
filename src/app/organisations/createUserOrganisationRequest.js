@@ -1,3 +1,4 @@
+const { getUsersByIds } = require("../../infrastructure/directories/api");
 const {
   createUserOrgRequest,
   getApproversForOrg,
@@ -8,13 +9,25 @@ const createUserOrganisationRequest = async (req, res) => {
     return res.status(400).send();
   }
 
-  const approvers = await getApproversForOrg(req.params.id);
+  let status = 0;
+  const approverIds = await getApproversForOrg(req.params.id);
+  if (approverIds && approverIds.length >= 1) {
+    const users = await getUsersByIds(approverIds);
+    const activeUsers = users.find((user) => user.status === 1);
+    if (activeUsers.length === 0) {
+      // Org has approvers but they're all deactivated.
+      status = 3;
+    }
+  } else {
+    // No approvers.
+    status = 3;
+  }
 
   const organisationRequest = {
     userId: req.params.uid,
     organisationId: req.params.id,
     reason: req.body.reason,
-    status: approvers && approvers.length === 0 ? 3 : 0,
+    status: status,
   };
   const request = await createUserOrgRequest(organisationRequest);
   return res.status(201).send(request);
