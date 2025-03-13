@@ -218,7 +218,7 @@ const overdueAllRequestsTypes = async () => {
   );
 
   logger.info(
-    "Updating outstanding servie requests to status 3 if organisation has no active approvers",
+    "Updating outstanding service requests to status 3 if organisation has no active approvers",
   );
   allOutstandingServSubServRequests =
     await updateRequestsWhereOrgHasNoActiveApprovers(
