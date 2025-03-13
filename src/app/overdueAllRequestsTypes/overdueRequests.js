@@ -88,7 +88,7 @@ const updateRequestsWhereOrgHasNoActiveApprovers = async (
       // If requests org has approvers then filter it into the list of requests that
       // will continue to be processed. If no approvers, we update the status and then
       // forget about it for the rest of this process.
-      if (activeUsers === undefined || activeUsers.length === 0) {
+      if (activeUsers.length === 0) {
         logger.info(
           `Request [${request.id}] for organisation [${request.org_id}] has no active approvers.  Setting to status 3`,
         );

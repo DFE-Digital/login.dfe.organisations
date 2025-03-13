@@ -1,8 +1,9 @@
-const { getUsersByIds } = require("../../infrastructure/directories/api");
+const { getUsersByIds } = require("../../infrastructure/directories");
 const {
   createUserOrgRequest,
   getApproversForOrg,
 } = require("./data/organisationsStorage");
+const logger = require("../../infrastructure/logger");
 
 const createUserOrganisationRequest = async (req, res) => {
   if (!req.params.uid || !req.params.id) {
@@ -12,14 +13,18 @@ const createUserOrganisationRequest = async (req, res) => {
   let status = 0;
   const approverIds = await getApproversForOrg(req.params.id);
   if (approverIds && approverIds.length >= 1) {
-    const users = await getUsersByIds(approverIds);
-    const activeUsers = users.find((user) => user.status === 1);
+    const users = await getUsersByIds(approverIds.join(","));
+    const activeUsers = users.filter((user) => user.status === 1);
     if (activeUsers.length === 0) {
-      // Org has approvers but they're all deactivated.
+      logger.info(
+        `Organisation [${req.params.id}] has no active approvers.  Setting request status to 3`,
+      );
       status = 3;
     }
   } else {
-    // No approvers.
+    logger.info(
+      `Organisation [${req.params.id}] has no approvers.  Setting request status to 3`,
+    );
     status = 3;
   }
 
