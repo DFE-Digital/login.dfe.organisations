@@ -61,6 +61,71 @@ const listApproversReqToOverdue = async (
  *
  * @param {Array} outstandingRequests
  * @param {string} requestType
+ *
+ * Takes an array of outstanding requests and loops over them to check each one has
+ * at least 1 active approver in the organisation.
+ *
+ * If the organisation has 0 active approvers (either becuase it has 0, or because all
+ * the approvers it has have been deactivated), the request will be set to status 3 and
+ * will NOT be in the list of returned requests
+ */
+const updateRequestsWhereOrgHasNoActiveApprovers = async (
+  outstandingRequests,
+  requestType,
+) => {
+  logger.info(
+    `Looping over [${outstandingRequests.length}] outstanding requests of type [${requestType}] and checking if the org has active approvers`,
+  );
+  const remainingOutstandingRequests = [];
+  for (let i = 0; i < outstandingRequests.length; i += 1) {
+    const request = outstandingRequests[i];
+
+    const approverIds = await getApproversForOrg(request.org_id);
+    if (approverIds && approverIds.length >= 1) {
+      const approversDetails = await getUsersByIds(approverIds.join(","));
+      const activeUsers = approversDetails.filter((user) => user.status === 1);
+
+      // If requests org has approvers then filter it into the list of requests that
+      // will continue to be processed. If no approvers, we update the status and then
+      // forget about it for the rest of this process.
+      if (activeUsers.length === 0) {
+        logger.info(
+          `Request [${request.id}] for organisation [${request.org_id}] has no active approvers.  Setting to status 3`,
+        );
+        const updatedRequest = { status: 3 };
+        if (requestType === requestTypes.ORGANISATION_ACCESS) {
+          await updateUserOrgRequest(request.id, updatedRequest);
+        } else if (requestType === requestTypes.SERVICE_SUB_SERVICE_ACCESS) {
+          await updateUserServSubServRequest(request.id, updatedRequest);
+        }
+      } else {
+        logger.info(
+          `Request [${request.id}] for organisation [${request.org_id}] has active approvers`,
+        );
+        remainingOutstandingRequests.push(request);
+      }
+    } else {
+      logger.info(
+        `Request [${request.id}] for organisation [${request.org_id}] has no active approvers.  Setting to status 3`,
+      );
+      const updatedRequest = { status: 3 };
+      if (requestType === requestTypes.ORGANISATION_ACCESS) {
+        await updateUserOrgRequest(request.id, updatedRequest);
+      } else if (requestType === requestTypes.SERVICE_SUB_SERVICE_ACCESS) {
+        await updateUserServSubServRequest(request.id, updatedRequest);
+      }
+    }
+  }
+  logger.info(
+    `Returning [${remainingOutstandingRequests.length}] outstanding requests that all have at least 1 active approver`,
+  );
+  return remainingOutstandingRequests;
+};
+
+/**
+ *
+ * @param {Array} outstandingRequests
+ * @param {string} requestType
  * @param {Map} orgIdsByRequestCount
  * @param {moment.Moment} dateNow
  * @param {number} numberOfDaysUntilOverdue
@@ -130,19 +195,36 @@ const overdueAllRequestsTypes = async () => {
 
   // get all outstanding requests
   logger.info("Getting organisation request data with status of 0");
-  const allOutstandingOrgRequests = await listRequests(
+  let allOutstandingOrgRequests = await listRequests(
     500,
     [0],
     requestTypes.ORGANISATION_ACCESS,
   );
 
   logger.info("Getting service and sub-service request data with status of 0");
-  const allOutstandingServSubServRequests = await listRequests(
+  let allOutstandingServSubServRequests = await listRequests(
     500,
     [0],
     requestTypes.SERVICE_SUB_SERVICE_ACCESS,
   );
   const orgIdsByRequestCount = new Map();
+
+  logger.info(
+    "Updating outstanding org requests to status 3 if organisation has no active approvers",
+  );
+  allOutstandingOrgRequests = await updateRequestsWhereOrgHasNoActiveApprovers(
+    allOutstandingOrgRequests,
+    requestTypes.ORGANISATION_ACCESS,
+  );
+
+  logger.info(
+    "Updating outstanding service requests to status 3 if organisation has no active approvers",
+  );
+  allOutstandingServSubServRequests =
+    await updateRequestsWhereOrgHasNoActiveApprovers(
+      allOutstandingServSubServRequests,
+      requestTypes.SERVICE_SUB_SERVICE_ACCESS,
+    );
 
   logger.info(
     "Updating overdue org requests to status 2 and nearly overdue ones into a list to send reminders",
