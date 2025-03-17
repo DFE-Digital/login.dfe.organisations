@@ -129,7 +129,6 @@ const action = async (req, res) => {
   }
   await add(organisation);
   await raiseNotificationThatOrganisationHasChanged(organisation.id);
-
   return res.status(201).send();
 };
 
