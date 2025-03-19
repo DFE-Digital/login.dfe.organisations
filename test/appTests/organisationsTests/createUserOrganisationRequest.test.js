@@ -1,6 +1,14 @@
-jest.mock("./../../../src/infrastructure/config", () => {
-  const singleton = {};
-  return () => singleton;
+jest.mock(
+  "./../../../src/infrastructure/config",
+  () => () => require("../../utils").mockConfig(),
+);
+jest.mock("../../../src/infrastructure/directories");
+jest.mock("./../../../src/infrastructure/logger", () => {
+  return {
+    error: jest.fn(),
+    info: jest.fn(),
+    debug: jest.fn(),
+  };
 });
 jest.mock("./../../../src/app/organisations/data/organisationsStorage", () => {
   return {
@@ -8,7 +16,6 @@ jest.mock("./../../../src/app/organisations/data/organisationsStorage", () => {
     getApproversForOrg: jest.fn(),
   };
 });
-
 const res = {
   json: jest.fn(),
   status: jest.fn(),
@@ -25,6 +32,7 @@ const {
   getApproversForOrg,
 } = require("./../../../src/app/organisations/data/organisationsStorage");
 const createUserOrganisationRequest = require("./../../../src/app/organisations/createUserOrganisationRequest");
+const { getUsersByIds } = require("../../../src/infrastructure/directories");
 
 describe("when creating a user organisation request for an organisation with approvers", () => {
   let req;
@@ -42,6 +50,41 @@ describe("when creating a user organisation request for an organisation with app
     };
 
     res.mockResetAll();
+    getUsersByIds.mockReset().mockReturnValue([
+      {
+        sub: "user2",
+        given_name: "ActiveName",
+        family_name: "UserLastName",
+        email: "activeUser@gmail.com",
+        job_title: null,
+        status: 1,
+        phone_number: null,
+        last_login: "2020-02-19T08:53:00.000Z",
+        prev_login: null,
+        isEntra: false,
+        entraOid: null,
+        entraLinked: null,
+        isInternalUser: false,
+        entraDeferUntil: null,
+      },
+      {
+        sub: "user3",
+        given_name: "DeactivatedName",
+        family_name: "UserLastName",
+        email: "deactivatedUser@gmail.com",
+        job_title: null,
+        status: 0,
+        phone_number: null,
+        last_login: "2020-02-19T08:53:00.000Z",
+        prev_login: null,
+        isEntra: false,
+        entraOid: null,
+        entraLinked: null,
+        isInternalUser: false,
+        entraDeferUntil: null,
+      },
+    ]);
+
     createUserOrgRequest.mockReset().mockReturnValue("some-new-id");
     getApproversForOrg.mockReset().mockImplementation((org) => {
       return [
@@ -55,6 +98,22 @@ describe("when creating a user organisation request for an organisation with app
         },
       ];
     });
+  });
+
+  it("returns 400 if one of the params are missing", async () => {
+    req = {
+      params: {
+        id: "org1",
+      },
+      body: {
+        reason: "Test",
+        status: 0,
+      },
+    };
+    await createUserOrganisationRequest(req, res);
+
+    expect(res.status).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(400);
   });
 
   it("then it should create user org request in storage", async () => {
@@ -79,5 +138,68 @@ describe("when creating a user organisation request for an organisation with app
     await createUserOrganisationRequest(req, res);
 
     expect(res.status).toHaveBeenCalledWith(201);
+  });
+
+  it("the request will be created with status 3 if the org has no approvers", async () => {
+    getApproversForOrg.mockReset().mockReturnValue([]);
+
+    await createUserOrganisationRequest(req, res);
+
+    expect(createUserOrgRequest).toHaveBeenCalledTimes(1);
+    expect(createUserOrgRequest.mock.calls[0][0]).toEqual({
+      organisationId: "org1",
+      reason: "Test",
+      status: 3,
+      userId: "user1",
+    });
+    expect(res.send).toHaveBeenCalledWith("some-new-id");
+  });
+
+  it("the request will be created with status 3 if the org has no active approvers", async () => {
+    getUsersByIds.mockReset().mockReturnValue([
+      {
+        sub: "user2",
+        given_name: "ActiveName",
+        family_name: "UserLastName",
+        email: "activeUser@gmail.com",
+        job_title: null,
+        status: 0,
+        phone_number: null,
+        last_login: "2020-02-19T08:53:00.000Z",
+        prev_login: null,
+        isEntra: false,
+        entraOid: null,
+        entraLinked: null,
+        isInternalUser: false,
+        entraDeferUntil: null,
+      },
+      {
+        sub: "user3",
+        given_name: "DeactivatedName",
+        family_name: "UserLastName",
+        email: "deactivatedUser@gmail.com",
+        job_title: null,
+        status: 0,
+        phone_number: null,
+        last_login: "2020-02-19T08:53:00.000Z",
+        prev_login: null,
+        isEntra: false,
+        entraOid: null,
+        entraLinked: null,
+        isInternalUser: false,
+        entraDeferUntil: null,
+      },
+    ]);
+
+    await createUserOrganisationRequest(req, res);
+
+    expect(createUserOrgRequest).toHaveBeenCalledTimes(1);
+    expect(createUserOrgRequest.mock.calls[0][0]).toEqual({
+      organisationId: "org1",
+      reason: "Test",
+      status: 3,
+      userId: "user1",
+    });
+    expect(res.send).toHaveBeenCalledWith("some-new-id");
   });
 });
