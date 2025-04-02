@@ -1,6 +1,6 @@
 const moment = require("moment");
 const logger = require("./../../infrastructure/logger");
-const config = require("./../../infrastructure/config")();
+const config = require("./../../infrastructure/config");
 const { getGroupsFile } = require("./../../infrastructure/gias");
 const { parse: parseGroups } = require("./groupCsvReader");
 const { parse: parseGroupLinks } = require("./groupLinksCsvReader");
