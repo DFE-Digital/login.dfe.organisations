@@ -1,4 +1,4 @@
-const config = require("./../config")();
+const config = require("./../config");
 const { URL } = require("url");
 
 const getFileFromBlob = async (path) => {
