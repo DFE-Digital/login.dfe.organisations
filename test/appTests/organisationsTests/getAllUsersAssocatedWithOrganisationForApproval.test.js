@@ -41,13 +41,11 @@ describe("when getting users associated to organisations for approval", () => {
 
     logger.error.mockReset();
 
-    getUsersPendingApproval
-      .mockReset()
-      .mockReturnValue({
-        usersForApproval: userOrgMapping,
-        totalNumberOfRecords: 11,
-        totalNumberOfPages: 1,
-      });
+    getUsersPendingApproval.mockReset().mockReturnValue({
+      usersForApproval: userOrgMapping,
+      totalNumberOfRecords: 11,
+      totalNumberOfPages: 1,
+    });
   });
 
   it("then it should get a page of users from organisations for approval", async () => {
