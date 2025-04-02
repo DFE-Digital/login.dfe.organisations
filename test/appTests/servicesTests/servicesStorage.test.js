@@ -1,3 +1,5 @@
+const { mockConfig } = require("../../utils");
+
 jest.mock("assert");
 jest.mock("./../../../src/infrastructure/logger", () => {
   return {};
@@ -29,9 +31,8 @@ describe("When using servicesStorage Data for a user", () => {
           dialect: "postgres",
         },
       };
-      jest.mock(
-        "./../../../src/infrastructure/config",
-        () => () => require("../../utils").mockConfig(configStub),
+      jest.mock("./../../../src/infrastructure/config", () =>
+        mockConfig(configStub),
       );
 
       require("./../../../src/app/services/data/servicesStorage");
@@ -47,9 +48,8 @@ describe("When using servicesStorage Data for a user", () => {
           dialect: "postgres",
         },
       };
-      jest.mock(
-        "./../../../src/infrastructure/config",
-        () => () => require("../../utils").mockConfig(configStub),
+      jest.mock("./../../../src/infrastructure/config", () =>
+        mockConfig(configStub),
       );
 
       require("./../../../src/app/services/data/servicesStorage");
@@ -65,9 +65,8 @@ describe("When using servicesStorage Data for a user", () => {
           dialect: "postgres",
         },
       };
-      jest.mock(
-        "./../../../src/infrastructure/config",
-        () => () => require("../../utils").mockConfig(configStub),
+      jest.mock("./../../../src/infrastructure/config", () =>
+        mockConfig(configStub),
       );
 
       require("./../../../src/app/services/data/servicesStorage");

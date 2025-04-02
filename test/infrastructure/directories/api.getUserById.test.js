@@ -1,23 +1,22 @@
-jest.mock("login.dfe.async-retry");
-jest.mock("login.dfe.jwt-strategies");
-jest.mock(
-  "./../../../src/infrastructure/config",
-  () => () =>
-    require("../../utils").mockConfig({
-      directories: {
-        type: "api",
-        service: {
-          url: "http://directories.test",
-          retryFactor: 0,
-          numberOfRetries: 2,
-        },
-      },
-    }),
-);
-
+const { mockConfig } = require("../../utils");
 const { fetchApi } = require("login.dfe.async-retry");
 const jwtStrategy = require("login.dfe.jwt-strategies");
 const { getUserById } = require("../../../src/infrastructure/directories/api");
+
+jest.mock("login.dfe.async-retry");
+jest.mock("login.dfe.jwt-strategies");
+jest.mock("./../../../src/infrastructure/config", () => {
+  return mockConfig({
+    directories: {
+      type: "api",
+      service: {
+        url: "http://directories.test",
+        retryFactor: 0,
+        numberOfRetries: 2,
+      },
+    },
+  });
+});
 
 const userId = "user1";
 const apiResponse = {};

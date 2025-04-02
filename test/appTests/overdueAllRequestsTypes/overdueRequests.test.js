@@ -1,7 +1,17 @@
-jest.mock(
-  "./../../../src/infrastructure/config",
-  () => () => require("../../utils").mockConfig(),
-);
+const { mockConfig } = require("../../utils");
+const {
+  pagedListOfRequests,
+  pagedListOfServSubServRequests,
+  getApproversForOrg,
+  updateUserOrgRequest,
+  updateUserServSubServRequest,
+} = require("./../../../src/app/organisations/data/organisationsStorage");
+const { getUsersByIds } = require("../../../src/infrastructure/directories");
+const { NotificationClient } = require("login.dfe.jobs-client");
+const moment = require("moment");
+const overdueAllRequestsTypes = require("../../../src/app/overdueAllRequestsTypes/overdueRequests");
+
+jest.mock("./../../../src/infrastructure/config", () => mockConfig());
 jest.mock("./../../../src/infrastructure/logger", () => {
   return {
     error: jest.fn(),
@@ -30,18 +40,6 @@ jest.mock("./../../../src/app/organisations/data/organisationsStorage", () => {
   };
 });
 
-const {
-  pagedListOfRequests,
-  pagedListOfServSubServRequests,
-  getApproversForOrg,
-  updateUserOrgRequest,
-  updateUserServSubServRequest,
-} = require("./../../../src/app/organisations/data/organisationsStorage");
-const { getUsersByIds } = require("../../../src/infrastructure/directories");
-const { NotificationClient } = require("login.dfe.jobs-client");
-const moment = require("moment");
-
-const overdueAllRequestsTypes = require("../../../src/app/overdueAllRequestsTypes/overdueRequests");
 const dateNow = moment();
 
 describe("when calling the overdueAllRequestsTypes function on organisation requests", () => {
