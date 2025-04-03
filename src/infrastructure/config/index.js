@@ -87,6 +87,9 @@ const config = {
   notifications: {
     connectionString: process.env.REDIS_CONN + "/4?tls=true"
   },
+  organisationRequests: {
+    numberOfDaysUntilOverdue: 5
+  },
   schedules: {
     establishmentImport: "0 5 * * *",
     groupImport: "0 6 * * *",
