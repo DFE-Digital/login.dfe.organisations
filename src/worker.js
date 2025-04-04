@@ -1,5 +1,5 @@
 const logger = require("./infrastructure/logger");
-const config = require("./infrastructure/config")();
+const config = require("./infrastructure/config");
 const configSchema = require("./infrastructure/config/schema");
 const schedule = require("node-schedule");
 const overdueRequests = require("./app/overdueAllRequestsTypes");

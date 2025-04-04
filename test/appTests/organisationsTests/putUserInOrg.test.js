@@ -18,7 +18,7 @@ jest.mock("./../../../src/app/organisations/notifications", () => ({
 }));
 
 const httpMocks = require("node-mocks-http");
-const config = require("./../../../src/infrastructure/config")();
+const config = require("./../../../src/infrastructure/config");
 const {
   raiseNotificationThatUserHasChanged,
 } = require("./../../../src/app/organisations/notifications");

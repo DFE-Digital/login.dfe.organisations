@@ -1,7 +1,10 @@
-jest.mock(
-  "./../../../../src/infrastructure/config",
-  () => () => require("../../../utils").mockConfig(),
-);
+const { mockConfig } = require("../../../utils");
+const {
+  add,
+} = require("../../../../src/app/organisations/data/organisationsStorage");
+const { organisations } = require("../../../../src/infrastructure/repository");
+
+jest.mock("./../../../../src/infrastructure/config", () => mockConfig());
 
 jest.mock("./../../../../src/infrastructure/repository", () => {
   return {
@@ -10,12 +13,6 @@ jest.mock("./../../../../src/infrastructure/repository", () => {
     },
   };
 });
-
-const {
-  add,
-} = require("../../../../src/app/organisations/data/organisationsStorage");
-
-const { organisations } = require("../../../../src/infrastructure/repository");
 
 describe("when calling add", () => {
   let org;

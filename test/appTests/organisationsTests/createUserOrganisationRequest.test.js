@@ -1,7 +1,12 @@
-jest.mock(
-  "./../../../src/infrastructure/config",
-  () => () => require("../../utils").mockConfig(),
-);
+const { mockConfig } = require("../../utils");
+const {
+  createUserOrgRequest,
+  getApproversForOrg,
+} = require("./../../../src/app/organisations/data/organisationsStorage");
+const createUserOrganisationRequest = require("./../../../src/app/organisations/createUserOrganisationRequest");
+const { getUsersByIds } = require("../../../src/infrastructure/directories");
+
+jest.mock("./../../../src/infrastructure/config", () => mockConfig());
 jest.mock("../../../src/infrastructure/directories");
 jest.mock("./../../../src/infrastructure/logger", () => {
   return {
@@ -26,13 +31,6 @@ const res = {
     this.send.mockReset().mockReturnValue(this);
   },
 };
-
-const {
-  createUserOrgRequest,
-  getApproversForOrg,
-} = require("./../../../src/app/organisations/data/organisationsStorage");
-const createUserOrganisationRequest = require("./../../../src/app/organisations/createUserOrganisationRequest");
-const { getUsersByIds } = require("../../../src/infrastructure/directories");
 
 describe("when creating a user organisation request for an organisation with approvers", () => {
   let req;

@@ -1,5 +1,5 @@
 const logger = require("./../../infrastructure/logger");
-const config = require("./../../infrastructure/config")();
+const config = require("./../../infrastructure/config");
 const { parse } = require("./establishmentCsvReader");
 const {
   getNextOrganisationLegacyId,

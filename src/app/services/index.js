@@ -1,6 +1,6 @@
 const express = require("express");
 const apiAuth = require("login.dfe.api.auth");
-const config = require("./../../infrastructure/config")();
+const config = require("./../../infrastructure/config");
 const { asyncWrapper } = require("login.dfe.express-error-handling");
 const { deprecate } = require("./../../utils");
 

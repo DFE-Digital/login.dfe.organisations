@@ -1,7 +1,14 @@
-jest.mock(
-  "./../../../src/infrastructure/config",
-  () => () => require("../../utils").mockConfig(),
-);
+const { mockConfig } = require("../../utils");
+const {
+  updateOtherStakeholders,
+} = require("./../../../src/app/organisations/data/organisationsStorage");
+
+const { Op } = require("sequelize");
+const { organisations } = require("./../../../src/infrastructure/repository");
+
+jest.mock("./../../../src/infrastructure/config", () => {
+  return mockConfig();
+});
 
 jest.mock("./../../../src/infrastructure/repository", () => {
   const { createJestMockForSequelizeEntity } = require("./../../utils/mocks");
@@ -20,13 +27,6 @@ jest.mock("./../../../src/infrastructure/repository", () => {
     },
   };
 });
-
-const {
-  updateOtherStakeholders,
-} = require("./../../../src/app/organisations/data/organisationsStorage");
-
-const { Op } = require("sequelize");
-const { organisations } = require("./../../../src/infrastructure/repository");
 
 describe("when calling updateOtherStakeholders", () => {
   let orgUpdate;

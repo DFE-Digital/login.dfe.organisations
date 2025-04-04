@@ -1,4 +1,4 @@
-const config = require("./../../../infrastructure/config")();
+const config = require("./../../../infrastructure/config");
 const { getOrgById } = require("./../data/organisationsStorage");
 const { ServiceNotificationsClient } = require("login.dfe.jobs-client");
 

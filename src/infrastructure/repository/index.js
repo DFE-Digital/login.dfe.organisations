@@ -1,4 +1,4 @@
-const config = require("./../config")();
+const config = require("./../config");
 
 const { makeConnection } = require("./connection");
 const externalIdentifiersModel = require("./externalIdentifiers");

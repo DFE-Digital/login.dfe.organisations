@@ -1,6 +1,6 @@
 const Sequelize = require("sequelize").default;
 const assert = require("assert");
-const config = require("./../config")();
+const config = require("./../config");
 const packetSize = config.database.packetSize || 65536;
 
 const Op = Sequelize.Op;

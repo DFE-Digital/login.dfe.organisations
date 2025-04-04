@@ -1,4 +1,4 @@
-const config = require("./infrastructure/config")();
+const config = require("./infrastructure/config");
 const configSchema = require("./infrastructure/config/schema");
 const logger = require("./infrastructure/logger");
 const express = require("express");
