@@ -1,7 +1,7 @@
 const { createLogger, format, transports, addColors } = require("winston");
 
 const { combine, prettyPrint, errors, simple, colorize } = format;
-const config = require("../config")();
+const config = require("../config");
 const appInsights = require("applicationinsights");
 const AppInsightsTransport = require("login.dfe.winston-appinsights");
 

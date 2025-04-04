@@ -1,4 +1,4 @@
-const config = require("./../config")();
+const config = require("./../config");
 
 let adapter;
 if (config.directories.type.toLowerCase() === "api") {

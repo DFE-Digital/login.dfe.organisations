@@ -1,7 +1,10 @@
-jest.mock(
-  "./../../../src/infrastructure/config",
-  () => () => require("../../utils").mockConfig(),
-);
+const { mockConfig } = require("../../utils");
+const createOrganisation = require("./../../../src/app/organisations/createOrganisation");
+const organisationStorage = require("./../../../src/app/organisations/data/organisationsStorage");
+const notifications = require("./../../../src/app/organisations/notifications");
+const httpMocks = require("node-mocks-http");
+
+jest.mock("./../../../src/infrastructure/config", () => mockConfig());
 
 jest.mock("../../../src/app/organisations/data/organisationsStorage", () => ({
   add: jest.fn(),
@@ -15,11 +18,6 @@ jest.mock("../../../src/app/organisations/data/organisationsStorage", () => ({
   getNextOrganisationLegacyId: jest.fn(),
 }));
 jest.mock("./../../../src/app/organisations/notifications");
-
-const createOrganisation = require("./../../../src/app/organisations/createOrganisation");
-const organisationStorage = require("./../../../src/app/organisations/data/organisationsStorage");
-const notifications = require("./../../../src/app/organisations/notifications");
-const httpMocks = require("node-mocks-http");
 
 const res = {
   json: jest.fn(),

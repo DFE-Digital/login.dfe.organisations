@@ -1,6 +1,6 @@
 const SimpleSchema = require('simpl-schema').default;
 const { validateConfigAgainstSchema, schemas, patterns } = require('login.dfe.config.schema.common');
-const config = require('./index')();
+const config = require('./index');
 const logger = require('./../logger');
 
 const schedulesSchema = new SimpleSchema({
