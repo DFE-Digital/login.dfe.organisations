@@ -39,7 +39,7 @@
     "login.dfe.async-retry": "github:DFE-Digital/login.dfe.async-retry#v2.0.3",
     "login.dfe.audit.transporter": "^4.0.2",
     "login.dfe.config.schema.common": "github:DFE-Digital/login.dfe.config.schema.common#v2.1.6",
-    "login.dfe.express-error-handling": "github:DFE-Digital/login.dfe.express-error-handling#v3.0.2",
+    "login.dfe.express-error-handling": "^3.0.3",
     "login.dfe.healthcheck": "^3.0.3",
     "login.dfe.jobs-client": "github:DFE-Digital/login.dfe.jobs-client#v6.1.0",
     "login.dfe.jwt-strategies": "github:DFE-Digital/login.dfe.jwt-strategies#v4.1.1",
