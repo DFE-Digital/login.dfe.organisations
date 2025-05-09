@@ -35,7 +35,7 @@
     "fs": "^0.0.2",
     "helmet": "^7.2.0",
     "lodash": "^4.17.21",
-    "login.dfe.api-client": "^1.0.5",
+    "login.dfe.api-client": "^1.0.6-alpha.1",
     "login.dfe.api.auth": "^2.3.4",
     "login.dfe.audit.transporter": "^4.0.3",
     "login.dfe.audit.winston-sequelize-transport": "^3.2.6",
