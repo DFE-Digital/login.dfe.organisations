@@ -4,7 +4,11 @@ const {
   getApproversForOrg,
 } = require("./../../../src/app/organisations/data/organisationsStorage");
 const createUserOrganisationRequest = require("./../../../src/app/organisations/createUserOrganisationRequest");
-const { getUsersByIds } = require("../../../src/infrastructure/directories");
+const { getUsersRaw } = require("login.dfe.api-client/users");
+
+jest.mock("login.dfe.api-client/users", () => ({
+  getUsersRaw: jest.fn(),
+}));
 
 jest.mock("./../../../src/infrastructure/config", () => mockConfig());
 jest.mock("../../../src/infrastructure/directories");
@@ -48,7 +52,7 @@ describe("when creating a user organisation request for an organisation with app
     };
 
     res.mockResetAll();
-    getUsersByIds.mockReset().mockReturnValue([
+    getUsersRaw.mockReset().mockReturnValue([
       {
         sub: "user2",
         given_name: "ActiveName",
@@ -154,7 +158,7 @@ describe("when creating a user organisation request for an organisation with app
   });
 
   it("the request will be created with status 3 if the org has no active approvers", async () => {
-    getUsersByIds.mockReset().mockReturnValue([
+    getUsersRaw.mockReset().mockReturnValue([
       {
         sub: "user2",
         given_name: "ActiveName",
