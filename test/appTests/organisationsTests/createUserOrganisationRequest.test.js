@@ -11,7 +11,6 @@ jest.mock("login.dfe.api-client/users", () => ({
 }));
 
 jest.mock("./../../../src/infrastructure/config", () => mockConfig());
-jest.mock("../../../src/infrastructure/directories");
 jest.mock("./../../../src/infrastructure/logger", () => {
   return {
     error: jest.fn(),
