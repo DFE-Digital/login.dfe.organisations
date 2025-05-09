@@ -23,7 +23,6 @@ jest.mock("./../../../src/infrastructure/logger", () => {
   };
 });
 jest.mock("login.dfe.jobs-client");
-jest.mock("../../../src/infrastructure/directories");
 jest.mock("./../../../src/app/organisations/data/organisationsStorage", () => {
   const getApproversForOrg = jest.fn();
   const pagedListOfRequests = jest.fn();

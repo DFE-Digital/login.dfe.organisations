@@ -83,7 +83,7 @@ const updateRequestsWhereOrgHasNoActiveApprovers = async (
     const approverIds = await getApproversForOrg(request.org_id);
     if (approverIds && approverIds.length >= 1) {
       const approversDetails = await getUsersRaw({
-        by: { userIds: approverIds.join(",") },
+        by: { userIds: approverIds },
       });
       const activeUsers = approversDetails.filter((user) => user.status === 1);
 
@@ -265,7 +265,7 @@ const overdueAllRequestsTypes = async () => {
     if (approversIds.length > 0) {
       const uniqueApproversIds = [...new Set(approversIds)];
       const approversDetails = await getUsersRaw({
-        by: { userIds: uniqueApproversIds.join(",") },
+        by: { userIds: uniqueApproversIds },
       });
       // Filters out all approvers who have inactive accounts
       activeApprovers = approversDetails.filter((user) => user.status === 1);
