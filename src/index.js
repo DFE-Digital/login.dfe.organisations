@@ -14,8 +14,24 @@ const dev = require("./app/dev");
 const healthCheck = require("login.dfe.healthcheck");
 const { getErrorHandler } = require("login.dfe.express-error-handling");
 const helmet = require("helmet");
+const { setupApi } = require("login.dfe.api-client/api/setup");
 
 configSchema.validate();
+
+setupApi({
+  auth: {
+    tenant: config.directories.service.auth.tenant,
+    authorityHostUrl: config.directories.service.auth.authorityHostUrl,
+    clientId: config.directories.service.auth.clientId,
+    clientSecret: config.directories.service.auth.clientSecret,
+    resource: config.directories.service.auth.resource,
+  },
+  api: {
+    directories: {
+      baseUri: config.directories.service.url,
+    },
+  },
+});
 
 https.globalAgent.maxSockets = http.globalAgent.maxSockets =
   config.hostingEnvironment.agentKeepAlive.maxSockets || 50;

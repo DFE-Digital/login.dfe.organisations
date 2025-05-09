@@ -1,7 +1,7 @@
 const { NotificationClient } = require("login.dfe.jobs-client");
 const logger = require("./../../infrastructure/logger");
 const config = require("./../../infrastructure/config");
-const { getUsersByIds } = require("./../../infrastructure/directories");
+const { getUsersRaw } = require("login.dfe.api-client/users");
 const {
   pagedListOfRequests,
   updateUserOrgRequest,
@@ -82,7 +82,9 @@ const updateRequestsWhereOrgHasNoActiveApprovers = async (
 
     const approverIds = await getApproversForOrg(request.org_id);
     if (approverIds && approverIds.length >= 1) {
-      const approversDetails = await getUsersByIds(approverIds.join(","));
+      const approversDetails = await getUsersRaw({
+        by: { userIds: approverIds.join(",") },
+      });
       const activeUsers = approversDetails.filter((user) => user.status === 1);
 
       // If requests org has approvers then filter it into the list of requests that
@@ -262,9 +264,9 @@ const overdueAllRequestsTypes = async () => {
 
     if (approversIds.length > 0) {
       const uniqueApproversIds = [...new Set(approversIds)];
-      const approversDetails = await getUsersByIds(
-        uniqueApproversIds.join(","),
-      );
+      const approversDetails = await getUsersRaw({
+        by: { userIds: uniqueApproversIds.join(",") },
+      });
       // Filters out all approvers who have inactive accounts
       activeApprovers = approversDetails.filter((user) => user.status === 1);
     }
