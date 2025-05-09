@@ -53,6 +53,9 @@ const mockConfig = (customConfig) => {
     organisationRequests: {
       numberOfDaysUntilOverdue: 5,
     },
+    loggerSettings: {
+      auditDb: {},
+    },
   };
   return customConfig
     ? Object.assign(defaultConfig, customConfig)
