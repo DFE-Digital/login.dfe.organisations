@@ -1,6 +1,10 @@
 const logger = require("./../../infrastructure/logger");
 const servicesStorage = require("./data/servicesStorage");
 
+const isFutureDate = (inputDate) => {
+  return inputDate.getTime() > new Date().getTime();
+};
+
 const isUuid = (value) =>
   value.match(/^[0-9a-z]{8}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{4}-[0-9a-z]{12}$/);
 
@@ -60,9 +64,47 @@ const getServiceUsers = async (req, res) => {
     const paramSource = req.method === "POST" ? req.body : req.query;
     if (paramSource && paramSource.userIds) userIds = req.body.userIds;
 
+    const status = paramSource.status;
+    const from = paramSource.from;
+    const to = paramSource.to;
+
+    if (status !== 1 || status !== 0) {
+      res.status(400).send("status must be 1 or 0");
+      return;
+    }
+
+    let fromDate;
+    let toDate;
+    if (to && isNaN(Date.parse(to))) {
+      return res.status(400).send("to date is not a valid date");
+    } else if (to) {
+      toDate = new Date(to);
+    }
+    if (from && isNaN(Date.parse(from))) {
+      return res.status(400).send("from date is not a valid date");
+    } else if (from) {
+      fromDate = new Date(from);
+    }
+
+    if (fromDate && toDate) {
+      if (isFutureDate(fromDate) && isFutureDate(toDate)) {
+        return res.status(400).send("date range should not be in the future");
+      } else if (fromDate.getTime() > toDate.getTime()) {
+        return res.status(400).send("from date greater than to date");
+      }
+    } else if (fromDate || toDate) {
+      const selectedDate = fromDate ? fromDate : toDate;
+      if (isFutureDate(selectedDate)) {
+        return res.status(400).send("date range should not be in the future");
+      }
+    }
+
     const usersOfService = await servicesStorage.getUsersOfServiceByUserIds(
       serviceId,
       userIds,
+      status,
+      fromDate,
+      toDate,
       pageNumber,
       pageSize,
       req.header("x-correlation-id"),
