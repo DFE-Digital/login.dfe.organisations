@@ -72,7 +72,7 @@ The necessary tables will be created when ran.
 
 ### Endpoints
 
-The API uses the security module [login.dfe.jwt-strategies](https://github.com/DFE-Digital/login.dfe.jwt-strategies). You are able to get and user associated services via the following endpoint:
+You are able to get and user associated services via the following endpoint:
 
 ```
 GET: /associated-with-user/[uid]

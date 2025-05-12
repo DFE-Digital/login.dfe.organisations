@@ -5,7 +5,7 @@ const organisationsStorage = require("./../organisations/data/organisationsStora
 const { getUserOrganisationIdentifiers } = require("./../organisations/utils");
 const config = require("./../../infrastructure/config");
 const { NotificationClient } = require("login.dfe.jobs-client");
-const { getUserById } = require("./../../infrastructure/directories");
+const { getUserRaw } = require("login.dfe.api-client/users");
 
 const APPROVED_STATUS = 1;
 
@@ -16,7 +16,7 @@ const notificationClient = new NotificationClient({
 const handler = async (req, res) => {
   const invitationId = req.params.inv_id;
   const userId = req.body.user_id;
-  const userDetails = await getUserById(userId);
+  const userDetails = await getUserRaw({ by: { id: userId } });
 
   const services = await invitationStorage.getForInvitationId(
     invitationId,
