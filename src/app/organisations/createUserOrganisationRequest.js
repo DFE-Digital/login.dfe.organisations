@@ -1,4 +1,4 @@
-const { getUsersByIds } = require("../../infrastructure/directories");
+const { getUsersRaw } = require("login.dfe.api-client/users");
 const {
   createUserOrgRequest,
   getApproversForOrg,
@@ -13,7 +13,7 @@ const createUserOrganisationRequest = async (req, res) => {
   let status = 0;
   const approverIds = await getApproversForOrg(req.params.id);
   if (approverIds && approverIds.length >= 1) {
-    const users = await getUsersByIds(approverIds.join(","));
+    const users = await getUsersRaw({ by: { userIds: approverIds } });
     const activeUsers = users.filter((user) => user.status === 1);
     if (activeUsers.length === 0) {
       logger.info(

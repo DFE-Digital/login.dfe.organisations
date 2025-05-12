@@ -6,11 +6,14 @@ const {
   updateUserOrgRequest,
   updateUserServSubServRequest,
 } = require("./../../../src/app/organisations/data/organisationsStorage");
-const { getUsersByIds } = require("../../../src/infrastructure/directories");
 const { NotificationClient } = require("login.dfe.jobs-client");
 const moment = require("moment");
 const overdueAllRequestsTypes = require("../../../src/app/overdueAllRequestsTypes/overdueRequests");
+const { getUsersRaw } = require("login.dfe.api-client/users");
 
+jest.mock("login.dfe.api-client/users", () => ({
+  getUsersRaw: jest.fn(),
+}));
 jest.mock("./../../../src/infrastructure/config", () => mockConfig());
 jest.mock("./../../../src/infrastructure/logger", () => {
   return {
@@ -20,7 +23,6 @@ jest.mock("./../../../src/infrastructure/logger", () => {
   };
 });
 jest.mock("login.dfe.jobs-client");
-jest.mock("../../../src/infrastructure/directories");
 jest.mock("./../../../src/app/organisations/data/organisationsStorage", () => {
   const getApproversForOrg = jest.fn();
   const pagedListOfRequests = jest.fn();
@@ -45,7 +47,7 @@ const dateNow = moment();
 describe("when calling the overdueAllRequestsTypes function on organisation requests", () => {
   beforeEach(() => {
     NotificationClient.mockReset();
-    getUsersByIds.mockReset().mockReturnValue([
+    getUsersRaw.mockReset().mockReturnValue([
       {
         sub: "089B72CD-7C80-4348-9C2A-395213B7ECAD",
         given_name: "Eoin",
@@ -131,7 +133,7 @@ describe("when calling the overdueAllRequestsTypes function on organisation requ
     getApproversForOrg
       .mockReset()
       .mockReturnValue(["089B72CD-7C80-4348-9C2A-395213B7ECAD"]);
-    getUsersByIds.mockReset().mockReturnValue([
+    getUsersRaw.mockReset().mockReturnValue([
       {
         sub: "089B72CD-7C80-4348-9C2A-395213B7ECAD",
         given_name: "Eoin",
@@ -186,7 +188,7 @@ describe("when calling the overdueAllRequestsTypes function on organisation requ
 describe("when calling the overdueAllRequestsTypes function on service requests", () => {
   beforeEach(() => {
     NotificationClient.mockReset();
-    getUsersByIds.mockReset().mockReturnValue([
+    getUsersRaw.mockReset().mockReturnValue([
       {
         sub: "089B72CD-7C80-4348-9C2A-395213B7ECAD",
         given_name: "Eoin",
@@ -262,16 +264,16 @@ describe("when calling the overdueAllRequestsTypes function on service requests"
 
   it("should set the service request to status 3 if the org has no approvers", async () => {
     getApproversForOrg.mockReset().mockReturnValue([]);
-    getUsersByIds.mockReset().mockReturnValue([]);
+    getUsersRaw.mockReset().mockReturnValue([]);
 
     await overdueAllRequestsTypes();
 
-    expect(getUsersByIds).toHaveBeenCalledTimes(0);
+    expect(getUsersRaw).toHaveBeenCalledTimes(0);
     expect(updateUserServSubServRequest).toHaveBeenCalledTimes(1);
   });
 
   it("should set the service request to status 3 if the org has approvers but they're all deactivated", async () => {
-    getUsersByIds.mockReset().mockReturnValue([
+    getUsersRaw.mockReset().mockReturnValue([
       {
         sub: "089B72CD-7C80-4348-9C2A-395213B7ECAD",
         given_name: "Eoin",
@@ -292,7 +294,7 @@ describe("when calling the overdueAllRequestsTypes function on service requests"
 
     await overdueAllRequestsTypes();
 
-    expect(getUsersByIds).toHaveBeenCalledTimes(1);
+    expect(getUsersRaw).toHaveBeenCalledTimes(1);
     expect(updateUserServSubServRequest).toHaveBeenCalledTimes(1);
   });
 
