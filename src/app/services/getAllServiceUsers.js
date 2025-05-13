@@ -27,7 +27,7 @@ const extractPageSize = (req) => {
   return isNaN(pageSize) ? 0 : pageSize;
 };
 
-const getServiceUsers = async (req, res) => {
+const getAllServiceUsers = async (req, res) => {
   const serviceId = req.params.sid ? req.params.sid.toLowerCase() : "";
 
   if (!isUuid(serviceId)) {
@@ -68,7 +68,7 @@ const getServiceUsers = async (req, res) => {
     const from = paramSource.from;
     const to = paramSource.to;
 
-    if (status !== 1 || status !== 0) {
+    if (status && (status !== 1 || status !== 0)) {
       res.status(400).send("status must be 1 or 0");
       return;
     }
@@ -117,4 +117,4 @@ const getServiceUsers = async (req, res) => {
   }
 };
 
-module.exports = getServiceUsers;
+module.exports = getAllServiceUsers;
