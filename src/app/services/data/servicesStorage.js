@@ -278,6 +278,9 @@ const getAllUsersOfService = async (id, page, pageSize, correlationId) => {
 const getUsersOfServiceByUserIds = async (
   id,
   userIds,
+  status,
+  from,
+  to,
   page,
   pageSize,
   correlationId,
@@ -305,6 +308,18 @@ const getUsersOfServiceByUserIds = async (
     if (userIds && userIds.length > 0) {
       query.where.user_id = {
         [Op.in]: userIds,
+      };
+    }
+
+    if (status) {
+      query.where.status = {
+        [Op.eq]: status,
+      };
+    }
+
+    if (from && to) {
+      query.where.updatedAt = {
+        [Op.between]: [from, to],
       };
     }
 
