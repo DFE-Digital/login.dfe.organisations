@@ -68,7 +68,7 @@ const getAllServiceUsers = async (req, res) => {
     const from = paramSource.from;
     const to = paramSource.to;
 
-    if (status && (status !== 1 || status !== 0)) {
+    if (status && status !== 1 && status !== 0) {
       res.status(400).send("status must be 1 or 0");
       return;
     }

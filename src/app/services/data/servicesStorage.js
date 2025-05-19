@@ -4,6 +4,7 @@ const Op = Sequelize.Op;
 const logger = require("./../../../infrastructure/logger");
 const {
   users,
+  user,
   services,
   organisations,
   userOrganisations,
@@ -311,10 +312,16 @@ const getUsersOfServiceByUserIds = async (
       };
     }
 
-    if (status) {
-      query.where.status = {
-        [Op.eq]: status,
-      };
+    if (status !== undefined) {
+      query.include.push({
+        model: user,
+        as: "User",
+        where: {
+          status: {
+            [Op.eq]: status,
+          },
+        },
+      });
     }
 
     if (from && to) {
@@ -323,11 +330,14 @@ const getUsersOfServiceByUserIds = async (
       };
     }
 
+    console.log(query);
+
     const userServiceEntities = await users.findAndCountAll(query);
 
     const mappedUsers = await Promise.all(
       userServiceEntities.rows.map(async (userServiceEntity) => {
         const role = await userServiceEntity.getRole();
+        console.log(userServiceEntity);
         return {
           id: userServiceEntity.getDataValue("user_id"),
           status: userServiceEntity.getDataValue("status"),
