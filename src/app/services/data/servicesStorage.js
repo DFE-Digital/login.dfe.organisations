@@ -312,25 +312,35 @@ const getUsersOfServiceByUserIds = async (
       };
     }
 
-    if (status !== undefined) {
+    // User table includes
+    if (status !== undefined || (from !== undefined && to !== undefined)) {
+      const where = {};
+      if (status !== undefined) {
+        where.status = {
+          [Op.eq]: status,
+        };
+      }
+
+      if (from !== undefined && to !== undefined) {
+        where.updatedAt = {
+          [Op.between]: [from, to],
+        };
+      } else if (from !== undefined) {
+        where.updatedAt = {
+          [Op.gte]: from,
+        };
+      } else if (to !== undefined) {
+        where.updatedAt = {
+          [Op.lte]: to,
+        };
+      }
+
       query.include.push({
         model: user,
         as: "User",
-        where: {
-          status: {
-            [Op.eq]: status,
-          },
-        },
+        where,
       });
     }
-
-    if (from && to) {
-      query.where.updatedAt = {
-        [Op.between]: [from, to],
-      };
-    }
-
-    console.log(query);
 
     const userServiceEntities = await users.findAndCountAll(query);
 
