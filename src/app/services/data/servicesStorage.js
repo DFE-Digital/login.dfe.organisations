@@ -4,6 +4,7 @@ const Op = Sequelize.Op;
 const logger = require("./../../../infrastructure/logger");
 const {
   users,
+  user,
   services,
   organisations,
   userOrganisations,
@@ -278,6 +279,9 @@ const getAllUsersOfService = async (id, page, pageSize, correlationId) => {
 const getUsersOfServiceByUserIds = async (
   id,
   userIds,
+  status,
+  from,
+  to,
   page,
   pageSize,
   correlationId,
@@ -308,11 +312,42 @@ const getUsersOfServiceByUserIds = async (
       };
     }
 
+    // User table includes
+    if (status !== undefined || (from !== undefined && to !== undefined)) {
+      const where = {};
+      if (status !== undefined) {
+        where.status = {
+          [Op.eq]: status,
+        };
+      }
+
+      if (from !== undefined && to !== undefined) {
+        where.updatedAt = {
+          [Op.between]: [from, to],
+        };
+      } else if (from !== undefined) {
+        where.updatedAt = {
+          [Op.gte]: from,
+        };
+      } else if (to !== undefined) {
+        where.updatedAt = {
+          [Op.lte]: to,
+        };
+      }
+
+      query.include.push({
+        model: user,
+        as: "User",
+        where,
+      });
+    }
+
     const userServiceEntities = await users.findAndCountAll(query);
 
     const mappedUsers = await Promise.all(
       userServiceEntities.rows.map(async (userServiceEntity) => {
         const role = await userServiceEntity.getRole();
+        console.log(userServiceEntity);
         return {
           id: userServiceEntity.getDataValue("user_id"),
           status: userServiceEntity.getDataValue("status"),

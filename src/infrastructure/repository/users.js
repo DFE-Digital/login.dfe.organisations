@@ -1,6 +1,7 @@
 const Sequelize = require("sequelize").default;
 const Op = Sequelize.Op;
 
+// TODO change the name of this file and exports to userServices.  Current name is misleading.
 const define = (db, schema) => {
   return db.define(
     "user_services",
@@ -32,6 +33,7 @@ const extend = ({
   users,
   organisations,
   services,
+  user,
   externalIdentifiers,
   userOrganisations,
   roles,
@@ -41,6 +43,11 @@ const extend = ({
     foreignKey: "organisation_id",
   });
   users.belongsTo(services, { as: "Service", foreignKey: "service_id" });
+  users.belongsTo(user, {
+    as: "User",
+    targetKey: "sub",
+    foreignKey: "user_id",
+  });
   users.prototype.getApprovers = function () {
     return userOrganisations.findAll({
       where: {
