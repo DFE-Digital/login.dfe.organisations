@@ -20,11 +20,20 @@ jest.mock("./../../../src/infrastructure/logger", () => {
 });
 const servicesStorage = require("../../../src/app/services/data/servicesStorage");
 const getAllServiceUsers = require("../../../src/app/services/getAllServiceUsers");
-const httpMocks = require("node-mocks-http");
+
+const res = {
+  json: jest.fn(),
+  status: jest.fn(),
+  send: jest.fn(),
+  mockResetAll: function () {
+    this.json.mockReset().mockReturnValue(this);
+    this.status.mockReset().mockReturnValue(this);
+    this.send.mockReset().mockReturnValue(this);
+  },
+};
 
 describe("when getting users of services", () => {
   let req;
-  const res = httpMocks.createResponse();
   const expectedRequestCorrelationId = "392f0e46-787b-41bc-9e77-4c3cb94824bb";
 
   beforeEach(() => {
@@ -44,6 +53,7 @@ describe("when getting users of services", () => {
         return this.headers[header];
       },
     };
+    res.mockResetAll();
 
     servicesStorage.getById.mockReset();
     servicesStorage.getUsersOfServiceByUserIds.mockReset();
@@ -79,8 +89,7 @@ describe("when getting users of services", () => {
 
     await getAllServiceUsers(req, res);
 
-    expect(res.statusCode).toBe(404);
-    expect(res._isEndCalled()).toBe(true);
+    expect(res.status).toHaveBeenCalledWith(404);
   });
 
   it("then it should send 404 if service not found", async () => {
@@ -92,24 +101,129 @@ describe("when getting users of services", () => {
 
     await getAllServiceUsers(req, res);
 
-    expect(res.statusCode).toBe(404);
-    expect(res._isEndCalled()).toBe(true);
+    expect(res.status).toHaveBeenCalledWith(404);
   });
 
   it("then it should send 400 if status is not 1 or 0", async () => {
-    req.body.status = {
+    req.body = {
       status: 2,
     };
     await getAllServiceUsers(req, res);
 
-    expect(res.statusCode).toBe(400);
-    expect(res._isEndCalled()).toBe(true);
+    expect(res.status).toHaveBeenCalledWith(400);
   });
 
   it("then it should send 200 if service found", async () => {
     await getAllServiceUsers(req, res);
 
-    expect(res.statusCode).toBe(200);
-    expect(res._isEndCalled()).toBe(true);
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
+  it("then it should send 400 if page is not a number", async () => {
+    req.body = {
+      status: 1,
+      page: "apple",
+    };
+    await getAllServiceUsers(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith("page must be greater than 0");
+  });
+
+  it("then it should send 400 if pageSize is not a number", async () => {
+    req.body = {
+      status: 1,
+      pageSize: "apple",
+    };
+    await getAllServiceUsers(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith("pageSize must be greater than 0");
+  });
+
+  it("then it should send 400 if pageSize is not a number", async () => {
+    req.body = {
+      status: 1,
+      pageSize: 1001,
+    };
+    await getAllServiceUsers(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith(
+      "pageSize must not be greater than 1000",
+    );
+  });
+
+  it("then it should send 400 if from date is not a valid date", async () => {
+    req.body = {
+      status: 1,
+      from: "not-a-date",
+    };
+    await getAllServiceUsers(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith("from date is not a valid date");
+  });
+
+  it("then it should send 400 if to date is not a valid date", async () => {
+    req.body = {
+      status: 1,
+      to: "not-a-date",
+    };
+    await getAllServiceUsers(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith("to date is not a valid date");
+  });
+
+  it("then it should send 400 if from date is in the future", async () => {
+    req.body = {
+      status: 1,
+      from: "2099-12-30",
+    };
+    await getAllServiceUsers(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith(
+      "date range should not be in the future",
+    );
+  });
+
+  it("then it should send 400 if from and to date are in the future", async () => {
+    req.body = {
+      status: 1,
+      from: "2099-12-01",
+      to: "2099-12-30",
+    };
+    await getAllServiceUsers(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith(
+      "date range should not be in the future",
+    );
+  });
+
+  it("then it should send 400 if from date is further in the future than the to date", async () => {
+    req.body = {
+      status: 1,
+      from: "2024-12-30",
+      to: "2024-12-01",
+    };
+    await getAllServiceUsers(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith("from date greater than to date");
+  });
+
+  it("then it should send 500 if service found", async () => {
+    servicesStorage.getUsersOfServiceByUserIds
+      .mockReset()
+      .mockImplementation(() => {
+        throw new Error("Sequelize error");
+      });
+
+    await getAllServiceUsers(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
   });
 });
