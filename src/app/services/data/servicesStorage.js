@@ -273,7 +273,16 @@ const getUsersOfService = async (organisationId, id, correlationId) => {
 };
 
 const getAllUsersOfService = async (id, page, pageSize, correlationId) => {
-  return getUsersOfServiceByUserIds(id, null, page, pageSize, correlationId);
+  return getUsersOfServiceByUserIds(
+    id,
+    null,
+    undefined,
+    undefined,
+    undefined,
+    page,
+    pageSize,
+    correlationId,
+  );
 };
 
 const getUsersOfServiceByUserIds = async (
@@ -347,7 +356,6 @@ const getUsersOfServiceByUserIds = async (
     const mappedUsers = await Promise.all(
       userServiceEntities.rows.map(async (userServiceEntity) => {
         const role = await userServiceEntity.getRole();
-        console.log(userServiceEntity);
         return {
           id: userServiceEntity.getDataValue("user_id"),
           status: userServiceEntity.getDataValue("status"),
