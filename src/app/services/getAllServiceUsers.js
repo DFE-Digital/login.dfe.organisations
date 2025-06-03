@@ -17,6 +17,7 @@ const extractPageNumber = (req) => {
   const pageNumber = parseInt(paramsSource.page);
   return isNaN(pageNumber) ? 0 : pageNumber;
 };
+
 const extractPageSize = (req) => {
   const paramsSource = req.method === "POST" ? req.body : req.query;
   if (!paramsSource || paramsSource.pageSize === undefined) {

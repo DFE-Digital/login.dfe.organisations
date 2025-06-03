@@ -358,10 +358,10 @@ const getUsersOfServiceByUserIds = async (
         const role = await userServiceEntity.getRole();
         return {
           id: userServiceEntity.getDataValue("user_id"),
-          status: userServiceEntity.getDataValue("status"),
+          status: userServiceEntity.User.getDataValue("status"),
           role,
-          createdAt: userServiceEntity.getDataValue("createdAt"),
-          updatedAt: userServiceEntity.getDataValue("updatedAt"),
+          createdAt: userServiceEntity.User.getDataValue("createdAt"),
+          updatedAt: userServiceEntity.User.getDataValue("updatedAt"),
           organisation: {
             ...userServiceEntity.Organisation.dataValues,
           },
