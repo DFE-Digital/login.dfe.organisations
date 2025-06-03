@@ -27,6 +27,17 @@ const extractPageSize = (req) => {
   return isNaN(pageSize) ? 0 : pageSize;
 };
 
+const extractStatus = (req) => {
+  const paramsSource = req.method === "POST" ? req.body : req.query;
+  if (!paramsSource || paramsSource.status === undefined) {
+    return undefined;
+  }
+
+  const status = parseInt(paramsSource.status);
+  // If not a number, we'll just return what we got and valiate it later
+  return isNaN(status) ? paramsSource.status : status;
+};
+
 const getAllServiceUsers = async (req, res) => {
   const serviceId = req.params.sid ? req.params.sid.toLowerCase() : "";
 
@@ -64,38 +75,38 @@ const getAllServiceUsers = async (req, res) => {
     const paramSource = req.method === "POST" ? req.body : req.query;
     if (paramSource && paramSource.userIds) userIds = req.body.userIds;
 
-    const status = paramSource.status;
+    const status = extractStatus(req);
     const from = paramSource.from;
     const to = paramSource.to;
 
     if (status && status !== 1 && status !== 0) {
-      res.status(400).send("status must be 1 or 0");
+      res.status(400).send("Status must be 1 or 0");
       return;
     }
 
     let fromDate;
     let toDate;
     if (to && isNaN(Date.parse(to))) {
-      return res.status(400).send("to date is not a valid date");
+      return res.status(400).send("To date is not a valid date");
     } else if (to) {
       toDate = new Date(to);
     }
     if (from && isNaN(Date.parse(from))) {
-      return res.status(400).send("from date is not a valid date");
+      return res.status(400).send("From date is not a valid date");
     } else if (from) {
       fromDate = new Date(from);
     }
 
     if (fromDate && toDate) {
       if (isFutureDate(fromDate) && isFutureDate(toDate)) {
-        return res.status(400).send("date range should not be in the future");
+        return res.status(400).send("Date range should not be in the future");
       } else if (fromDate.getTime() > toDate.getTime()) {
-        return res.status(400).send("from date greater than to date");
+        return res.status(400).send("From date greater than to date");
       }
     } else if (fromDate || toDate) {
       const selectedDate = fromDate ? fromDate : toDate;
       if (isFutureDate(selectedDate)) {
-        return res.status(400).send("date range should not be in the future");
+        return res.status(400).send("Date range should not be in the future");
       }
     }
 
