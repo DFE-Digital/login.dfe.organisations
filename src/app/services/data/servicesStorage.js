@@ -322,34 +322,34 @@ const getUsersOfServiceByUserIds = async (
     }
 
     // User table includes
-    if (status !== undefined || (from !== undefined && to !== undefined)) {
-      const where = {};
-      if (status !== undefined) {
-        where.status = {
-          [Op.eq]: status,
-        };
-      }
-
-      if (from !== undefined && to !== undefined) {
-        where.updatedAt = {
-          [Op.between]: [from, to],
-        };
-      } else if (from !== undefined) {
-        where.updatedAt = {
-          [Op.gte]: from,
-        };
-      } else if (to !== undefined) {
-        where.updatedAt = {
-          [Op.lte]: to,
-        };
-      }
-
-      query.include.push({
-        model: user,
-        as: "User",
-        where,
-      });
+    const userWhere = {};
+    if (status !== undefined) {
+      userWhere.status = {
+        [Op.eq]: status,
+      };
     }
+
+    if (from !== undefined && to !== undefined) {
+      userWhere.updatedAt = {
+        [Op.between]: [from, to],
+      };
+    } else if (from !== undefined) {
+      userWhere.updatedAt = {
+        [Op.gte]: from,
+      };
+    } else if (to !== undefined) {
+      userWhere.updatedAt = {
+        [Op.lte]: to,
+      };
+    }
+
+    // required: true ensures we always have a user record
+    query.include.push({
+      model: user,
+      as: "User",
+      where: userWhere,
+      required: true,
+    });
 
     const userServiceEntities = await users.findAndCountAll(query);
 
