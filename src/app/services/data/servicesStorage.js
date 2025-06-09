@@ -4,6 +4,7 @@ const Op = Sequelize.Op;
 const logger = require("./../../../infrastructure/logger");
 const {
   users,
+  user,
   services,
   organisations,
   userOrganisations,
@@ -272,12 +273,24 @@ const getUsersOfService = async (organisationId, id, correlationId) => {
 };
 
 const getAllUsersOfService = async (id, page, pageSize, correlationId) => {
-  return getUsersOfServiceByUserIds(id, null, page, pageSize, correlationId);
+  return getUsersOfServiceByUserIds(
+    id,
+    null,
+    undefined,
+    undefined,
+    undefined,
+    page,
+    pageSize,
+    correlationId,
+  );
 };
 
 const getUsersOfServiceByUserIds = async (
   id,
   userIds,
+  status,
+  from,
+  to,
   page,
   pageSize,
   correlationId,
@@ -308,6 +321,36 @@ const getUsersOfServiceByUserIds = async (
       };
     }
 
+    // User table includes
+    const userWhere = {};
+    if (status !== undefined) {
+      userWhere.status = {
+        [Op.eq]: status,
+      };
+    }
+
+    if (from !== undefined && to !== undefined) {
+      userWhere.updatedAt = {
+        [Op.between]: [from, to],
+      };
+    } else if (from !== undefined) {
+      userWhere.updatedAt = {
+        [Op.gte]: from,
+      };
+    } else if (to !== undefined) {
+      userWhere.updatedAt = {
+        [Op.lte]: to,
+      };
+    }
+
+    // required: true ensures we always have a user record
+    query.include.push({
+      model: user,
+      as: "User",
+      where: userWhere,
+      required: true,
+    });
+
     const userServiceEntities = await users.findAndCountAll(query);
 
     const mappedUsers = await Promise.all(
@@ -315,10 +358,10 @@ const getUsersOfServiceByUserIds = async (
         const role = await userServiceEntity.getRole();
         return {
           id: userServiceEntity.getDataValue("user_id"),
-          status: userServiceEntity.getDataValue("status"),
+          status: userServiceEntity.User.getDataValue("status"),
           role,
-          createdAt: userServiceEntity.getDataValue("createdAt"),
-          updatedAt: userServiceEntity.getDataValue("updatedAt"),
+          createdAt: userServiceEntity.User.getDataValue("createdAt"),
+          updatedAt: userServiceEntity.User.getDataValue("updatedAt"),
           organisation: {
             ...userServiceEntity.Organisation.dataValues,
           },

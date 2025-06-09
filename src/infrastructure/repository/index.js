@@ -11,6 +11,7 @@ const organisationAnnoucementsModel = require("./organisationAnnoucements");
 const organisationAssociationsModel = require("./organisationAssociations");
 const organisationsModel = require("./organisations");
 const servicesModel = require("./services");
+const userModel = require("./user");
 const usersModel = require("./users");
 const userOrganisationsModel = require("./userOrganisations");
 const countersModel = require("./counters");
@@ -200,6 +201,7 @@ buildDataModel(dataModel, db, [
   organisationsModel,
   servicesModel,
   usersModel,
+  userModel,
   userOrganisationsModel,
   countersModel,
   userOrganisationRequestsModel,
