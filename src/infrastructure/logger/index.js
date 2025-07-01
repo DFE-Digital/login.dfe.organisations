@@ -18,6 +18,6 @@ if (config.hostingEnvironment.applicationInsights) {
 
 module.exports = setupLogging({
   applicationName: config.loggerSettings.applicationName || "Organisations",
-  logLevel: config.loggerSettings?.logLevel,
+  logLevel: process.env.LOG_LEVEL,
   additionalTransports,
 });
