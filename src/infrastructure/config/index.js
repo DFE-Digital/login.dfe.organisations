@@ -60,16 +60,6 @@ const config = {
       idle: 10000
     }
   },
-  gias: {
-    type: "gias",
-    params: {
-      webserviceUrl: process.env.GIAS_SERVICE_URL,
-      username: process.env.GIAS_SERVICE_USERNAME,
-      password: process.env.GIAS_SERVICE_PASSWORD,
-      establishmentExtractId: 2392
-    },
-    allGroupsDataUrl: process.env.GIAS_ALL_GROUPS_DATA_URL
-  },
   directories: {
     type: "api",
     service: {
@@ -116,4 +106,4 @@ function mimicLegacySettings(config) {
 
 mimicLegacySettings(config);
 
-module.exports = config; 
+module.exports = config;

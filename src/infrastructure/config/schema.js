@@ -9,73 +9,6 @@ const schedulesSchema = new SimpleSchema({
   overdueRequests: String,
 });
 
-const giasSchema = new SimpleSchema({
-  type: {
-    type: String,
-    allowedValues: ['static', 'azureblob', 'gias'],
-  },
-  allGroupsDataUrl: {
-    type: String,
-    regEx: patterns.url
-  },
-  params: {
-    type: Object,
-    optional: true,
-    custom: function() {
-      if (this.siblingField('type').value !== 'static' && !this.isSet) {
-        return SimpleSchema.ErrorTypes.REQUIRED;
-      }
-    },
-  },
-  'params.webserviceUrl': {
-    type: String,
-    regEx: patterns.url,
-    optional: true,
-    custom: function() {
-      if (this.field('type').value === 'gias' && !this.isSet) {
-        return SimpleSchema.ErrorTypes.REQUIRED;
-      }
-    },
-  },
-  'params.username': {
-    type: String,
-    optional: true,
-    custom: function() {
-      if (this.field('type').value === 'gias' && !this.isSet) {
-        return SimpleSchema.ErrorTypes.REQUIRED;
-      }
-    },
-  },
-  'params.password': {
-    type: String,
-    optional: true,
-    custom: function() {
-      if (this.field('type').value === 'gias' && !this.isSet) {
-        return SimpleSchema.ErrorTypes.REQUIRED;
-      }
-    },
-  },
-  'params.establishmentExtractId': {
-    type: SimpleSchema.Integer,
-    optional: true,
-    custom: function() {
-      if (this.field('type').value === 'gias' && !this.isSet) {
-        return SimpleSchema.ErrorTypes.REQUIRED;
-      }
-    },
-  },
-  'params.containerUrl': {
-    type: String,
-    regEx: patterns.url,
-    optional: true,
-    custom: function() {
-      if (this.field('type').value === 'azureblob' && !this.isSet) {
-        return SimpleSchema.ErrorTypes.REQUIRED;
-      }
-    },
-  },
-});
-
 const notificationsSchema = new SimpleSchema({
   connectionString: patterns.redis,
 });
@@ -109,7 +42,6 @@ const schema = new SimpleSchema({
   schedules: schedulesSchema,
   database: schemas.sequelizeConnection,
   directories: schemas.apiClient,
-  gias: giasSchema,
   notifications: notificationsSchema,
   toggles: {
     type: togglesSchema,
