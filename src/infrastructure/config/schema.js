@@ -4,8 +4,6 @@ const config = require('./index');
 const logger = require('./../logger');
 
 const schedulesSchema = new SimpleSchema({
-  establishmentImport: String,
-  groupImport: String,
   overdueRequests: String,
 });
 

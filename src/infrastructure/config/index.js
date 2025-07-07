@@ -81,8 +81,6 @@ const config = {
     numberOfDaysUntilOverdue: 5
   },
   schedules: {
-    establishmentImport: "0 5 * * *",
-    groupImport: "0 6 * * *",
     overdueRequests: "0 0 * * *"
   },
   toggles: {
