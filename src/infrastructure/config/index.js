@@ -60,16 +60,6 @@ const config = {
       idle: 10000
     }
   },
-  gias: {
-    type: "gias",
-    params: {
-      webserviceUrl: process.env.GIAS_SERVICE_URL,
-      username: process.env.GIAS_SERVICE_USERNAME,
-      password: process.env.GIAS_SERVICE_PASSWORD,
-      establishmentExtractId: 2392
-    },
-    allGroupsDataUrl: process.env.GIAS_ALL_GROUPS_DATA_URL
-  },
   directories: {
     type: "api",
     service: {
@@ -91,8 +81,6 @@ const config = {
     numberOfDaysUntilOverdue: 5
   },
   schedules: {
-    establishmentImport: "0 5 * * *",
-    groupImport: "0 6 * * *",
     overdueRequests: "0 0 * * *"
   },
   toggles: {
@@ -116,4 +104,4 @@ function mimicLegacySettings(config) {
 
 mimicLegacySettings(config);
 
-module.exports = config; 
+module.exports = config;
