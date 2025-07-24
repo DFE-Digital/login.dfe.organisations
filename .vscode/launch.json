@@ -6,9 +6,8 @@
       "request": "launch",
       "name": "Launch Orgs",
       "skipFiles": ["<node_internals>/**"],
-      "envFile": "${workspaceFolder}/.env",
+      "envFile": "${workspaceFolder}/../.env",
       "env": {
-        "settings": "${workspaceFolder}/config/local-config.json",
         "NODE_TLS_REJECT_UNAUTHORIZED": "0"
       },
       "program": "${workspaceFolder}/src/index.js",
@@ -19,8 +18,8 @@
       "request": "launch",
       "name": "Launch Org worker",
       "skipFiles": ["<node_internals>/**"],
+      "envFile": "${workspaceFolder}/../.env",
       "env": {
-        "settings": "${workspaceFolder}/config/worker-local-config.json",
         "NODE_TLS_REJECT_UNAUTHORIZED": "0"
       },
       "program": "${workspaceFolder}/src/worker.js",
