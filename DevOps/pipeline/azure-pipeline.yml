@@ -168,3 +168,30 @@ stages:
                         ContRegServerCode: $(tranShaCode)
                       ${{ else }}:
                         ContRegServerCode: $(prShaCode)
+                
+                  - template: pipeline/components/deploy/deployAppServicesNodeJs.yml@devopsTemplates
+                    parameters:
+                      serviceConnection: $(${{variables.ServConName}})
+                      shaPool: $[variables['${{env}}ShaPool']]
+                      shaCode: $(${{variables.ShaCodeName}})
+                      devOpsEnv: ${{variables.secRegionId}}${{env}}
+                      environmentName: ${{env}}
+                      applicationShortName: orgwkr
+                      applicationFullName: organisationsWorker
+                      InfrDeploy: ${{parameters.InfrDeploy}}
+                      deploymentLocation: ${{location}}
+                      gitCheck: ${{parameters.gitCheck}}
+                      tier: backend
+                      tierPlan: backend-g1
+                      ipSecurityRestrictionsSubnets:
+                        prestier-g1-sn,prestier-g2-sn,prestier-g3-sn,prestier-g4-sn,prestier-g5-sn,
+                        midtier-g1-sn,midtier-g2-sn,midtier-g3-sn,backend-g1-sn,backend-g3-sn
+                      shaUse: ${{parameters.shaUse}}
+                      slotDeploy: ${{parameters.slotDeploy}}
+                      appRepoName: organisations
+                      healthCheckEndpoint: healthcheck
+                      existTag: ${{parameters.existTag}}
+                      ${{ if eq(env, 'tran') }}:
+                        ContRegServerCode: $(tranShaCode)
+                      ${{ else }}:
+                        ContRegServerCode: $(prShaCode)
