@@ -60,7 +60,6 @@ junit.xml
 .env
 
 # dev env
-.idea
 .vscode
 .npmrc
 
