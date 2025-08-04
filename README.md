@@ -58,16 +58,6 @@ GRANT ALL PRIVILEGES ON SCHEMA services TO GROUP db_user;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA services TO GROUP db_user;
 ```
 
-The following configuration must then be supplied as detailed in login.dfe.organisations.dev.json
-
-```
-  "database":{
-    "host" :"localhost",
-    "username":"db_user",
-    "password":"my-password"
-  }
-```
-
 The necessary tables will be created when ran.
 
 ### Endpoints
