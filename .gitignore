@@ -66,4 +66,3 @@ junit.xml
 
 #config
 /config/
-!/config/login.dfe.organisations.dev.json
