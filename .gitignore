@@ -60,10 +60,8 @@ junit.xml
 .env
 
 # dev env
-.idea
 .vscode
 .npmrc
 
 #config
 /config/
-!/config/login.dfe.organisations.dev.json
