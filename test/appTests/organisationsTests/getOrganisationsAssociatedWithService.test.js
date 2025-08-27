@@ -266,4 +266,49 @@ describe("when listing or searching organisations associated with a service", ()
     expect(getOrganisationsAssociatedToService.mock.calls[0][4]).toBe("name");
     expect(getOrganisationsAssociatedToService.mock.calls[0][5]).toBe("asc");
   });
+
+  it("should convert filtercategory and filterstatus into an array if only single values provided", async () => {
+    req.query.filtercategory = "cat-1";
+    req.query.filterstatus = "status-1";
+
+    await getOrganisationsAssociatedWithService(req, res);
+
+    expect(getOrganisationsAssociatedToService.mock.calls).toHaveLength(1);
+    expect(getOrganisationsAssociatedToService.mock.calls[0][6]).toStrictEqual([
+      "cat-1",
+    ]);
+    expect(getOrganisationsAssociatedToService.mock.calls[0][7]).toStrictEqual([
+      "status-1",
+    ]);
+  });
+
+  it("should leave filtercategory and filterstatus as an array if an array is provided", async () => {
+    req.query.filtercategory = ["cat-1", "cat-2"];
+    req.query.filterstatus = ["status-1", "status-2"];
+
+    await getOrganisationsAssociatedWithService(req, res);
+
+    expect(getOrganisationsAssociatedToService.mock.calls).toHaveLength(1);
+    expect(getOrganisationsAssociatedToService.mock.calls[0][6]).toStrictEqual([
+      "cat-1",
+      "cat-2",
+    ]);
+    expect(getOrganisationsAssociatedToService.mock.calls[0][7]).toStrictEqual([
+      "status-1",
+      "status-2",
+    ]);
+  });
+
+  it("should return a 500 error on failure", async () => {
+    getOrganisationsAssociatedToService.mockReset().mockImplementation(() => {
+      const error = new Error("Error thrown in function");
+      error.statusCode = 400;
+      throw error;
+    });
+
+    await getOrganisationsAssociatedWithService(req, res);
+
+    expect(res.statusCode).toBe(500);
+    expect(res._getData()).toBe("Error thrown in function");
+  });
 });

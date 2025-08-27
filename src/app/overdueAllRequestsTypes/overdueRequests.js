@@ -196,14 +196,14 @@ const overdueAllRequestsTypes = async () => {
     config.organisationRequests.numberOfDaysUntilOverdue || 5;
 
   // get all outstanding requests
-  logger.info("Getting organisation request data with status of 0");
+  logger.info("Getting organisation requests with status of 0");
   let allOutstandingOrgRequests = await listRequests(
     500,
     [0],
     requestTypes.ORGANISATION_ACCESS,
   );
 
-  logger.info("Getting service and sub-service request data with status of 0");
+  logger.info("Getting service and sub-service requests data with status of 0");
   let allOutstandingServSubServRequests = await listRequests(
     500,
     [0],
