@@ -5,6 +5,7 @@ const schedule = require("node-schedule");
 const overdueRequests = require("./app/overdueAllRequestsTypes");
 const express = require("express");
 const healthCheck = require("login.dfe.healthcheck");
+const { setupApi } = require("login.dfe.api-client/api/setup");
 
 const runSchedule = (name, cronInterval, action) => {
   logger.info(`Scheduling [${name}] job at [${cronInterval}] interval`);
@@ -37,6 +38,21 @@ const runSchedule = (name, cronInterval, action) => {
 };
 
 configSchema.validate();
+setupApi({
+  auth: {
+    tenant: config.directories.service.auth.tenant,
+    authorityHostUrl: config.directories.service.auth.authorityHostUrl,
+    clientId: config.directories.service.auth.clientId,
+    clientSecret: config.directories.service.auth.clientSecret,
+    resource: config.directories.service.auth.resource,
+  },
+  api: {
+    directories: {
+      baseUri: config.directories.service.url,
+    },
+  },
+});
+
 runSchedule(
   "Find overdue organisation, service and sub-service access requests",
   config.schedules.overdueRequests,
