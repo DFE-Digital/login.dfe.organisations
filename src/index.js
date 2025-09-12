@@ -5,12 +5,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const http = require("http");
 const https = require("https");
-const expressLayouts = require("express-ejs-layouts");
-const path = require("path");
 const services = require("./app/services");
 const organisations = require("./app/organisations");
 const { organisationInvitations, invitations } = require("./app/invitations");
-const dev = require("./app/dev");
 const healthCheck = require("login.dfe.healthcheck");
 const { getErrorHandler } = require("login.dfe.express-error-handling");
 const helmet = require("helmet");
@@ -62,8 +59,6 @@ const scriptSources = [
   "'unsafe-eval'",
   "*.localhost",
   "*.signin.education.gov.uk",
-  "https://code.jquery.com",
-  "https://rawgit.com",
 ];
 
 app.use(
@@ -80,7 +75,6 @@ app.use(
         "'self'",
         "*.localhost",
         "*.signin.education.gov.uk",
-        "https://rawgit.com",
         "'unsafe-inline'",
       ],
       imgSrc: [
@@ -89,8 +83,6 @@ app.use(
         "blob:",
         "*.localhost",
         "*.signin.education.gov.uk",
-        "https://rawgit.com",
-        "https://raw.githubusercontent.com",
       ],
       fontSrc: ["'self'", "data:", "*.signin.education.gov.uk"],
       connectSrc: ["'self'"],
@@ -116,19 +108,6 @@ app.use("/organisations", organisations);
 app.use("/organisations", services.organisations);
 app.use("/organisations", organisationInvitations);
 app.use("/invitations", invitations);
-
-if (config.hostingEnvironment.useDevViews) {
-  app.use(expressLayouts);
-  app.set("view engine", "ejs");
-  app.set("views", path.resolve(__dirname, "app"));
-  app.set("layout", "layouts/layout");
-
-  app.use("/manage", dev());
-
-  app.get("/", (req, res) => {
-    res.redirect("/manage");
-  });
-}
 
 app.use(
   getErrorHandler({
