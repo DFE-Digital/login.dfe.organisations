@@ -102,7 +102,7 @@ const updateRequestsWhereOrgHasNoActiveApprovers = async (
         }
       } else {
         logger.info(
-          `Request [${request.id}] for organisation [${request.org_id}] has active approvers`,
+          `Request [${request.id}] for organisation [${request.org_id}] has active approvers. Adding to list to check if overdue`,
         );
         remainingOutstandingRequests.push(request);
       }
@@ -119,7 +119,7 @@ const updateRequestsWhereOrgHasNoActiveApprovers = async (
     }
   }
   logger.info(
-    `Returning [${remainingOutstandingRequests.length}] outstanding requests that all have at least 1 active approver`,
+    `Returning [${remainingOutstandingRequests.length}] outstanding requests of type [${requestType}] that all have at least 1 active approver`,
   );
   return remainingOutstandingRequests;
 };
@@ -152,7 +152,7 @@ const overdueRequests = async (
   actionedReason = undefined,
 ) => {
   logger.info(
-    `Looping over [${outstandingRequests.length}] outstanding requests of type [${requestType}]`,
+    `Looping over [${outstandingRequests.length}] outstanding requests of type [${requestType}] to check if they are overdue`,
   );
   for (let i = 0; i < outstandingRequests.length; i += 1) {
     const request = outstandingRequests[i];
@@ -161,6 +161,9 @@ const overdueRequests = async (
       dateNow.clone().diff(request.created_date, "days") + 1;
 
     if (differenceInDays >= numberOfDaysUntilOverdue) {
+      logger.info(
+        "Request [" + request.id + "] is overdue.  Setting to status 2",
+      );
       // update request as overdue
       let updatedRequest;
       if (actionedReason) {
@@ -178,14 +181,14 @@ const overdueRequests = async (
         await updateUserServSubServRequest(request.id, updatedRequest);
       }
     } else if (differenceInDays === numberOfDaysUntilOverdue - 1) {
-      if (orgIdsByRequestCount && orgIdsByRequestCount.get(request.org_id)) {
-        orgIdsByRequestCount.set(
-          request.org_id,
-          orgIdsByRequestCount.get(request.org_id) + 1,
-        );
-      } else {
-        orgIdsByRequestCount.set(request.org_id, 1);
-      }
+      logger.info(
+        "Request [" +
+          request.id +
+          "] will be overdue in 1 day.  Adding organisation [" +
+          request.org_id +
+          "] to list to have approvers get a reminder email",
+      );
+      orgIdsByRequestCount.add(request.org_id);
     }
   }
 };
@@ -209,7 +212,7 @@ const overdueAllRequestsTypes = async () => {
     [0],
     requestTypes.SERVICE_SUB_SERVICE_ACCESS,
   );
-  const orgIdsByRequestCount = new Map();
+  const orgIdsByRequestCount = new Set();
 
   logger.info(
     "Updating outstanding org requests to status 3 if organisation has no active approvers",
@@ -254,11 +257,11 @@ const overdueAllRequestsTypes = async () => {
   // Everything in orgIdsByRequestCount will become overdue in 1 day, so we send a reminder.
   if (orgIdsByRequestCount && orgIdsByRequestCount.size > 0) {
     logger.info(
-      `[${orgIdsByRequestCount.size}] orgs with requests that become overdue in 1 day`,
+      `There are [${orgIdsByRequestCount.size}] unique orgs with requests that become overdue in 1 day. Attemping to send reminder emails to approvers of those orgs`,
     );
     let approversIds = [];
     let activeApprovers = [];
-    for (const [orgId] of orgIdsByRequestCount) {
+    for (const orgId of orgIdsByRequestCount) {
       approversIds = [...approversIds, ...(await getApproversForOrg(orgId))];
     }
 
@@ -301,6 +304,10 @@ const overdueAllRequestsTypes = async () => {
         );
       }
     }
+  } else {
+    logger.info(
+      "There are [0] orgs with requests that become overdue in 1 day. No reminder emails need to be sent",
+    );
   }
 };
 
