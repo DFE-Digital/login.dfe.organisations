@@ -306,7 +306,7 @@ const overdueAllRequestsTypes = async () => {
     }
   } else {
     logger.info(
-      "There are [0] orgs with requests that become overdue in 1 day. No reminder emails need to be sent",
+      "There are [0] unique orgs with requests that become overdue in 1 day. No reminder emails need to be sent",
     );
   }
 };
