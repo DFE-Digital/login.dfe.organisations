@@ -26,7 +26,7 @@
   "dependencies": {
     "agentkeepalive": "^4.6.0",
     "body-parser": "^1.20.4",
-    "csv": "^6.4.npm 1",
+    "csv": "^6.4.1",
     "dotenv": "^17.2.3",
     "express": "^4.22.1",
     "fs": "^0.0.2",
