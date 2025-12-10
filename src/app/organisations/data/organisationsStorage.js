@@ -23,7 +23,6 @@ const {
 const Sequelize = require("sequelize");
 const { uniq, trim, orderBy } = require("lodash");
 const {
-  mapAsync,
   mapArrayToProperty,
   arrayToMapById,
   mapAndFilterArray,
@@ -771,7 +770,6 @@ const getOrganisationsAssociatedToUser = async (
         [Op.eq]: userId,
       },
     },
-    // include: ['Organisation'],
     include: [
       {
         model: organisations,
@@ -785,31 +783,40 @@ const getOrganisationsAssociatedToUser = async (
     return [];
   }
 
-  return mapAsync(userOrgs, async (userOrg) => {
-    const role = await userOrg.getRole();
-    const approvers = (await userOrg.getApprovers()).map(
-      (user) => user.user_id,
-    );
-    const endUsers = (await userOrg.getEndUsers()).map((user) => user.user_id);
-    let organisation;
-    if (WithNewPPFields) {
-      organisation = await mapOrganisationFromEntityWithNewPPFields(
-        userOrg.Organisation,
+  const mappedUserOrgs = await Promise.all(
+    userOrgs.map(async (userOrg) => {
+      const role = await userOrg.getRole();
+      const approvers = (await userOrg.getApprovers()).map(
+        (user) => user.user_id,
       );
-    } else {
-      organisation = await mapOrganisationFromEntity(userOrg.Organisation);
-    }
-    await updateOrganisationsWithLocalAuthorityDetails([organisation]);
+      const endUsers = (await userOrg.getEndUsers()).map(
+        (user) => user.user_id,
+      );
+      let organisation;
+      if (WithNewPPFields) {
+        organisation = mapOrganisationFromEntityWithNewPPFields(
+          userOrg.Organisation,
+        );
+      } else {
+        organisation = mapOrganisationFromEntity(userOrg.Organisation);
+      }
 
-    return {
-      organisation,
-      role,
-      approvers,
-      endUsers,
-      numericIdentifier: userOrg.numeric_identifier || undefined,
-      textIdentifier: userOrg.text_identifier || undefined,
-    };
-  });
+      return {
+        organisation,
+        role,
+        approvers,
+        endUsers,
+        numericIdentifier: userOrg.numeric_identifier || undefined,
+        textIdentifier: userOrg.text_identifier || undefined,
+      };
+    }),
+  );
+
+  await updateOrganisationsWithLocalAuthorityDetails(
+    mappedUserOrgs.map((info) => info.organisation),
+  );
+
+  return mappedUserOrgs;
 };
 
 const setUserAccessToOrganisation = async (
