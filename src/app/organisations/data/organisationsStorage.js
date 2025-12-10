@@ -170,64 +170,6 @@ const mapOrganisationFromEntity = (entity) => {
     IsOnAPAR: entity.IsOnAPAR,
   };
 };
-const mapOrganisationFromEntityWithNewPPFields = (entity) => {
-  if (!entity) {
-    return null;
-  }
-
-  const laAssociation = entity.associations
-    ? entity.associations.find((a) => a.link_type === "LA")
-    : undefined;
-  const category = organisationCategory.find(
-    (c) => c.id === entity.Category,
-  ) || { id: entity.Category, name: "Unknown" };
-  return {
-    id: entity.id,
-    name: entity.name,
-    LegalName: entity.LegalName,
-    category,
-    type: establishmentTypes.find((c) => c.id === entity.Type),
-    urn: entity.URN,
-    uid: entity.UID,
-    upin: entity.UPIN,
-    ukprn: entity.UKPRN,
-    establishmentNumber: entity.EstablishmentNumber,
-    status: organisationStatus.find((c) => c.id === entity.Status),
-    closedOn: entity.ClosedOn,
-    address: entity.Address,
-    telephone: entity.telephone,
-    region: regionCodes.find((c) => c.id === entity.regionCode),
-    localAuthority: laAssociation
-      ? {
-          id: laAssociation.associated_organisation_id,
-        }
-      : undefined,
-    phaseOfEducation: phasesOfEducation.find(
-      (c) => c.id === entity.phaseOfEducation,
-    ),
-    statutoryLowAge: entity.statutoryLowAge,
-    statutoryHighAge: entity.statutoryHighAge,
-    legacyId: entity.legacyId,
-    companyRegistrationNumber: entity.companyRegistrationNumber,
-    SourceSystem: entity.SourceSystem,
-    providerTypeName: entity.ProviderTypeName,
-    ProviderTypeCode: entity.ProviderTypeCode,
-    GIASProviderType: entity.GIASProviderType,
-    PIMSProviderType: entity.PIMSProviderType,
-    PIMSProviderTypeCode: entity.PIMSProviderTypeCode,
-    PIMSStatusName: entity.PIMSStatusName,
-    pimsStatus: entity.PIMSStatus,
-    GIASStatusName: entity.GIASStatusName,
-    GIASStatus: entity.GIASStatus,
-    MasterProviderStatusName: entity.MasterProviderStatusName,
-    MasterProviderStatusCode: entity.MasterProviderStatusCode,
-    OpenedOn: entity.OpenedOn,
-    DistrictAdministrativeName: entity.DistrictAdministrativeName,
-    DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
-    DistrictAdministrative_code: entity.DistrictAdministrative_code,
-    IsOnAPAR: entity.IsOnAPAR,
-  };
-};
 const mapAnnouncementFromEntity = (entity) => {
   return {
     id: entity.announcement_id,
@@ -762,10 +704,7 @@ const getOrganisationsForUserIncludingServices = async (userId) => {
   );
 };
 
-const getOrganisationsAssociatedToUser = async (
-  userId,
-  WithNewPPFields = false,
-) => {
+const getOrganisationsAssociatedToUser = async (userId) => {
   const userOrgs = await userOrganisations.findAll({
     where: {
       user_id: {
@@ -794,14 +733,7 @@ const getOrganisationsAssociatedToUser = async (
       const endUsers = (await userOrg.getEndUsers()).map(
         (user) => user.user_id,
       );
-      let organisation;
-      if (WithNewPPFields) {
-        organisation = mapOrganisationFromEntityWithNewPPFields(
-          userOrg.Organisation,
-        );
-      } else {
-        organisation = mapOrganisationFromEntity(userOrg.Organisation);
-      }
+      const organisation = mapOrganisationFromEntity(userOrg.Organisation);
 
       return {
         organisation,
