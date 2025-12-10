@@ -91,24 +91,26 @@ const updateOrganisationsWithLocalAuthorityDetails = async (orgs) => {
   const localAuthorityIds = uniq(
     orgs.filter((o) => o.localAuthority).map((o) => o.localAuthority.id),
   );
-  const localAuthorityEntities = await organisations.findAll({
-    where: {
-      id: {
-        [Op.in]: localAuthorityIds,
+  if (localAuthorityIds.length > 0) {
+    const localAuthorityEntities = await organisations.findAll({
+      where: {
+        id: {
+          [Op.in]: localAuthorityIds,
+        },
       },
-    },
-  });
-  localAuthorityEntities.forEach((laEntity) => {
-    const localAuthority = {
-      id: laEntity.id,
-      name: laEntity.name,
-      code: laEntity.EstablishmentNumber,
-    };
-    const laOrgs = orgs.filter(
-      (o) => o.localAuthority && o.localAuthority.id === localAuthority.id,
-    );
-    laOrgs.forEach((org) => (org.localAuthority = localAuthority));
-  });
+    });
+    localAuthorityEntities.forEach((laEntity) => {
+      const localAuthority = {
+        id: laEntity.id,
+        name: laEntity.name,
+        code: laEntity.EstablishmentNumber,
+      };
+      const laOrgs = orgs.filter(
+        (o) => o.localAuthority && o.localAuthority.id === localAuthority.id,
+      );
+      laOrgs.forEach((org) => (org.localAuthority = localAuthority));
+    });
+  }
 };
 const mapOrganisationFromEntity = (entity) => {
   if (!entity) {
