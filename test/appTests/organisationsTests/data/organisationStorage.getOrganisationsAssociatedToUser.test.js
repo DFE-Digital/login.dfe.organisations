@@ -467,6 +467,26 @@ describe("getOrganisationsAssociatedToUser.test.js", () => {
     });
   });
 
+  it("Doesn't call the database to get local authority information if no organisations are linked to one", async () => {
+    userOrganisations.findAll.mockResolvedValue([
+      {
+        ...minimalUserOrgData,
+        Organisation: {
+          associations: [],
+        },
+      },
+      {
+        ...minimalUserOrgData,
+        Organisation: {
+          associations: [],
+        },
+      },
+    ]);
+    await getOrganisationsAssociatedToUser("");
+
+    expect(organisations.findAll).not.toHaveBeenCalled();
+  });
+
   it("Replaces a LA linked organisation's localAuthority property with the ID, name, and code if the local authority organisation was found", async () => {
     const localAuthorityData = [
       { id: "LA-1", name: "LA One", code: "1" },
