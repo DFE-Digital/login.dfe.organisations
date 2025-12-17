@@ -23,7 +23,6 @@ const {
 const Sequelize = require("sequelize");
 const { uniq, trim, orderBy } = require("lodash");
 const {
-  mapAsync,
   mapArrayToProperty,
   arrayToMapById,
   mapAndFilterArray,
@@ -92,84 +91,28 @@ const updateOrganisationsWithLocalAuthorityDetails = async (orgs) => {
   const localAuthorityIds = uniq(
     orgs.filter((o) => o.localAuthority).map((o) => o.localAuthority.id),
   );
-  const localAuthorityEntities = await organisations.findAll({
-    where: {
-      id: {
-        [Op.in]: localAuthorityIds,
+  if (localAuthorityIds.length > 0) {
+    const localAuthorityEntities = await organisations.findAll({
+      where: {
+        id: {
+          [Op.in]: localAuthorityIds,
+        },
       },
-    },
-  });
-  localAuthorityEntities.forEach((laEntity) => {
-    const localAuthority = {
-      id: laEntity.id,
-      name: laEntity.name,
-      code: laEntity.EstablishmentNumber,
-    };
-    const laOrgs = orgs.filter(
-      (o) => o.localAuthority && o.localAuthority.id === localAuthority.id,
-    );
-    laOrgs.forEach((org) => (org.localAuthority = localAuthority));
-  });
+    });
+    localAuthorityEntities.forEach((laEntity) => {
+      const localAuthority = {
+        id: laEntity.id,
+        name: laEntity.name,
+        code: laEntity.EstablishmentNumber,
+      };
+      const laOrgs = orgs.filter(
+        (o) => o.localAuthority && o.localAuthority.id === localAuthority.id,
+      );
+      laOrgs.forEach((org) => (org.localAuthority = localAuthority));
+    });
+  }
 };
 const mapOrganisationFromEntity = (entity) => {
-  if (!entity) {
-    return null;
-  }
-
-  const laAssociation = entity.associations
-    ? entity.associations.find((a) => a.link_type === "LA")
-    : undefined;
-  const category = organisationCategory.find(
-    (c) => c.id === entity.Category,
-  ) || { id: entity.Category, name: "Unknown" };
-  return {
-    id: entity.id,
-    name: entity.name,
-    LegalName: entity.LegalName,
-    category,
-    type: establishmentTypes.find((c) => c.id === entity.Type),
-    urn: entity.URN,
-    uid: entity.UID,
-    upin: entity.UPIN,
-    ukprn: entity.UKPRN,
-    establishmentNumber: entity.EstablishmentNumber,
-    status: organisationStatus.find((c) => c.id === entity.Status),
-    closedOn: entity.ClosedOn,
-    address: entity.Address,
-    telephone: entity.telephone,
-    region: regionCodes.find((c) => c.id === entity.regionCode),
-    localAuthority: laAssociation
-      ? {
-          id: laAssociation.associated_organisation_id,
-        }
-      : undefined,
-    phaseOfEducation: phasesOfEducation.find(
-      (c) => c.id === entity.phaseOfEducation,
-    ),
-    statutoryLowAge: entity.statutoryLowAge,
-    statutoryHighAge: entity.statutoryHighAge,
-    legacyId: entity.legacyId,
-    companyRegistrationNumber: entity.companyRegistrationNumber,
-    SourceSystem: entity.SourceSystem,
-    providerTypeName: entity.ProviderTypeName,
-    ProviderTypeCode: entity.ProviderTypeCode,
-    GIASProviderType: entity.GIASProviderType,
-    PIMSProviderType: entity.PIMSProviderType,
-    PIMSProviderTypeCode: entity.PIMSProviderTypeCode,
-    PIMSStatusName: entity.PIMSStatusName,
-    pimsStatus: entity.PIMSStatus,
-    GIASStatusName: entity.GIASStatusName,
-    GIASStatus: entity.GIASStatus,
-    MasterProviderStatusName: entity.MasterProviderStatusName,
-    MasterProviderStatusCode: entity.MasterProviderStatusCode,
-    OpenedOn: entity.OpenedOn,
-    DistrictAdministrativeName: entity.DistrictAdministrativeName,
-    DistrictAdministrativeCode: entity.DistrictAdministrativeCode,
-    DistrictAdministrative_code: entity.DistrictAdministrative_code,
-    IsOnAPAR: entity.IsOnAPAR,
-  };
-};
-const mapOrganisationFromEntityWithNewPPFields = (entity) => {
   if (!entity) {
     return null;
   }
@@ -761,17 +704,13 @@ const getOrganisationsForUserIncludingServices = async (userId) => {
   );
 };
 
-const getOrganisationsAssociatedToUser = async (
-  userId,
-  WithNewPPFields = false,
-) => {
+const getOrganisationsAssociatedToUser = async (userId) => {
   const userOrgs = await userOrganisations.findAll({
     where: {
       user_id: {
         [Op.eq]: userId,
       },
     },
-    // include: ['Organisation'],
     include: [
       {
         model: organisations,
@@ -785,31 +724,33 @@ const getOrganisationsAssociatedToUser = async (
     return [];
   }
 
-  return mapAsync(userOrgs, async (userOrg) => {
-    const role = await userOrg.getRole();
-    const approvers = (await userOrg.getApprovers()).map(
-      (user) => user.user_id,
-    );
-    const endUsers = (await userOrg.getEndUsers()).map((user) => user.user_id);
-    let organisation;
-    if (WithNewPPFields) {
-      organisation = await mapOrganisationFromEntityWithNewPPFields(
-        userOrg.Organisation,
+  const mappedUserOrgs = await Promise.all(
+    userOrgs.map(async (userOrg) => {
+      const role = await userOrg.getRole();
+      const approvers = (await userOrg.getApprovers()).map(
+        (user) => user.user_id,
       );
-    } else {
-      organisation = await mapOrganisationFromEntity(userOrg.Organisation);
-    }
-    await updateOrganisationsWithLocalAuthorityDetails([organisation]);
+      const endUsers = (await userOrg.getEndUsers()).map(
+        (user) => user.user_id,
+      );
+      const organisation = mapOrganisationFromEntity(userOrg.Organisation);
 
-    return {
-      organisation,
-      role,
-      approvers,
-      endUsers,
-      numericIdentifier: userOrg.numeric_identifier || undefined,
-      textIdentifier: userOrg.text_identifier || undefined,
-    };
-  });
+      return {
+        organisation,
+        role,
+        approvers,
+        endUsers,
+        numericIdentifier: userOrg.numeric_identifier || undefined,
+        textIdentifier: userOrg.text_identifier || undefined,
+      };
+    }),
+  );
+
+  await updateOrganisationsWithLocalAuthorityDetails(
+    mappedUserOrgs.map((info) => info.organisation),
+  );
+
+  return mappedUserOrgs;
 };
 
 const setUserAccessToOrganisation = async (
