@@ -26,9 +26,13 @@ const mockRepository = () => {
     users: mockTable(),
     userServices: mockTable(),
     organisations: mockTable(),
+    sequelize: {
+      query: jest.fn(),
+    },
 
     mockResetAll: function () {
       this.connection.query.mockReset();
+      this.sequelize.query.mockReset();
       this.users.mockResetAll();
       this.userServices.mockResetAll();
       this.organisations.mockResetAll();

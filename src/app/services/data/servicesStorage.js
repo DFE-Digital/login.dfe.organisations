@@ -1,10 +1,10 @@
 const Sequelize = require("sequelize");
 
 const Op = Sequelize.Op;
+const QueryTypes = Sequelize.QueryTypes;
 const logger = require("./../../../infrastructure/logger");
 const {
   users,
-  user,
   services,
   organisations,
   userOrganisations,
@@ -14,8 +14,30 @@ const {
   organisationStatus,
   regionCodes,
   phasesOfEducation,
+  sequelize,
 } = require("./../../../infrastructure/repository");
 const uuid = require("uuid");
+
+const buildRawQuery = (sql, replacements) => {
+  let rawQuery = sql;
+  Object.entries(replacements).forEach(([key, value]) => {
+    let replacementValue;
+    if (value === null || value === undefined) {
+      replacementValue = "NULL";
+    } else if (typeof value === "string") {
+      replacementValue = `'${value.replace(/'/g, "''")}'`;
+    } else if (Array.isArray(value)) {
+      replacementValue = `(${value.map((v) => (typeof v === "string" ? `'${v.replace(/'/g, "''")}'` : v)).join(", ")})`;
+    } else {
+      replacementValue = value;
+    }
+    rawQuery = rawQuery.replace(
+      new RegExp(`:${key}(?![\\w])`, "g"),
+      replacementValue,
+    );
+  });
+  return rawQuery;
+};
 
 const mapOrganisationEntity = async (entity, laCache = undefined) => {
   const laAssociation = entity.associations.find((a) => a.link_type === "LA");
@@ -300,79 +322,116 @@ const getUsersOfServiceByUserIds = async (
       `Calling getAllUsersOfService for services storage for request ${correlationId}`,
       { correlationId },
     );
-    const query = {
-      order: [
-        ["user_id", "ASC"],
-        ["organisation_id", "ASC"],
-      ],
-      limit: pageSize,
+
+    const dataSql = `
+    SELECT
+      us.user_id,
+      us.organisation_id,
+      u.status AS user_status,
+      u.createdAt AS user_createdAt,
+      u.updatedAt AS user_updatedAt,
+      o.*
+    FROM dbo.[user_services] AS us
+    JOIN dbo.[user] AS u
+      ON u.sub = us.user_id
+    JOIN dbo.[organisation] AS o
+      ON o.id = us.organisation_id
+    WHERE us.service_id = :serviceId
+      ${userIds && userIds.length ? "AND us.user_id IN (:userIds)" : ""}
+      ${status !== undefined ? "AND u.status = :status" : ""}
+      ${
+        from !== undefined && to !== undefined
+          ? "AND u.updatedAt BETWEEN :from AND :to"
+          : from !== undefined
+            ? "AND u.updatedAt >= :from"
+            : to !== undefined
+              ? "AND u.updatedAt <= :to"
+              : ""
+      }
+    ORDER BY us.user_id ASC, us.organisation_id ASC
+    OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY
+    OPTION (FORCE ORDER);`;
+
+    const countSql = `
+    SELECT COUNT_BIG(1) AS total
+    FROM dbo.[user_services] AS us
+    JOIN dbo.[user] AS u
+      ON u.sub = us.user_id
+    JOIN dbo.[organisation] AS o
+      ON o.id = us.organisation_id
+    WHERE us.service_id = :serviceId
+      ${userIds && userIds.length ? "AND us.user_id IN (:userIds)" : ""}
+      ${status !== undefined ? "AND u.status = :status" : ""}
+      ${
+        from !== undefined && to !== undefined
+          ? "AND u.updatedAt BETWEEN :from AND :to"
+          : from !== undefined
+            ? "AND u.updatedAt >= :from"
+            : to !== undefined
+              ? "AND u.updatedAt <= :to"
+              : ""
+      }
+    OPTION (FORCE ORDER);`;
+
+    const replacements = {
+      serviceId: id,
+      userIds,
+      status,
+      from,
+      to,
       offset: page !== 1 ? pageSize * (page - 1) : 0,
-      where: {
-        service_id: {
-          [Op.eq]: id,
-        },
-      },
-      include: ["Organisation"],
+      limit: pageSize,
     };
 
-    if (userIds && userIds.length > 0) {
-      query.where.user_id = {
-        [Op.in]: userIds,
-      };
-    }
+    const rawDataQuery = buildRawQuery(dataSql, replacements);
+    logger.debug(
+      `Info: Raw data query to execute for ${id} - ${rawDataQuery} correlation: ${correlationId}`,
+    );
 
-    // User table includes
-    const userWhere = {};
-    if (status !== undefined) {
-      userWhere.status = {
-        [Op.eq]: status,
-      };
-    }
-
-    if (from !== undefined && to !== undefined) {
-      userWhere.updatedAt = {
-        [Op.between]: [from, to],
-      };
-    } else if (from !== undefined) {
-      userWhere.updatedAt = {
-        [Op.gte]: from,
-      };
-    } else if (to !== undefined) {
-      userWhere.updatedAt = {
-        [Op.lte]: to,
-      };
-    }
-
-    // required: true ensures we always have a user record
-    query.include.push({
-      model: user,
-      as: "User",
-      where: userWhere,
-      required: true,
+    const rows = await sequelize.query(dataSql, {
+      replacements,
+      type: QueryTypes.SELECT,
     });
 
-    const userServiceEntities = await users.findAndCountAll(query);
+    const rawCountQuery = buildRawQuery(countSql, replacements);
+    logger.debug(
+      `Info: Raw count query to execute for ${id} - ${rawCountQuery} correlation: ${correlationId}`,
+    );
+
+    const [{ total }] = await sequelize.query(countSql, {
+      replacements,
+      type: QueryTypes.SELECT,
+    });
 
     const mappedUsers = await Promise.all(
-      userServiceEntities.rows.map(async (userServiceEntity) => {
-        const role = await userServiceEntity.getRole();
+      rows.map(async (row) => {
+        const userService = await users.findOne({
+          where: {
+            user_id: row.user_id,
+            organisation_id: row.organisation_id,
+            service_id: id,
+          },
+        });
+        const role = userService ? await userService.getRole() : null;
+
         return {
-          id: userServiceEntity.getDataValue("user_id"),
-          status: userServiceEntity.User.getDataValue("status"),
+          id: row.user_id,
+          status: row.user_status,
           role,
-          createdAt: userServiceEntity.User.getDataValue("createdAt"),
-          updatedAt: userServiceEntity.User.getDataValue("updatedAt"),
+          createdAt: row.user_createdAt,
+          updatedAt: row.user_updatedAt,
           organisation: {
-            ...userServiceEntity.Organisation.dataValues,
+            ...row,
           },
         };
       }),
     );
+
     return {
       users: mappedUsers,
       page,
-      totalNumberOfPages: Math.ceil(userServiceEntities.count / pageSize),
-      totalNumberOfRecords: userServiceEntities.count,
+      totalNumberOfPages: Math.ceil(Number(total) / pageSize),
+      totalNumberOfRecords: Number(total),
     };
   } catch (e) {
     logger.error(
