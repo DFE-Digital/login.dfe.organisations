@@ -209,4 +209,6 @@ buildDataModel(dataModel, db, [
   userServiceRequestsModel,
 ]);
 
+dataModel.sequelize = db;
+
 module.exports = dataModel;
