@@ -10,7 +10,7 @@ const getServiceRequest = async (req, res) => {
     return res.status(200).send(request);
   } catch (e) {
     logger.error(
-      `Error getting service request ${req.params.rid} - ${e.message}`,
+      `Error getting service request ${req.params.rid} - ${e.message} - ${e.stack}`,
     );
     return res.status(500).send();
   }

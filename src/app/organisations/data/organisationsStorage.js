@@ -2314,8 +2314,8 @@ const getServiceRequestById = async (requestId) => {
 
   return {
     id: entity.get("id"),
-    org_id: entity.Organisation.getDataValue("id"),
-    org_name: entity.Organisation.getDataValue("name"),
+    org_id: entity.Organisation ? entity.Organisation.getDataValue("id") : entity.getDataValue("organisation_id"),
+    org_name: entity.Organisation ? entity.Organisation.getDataValue("name") : null,
     service_id: entity.getDataValue("service_id"),
     role_ids: entity.getDataValue("role_ids"),
     user_id: entity.getDataValue("user_id"),
