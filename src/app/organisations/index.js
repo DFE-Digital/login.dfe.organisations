@@ -41,6 +41,7 @@ const getOrganisationsAssociatedWithService = require("./getOrganisationsAssocia
 const getOrgsServicesSubServicesRequests = require("./getOrgsServicesSubServicesRequests");
 const getAllRequestsTypesAssociatedWithOrgs = require("./getAllRequestsTypesAssociatedWithOrgs");
 const getPendingRequestTypesForApproval = require("./getPendingRequestTypesForApproval");
+const getServiceRequest = require("./getServiceRequest");
 
 const router = express.Router();
 
@@ -66,6 +67,7 @@ const routes = () => {
   router.patch("/:id", asyncWrapper(editOrganisation));
   router.get("/announcements", asyncWrapper(listAllAnnouncements));
   router.get("/requests", asyncWrapper(listRequests));
+  router.get("/service-requests/:rid", asyncWrapper(getServiceRequest));
 
   router.get(
     "/by-external-id/:type/:id",

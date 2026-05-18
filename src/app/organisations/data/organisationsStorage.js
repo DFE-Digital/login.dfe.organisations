@@ -2302,6 +2302,36 @@ const pagedListOfServSubServRequests = async (
   };
 };
 
+const getServiceRequestById = async (requestId) => {
+  const entity = await userServiceRequests.findOne({
+    where: { id: { [Op.eq]: requestId } },
+    include: ["Organisation"],
+  });
+
+  if (!entity) {
+    return null;
+  }
+
+  return {
+    id: entity.get("id"),
+    org_id: entity.Organisation.getDataValue("id"),
+    org_name: entity.Organisation.getDataValue("name"),
+    service_id: entity.getDataValue("service_id"),
+    role_ids: entity.getDataValue("role_ids"),
+    user_id: entity.getDataValue("user_id"),
+    created_date: entity.getDataValue("createdAt"),
+    request_type: serviceRequestsTypes.find(
+      (e) => e.id === entity.getDataValue("request_type"),
+    ),
+    status: serviceRequestStatus.find(
+      (c) => c.id === entity.getDataValue("status"),
+    ),
+    reason: entity.getDataValue("reason"),
+    actioned_by: entity.getDataValue("actioned_by"),
+    actioned_at: entity.getDataValue("actioned_at"),
+  };
+};
+
 const updateUserServSubServRequest = async (requestId, request) => {
   const existingRequest = await userServiceRequests.findOne({
     where: {
@@ -2385,6 +2415,7 @@ module.exports = {
   pagedListOfAllRequestTypesForOrg,
   getAllPendingRequestTypesForApprover,
   pagedListOfServSubServRequests,
+  getServiceRequestById,
   updateUserServSubServRequest,
   getAllOrgsByUpin,
 };
