@@ -3,7 +3,7 @@ jest.mock("./../../../src/infrastructure/logger", () => ({
 }));
 jest.mock("./../../../src/app/organisations/data/organisationsStorage", () => {
   return {
-    pagedListOfRequests: jest.fn(),
+    pagedListOfAllRequestTypes: jest.fn(),
   };
 });
 
@@ -20,7 +20,7 @@ const res = {
   },
 };
 const {
-  pagedListOfRequests,
+  pagedListOfAllRequestTypes,
 } = require("./../../../src/app/organisations/data/organisationsStorage");
 const getRequestsForSupport = require("../../../src/app/organisations/listRequests");
 
@@ -43,9 +43,9 @@ describe("when getting requests that have been escalated to support", () => {
       },
     };
 
-    pagedListOfRequests.mockReset();
+    pagedListOfAllRequestTypes.mockReset();
 
-    pagedListOfRequests.mockReturnValue({
+    pagedListOfAllRequestTypes.mockReturnValue({
       requests: [
         {
           id: "requestId",
@@ -93,10 +93,10 @@ describe("when getting requests that have been escalated to support", () => {
 
     await getRequestsForSupport(req, res);
 
-    expect(pagedListOfRequests.mock.calls).toHaveLength(1);
-    expect(pagedListOfRequests.mock.calls[0][0]).toBe(1);
-    expect(pagedListOfRequests.mock.calls[0][1]).toBe(25);
-    expect(pagedListOfRequests.mock.calls[0][2]).toEqual(["2"]);
+    expect(pagedListOfAllRequestTypes.mock.calls).toHaveLength(1);
+    expect(pagedListOfAllRequestTypes.mock.calls[0][0]).toBe(1);
+    expect(pagedListOfAllRequestTypes.mock.calls[0][1]).toBe(25);
+    expect(pagedListOfAllRequestTypes.mock.calls[0][2]).toEqual(["2"]);
   });
 
   it("then it should get page specified in query", async () => {
@@ -104,9 +104,18 @@ describe("when getting requests that have been escalated to support", () => {
 
     await getRequestsForSupport(req, res);
 
-    expect(pagedListOfRequests.mock.calls).toHaveLength(1);
-    expect(pagedListOfRequests.mock.calls[0][0]).toBe(2);
-    expect(pagedListOfRequests.mock.calls[0][1]).toBe(25);
-    expect(pagedListOfRequests.mock.calls[0][2]).toEqual([]);
+    expect(pagedListOfAllRequestTypes.mock.calls).toHaveLength(1);
+    expect(pagedListOfAllRequestTypes.mock.calls[0][0]).toBe(2);
+    expect(pagedListOfAllRequestTypes.mock.calls[0][1]).toBe(25);
+    expect(pagedListOfAllRequestTypes.mock.calls[0][2]).toEqual([]);
+  });
+
+  it("then it should filter by type if specified in query", async () => {
+    req.query.filtertype = "service";
+
+    await getRequestsForSupport(req, res);
+
+    expect(pagedListOfAllRequestTypes.mock.calls).toHaveLength(1);
+    expect(pagedListOfAllRequestTypes.mock.calls[0][3]).toEqual(["service"]);
   });
 });
