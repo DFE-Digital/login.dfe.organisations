@@ -2076,6 +2076,99 @@ const getServiceAndSubServiceReqForOrgs = async (orgIds) => {
   }));
 };
 
+const pagedListOfAllRequestTypes = async (
+  pageNumber = 1,
+  pageSize = 25,
+  filterStates = undefined,
+  filterTypes = undefined,
+) => {
+  const includeOrg =
+    !filterTypes || filterTypes.length === 0 || filterTypes.includes("organisation");
+  const includeService =
+    !filterTypes || filterTypes.length === 0 || filterTypes.includes("service");
+  const includeSubService =
+    !filterTypes || filterTypes.length === 0 || filterTypes.includes("subService");
+
+  const orgQuery = {
+    where: {},
+    order: [["createdAt", "ASC"]],
+    include: ["Organisation"],
+  };
+
+  const servQuery = {
+    where: {},
+    order: [["createdAt", "ASC"]],
+    include: ["Organisation"],
+  };
+
+  if (filterStates && filterStates.length > 0) {
+    orgQuery.where.status = { [Op.in]: filterStates };
+    servQuery.where.status = { [Op.in]: filterStates };
+  }
+
+  let orgResults = [];
+  let servResults = [];
+
+  if (includeOrg) {
+    const rows = await userOrganisationRequests.findAll(orgQuery);
+    orgResults = rows.map((entity) => ({
+      id: entity.get("id"),
+      org_id: entity.Organisation.getDataValue("id"),
+      org_name: entity.Organisation.getDataValue("name"),
+      user_id: entity.getDataValue("user_id"),
+      created_date: entity.getDataValue("createdAt"),
+      request_type: { id: "organisation", name: "Organisation access" },
+      status: organisationRequestStatus.find(
+        (c) => c.id === entity.getDataValue("status"),
+      ),
+      reason: entity.getDataValue("reason"),
+    }));
+  }
+
+  if (includeService || includeSubService) {
+    const typeFilter = [];
+    if (includeService) typeFilter.push("service");
+    if (includeSubService) typeFilter.push("subService");
+    if (typeFilter.length > 0) {
+      servQuery.where.request_type = { [Op.in]: typeFilter };
+    }
+    const rows = await userServiceRequests.findAll(servQuery);
+    servResults = rows.map((entity) => ({
+      id: entity.get("id"),
+      org_id: entity.Organisation.getDataValue("id"),
+      org_name: entity.Organisation.getDataValue("name"),
+      service_id: entity.getDataValue("service_id"),
+      role_ids: entity.getDataValue("role_ids"),
+      user_id: entity.getDataValue("user_id"),
+      created_date: entity.getDataValue("createdAt"),
+      request_type: serviceRequestsTypes.find(
+        (e) => e.id === entity.getDataValue("request_type"),
+      ),
+      status: serviceRequestStatus.find(
+        (c) => c.id === entity.getDataValue("status"),
+      ),
+    }));
+  }
+
+  const allRequests = orderBy(
+    orgResults.concat(servResults),
+    "created_date",
+    "asc",
+  );
+
+  const totalNumberOfRecords = allRequests.length;
+  const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
+  const offset = (pageNumber - 1) * pageSize;
+  const requests = allRequests.slice(offset, offset + pageSize);
+
+  return {
+    requests,
+    pageNumber,
+    totalNumberOfPages,
+    totalNumberOfRecords,
+  };
+};
+
 const pagedListOfAllRequestTypesForOrg = async (
   orgIds,
   pageNumber = 1,
@@ -2209,6 +2302,36 @@ const pagedListOfServSubServRequests = async (
   };
 };
 
+const getServiceRequestById = async (requestId) => {
+  const entity = await userServiceRequests.findOne({
+    where: { id: { [Op.eq]: requestId } },
+    include: ["Organisation"],
+  });
+
+  if (!entity) {
+    return null;
+  }
+
+  return {
+    id: entity.get("id"),
+    org_id: entity.Organisation ? entity.Organisation.getDataValue("id") : entity.getDataValue("organisation_id"),
+    org_name: entity.Organisation ? entity.Organisation.getDataValue("name") : null,
+    service_id: entity.getDataValue("service_id"),
+    role_ids: entity.getDataValue("role_ids"),
+    user_id: entity.getDataValue("user_id"),
+    created_date: entity.getDataValue("createdAt"),
+    request_type: serviceRequestsTypes.find(
+      (e) => e.id === entity.getDataValue("request_type"),
+    ),
+    status: serviceRequestStatus.find(
+      (c) => c.id === entity.getDataValue("status"),
+    ),
+    reason: entity.getDataValue("reason"),
+    actioned_by: entity.getDataValue("actioned_by"),
+    actioned_at: entity.getDataValue("actioned_at"),
+  };
+};
+
 const updateUserServSubServRequest = async (requestId, request) => {
   const existingRequest = await userServiceRequests.findOne({
     where: {
@@ -2284,6 +2407,7 @@ module.exports = {
   getPagedListOfUsersV2,
   getPagedListOfUsersV3,
   pagedListOfRequests,
+  pagedListOfAllRequestTypes,
   getLatestActionedRequestAssociated,
   hasUserOrganisationRequestsByOrgId,
   getOrganisationsAssociatedToService,
@@ -2291,6 +2415,7 @@ module.exports = {
   pagedListOfAllRequestTypesForOrg,
   getAllPendingRequestTypesForApprover,
   pagedListOfServSubServRequests,
+  getServiceRequestById,
   updateUserServSubServRequest,
   getAllOrgsByUpin,
 };

@@ -1,4 +1,4 @@
-const { pagedListOfRequests } = require("./data/organisationsStorage");
+const { pagedListOfAllRequestTypes } = require("./data/organisationsStorage");
 
 const pageSize = 25;
 
@@ -28,8 +28,9 @@ const fixMultiSelect = (value) => {
 const listRequests = async (req, res) => {
   const pageNumber = getPageNumber(req);
   const filterStates = fixMultiSelect(req.query.filterstatus);
+  const filterTypes = fixMultiSelect(req.query.filtertype);
 
-  const page = await pagedListOfRequests(pageNumber, pageSize, filterStates);
+  const page = await pagedListOfAllRequestTypes(pageNumber, pageSize, filterStates, filterTypes);
 
   return res.contentType("json").send({
     requests: page.requests,
