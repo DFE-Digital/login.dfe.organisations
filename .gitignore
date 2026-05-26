@@ -65,3 +65,4 @@ junit.xml
 
 #config
 /config/
+.npmrc
