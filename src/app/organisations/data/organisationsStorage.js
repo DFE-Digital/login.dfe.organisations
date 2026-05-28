@@ -757,7 +757,6 @@ const setUserAccessToOrganisation = async (
   organisationId,
   userId,
   roleId,
-  status,
   reason,
   numericIdentifier,
   textIdentifier,
@@ -766,7 +765,6 @@ const setUserAccessToOrganisation = async (
     user_id: userId.toUpperCase(),
     organisation_id: organisationId,
     role_id: roleId,
-    status,
     reason,
     numeric_identifier: numericIdentifier,
     text_identifier: textIdentifier,
@@ -2083,11 +2081,15 @@ const pagedListOfAllRequestTypes = async (
   filterTypes = undefined,
 ) => {
   const includeOrg =
-    !filterTypes || filterTypes.length === 0 || filterTypes.includes("organisation");
+    !filterTypes ||
+    filterTypes.length === 0 ||
+    filterTypes.includes("organisation");
   const includeService =
     !filterTypes || filterTypes.length === 0 || filterTypes.includes("service");
   const includeSubService =
-    !filterTypes || filterTypes.length === 0 || filterTypes.includes("subService");
+    !filterTypes ||
+    filterTypes.length === 0 ||
+    filterTypes.includes("subService");
 
   const orgQuery = {
     where: {},
@@ -2314,8 +2316,12 @@ const getServiceRequestById = async (requestId) => {
 
   return {
     id: entity.get("id"),
-    org_id: entity.Organisation ? entity.Organisation.getDataValue("id") : entity.getDataValue("organisation_id"),
-    org_name: entity.Organisation ? entity.Organisation.getDataValue("name") : null,
+    org_id: entity.Organisation
+      ? entity.Organisation.getDataValue("id")
+      : entity.getDataValue("organisation_id"),
+    org_name: entity.Organisation
+      ? entity.Organisation.getDataValue("name")
+      : null,
     service_id: entity.getDataValue("service_id"),
     role_ids: entity.getDataValue("role_ids"),
     user_id: entity.getDataValue("user_id"),
