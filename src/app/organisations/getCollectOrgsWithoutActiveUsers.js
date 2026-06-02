@@ -15,7 +15,7 @@ const getCollectOrgsWithoutActiveUsers = async (req, res) => {
         o.EstablishmentNumber     AS establishment_number,
         o.Category                AS category,
         o.Status                  AS status,
-        o.localAutharityCode      AS local_authority_code,
+        o.localAuthorityCode      AS local_authority_code,
         o.ClosedOn                AS closed_on,
         (
           SELECT COUNT(*)
