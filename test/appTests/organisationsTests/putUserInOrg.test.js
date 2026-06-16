@@ -76,16 +76,9 @@ describe("when setting a users access within an organisation", () => {
     expect(setUserAccessToOrganisation.mock.calls[0][0]).toBe("org1");
     expect(setUserAccessToOrganisation.mock.calls[0][1]).toBe("user1");
     expect(setUserAccessToOrganisation.mock.calls[0][2]).toBe(10000);
-    expect(setUserAccessToOrganisation.mock.calls[0][3]).toBe(0);
-    expect(setUserAccessToOrganisation.mock.calls[0][4]).toBe("Test");
-    expect(setUserAccessToOrganisation.mock.calls[0][5]).toBe(123456);
-    expect(setUserAccessToOrganisation.mock.calls[0][6]).toBe("userone");
-  });
-
-  it("then the status of the users access is pending", async () => {
-    await putUserInOrg(req, res);
-
-    expect(setUserAccessToOrganisation.mock.calls[0][3]).toBe(0);
+    expect(setUserAccessToOrganisation.mock.calls[0][3]).toBe("Test");
+    expect(setUserAccessToOrganisation.mock.calls[0][4]).toBe(123456);
+    expect(setUserAccessToOrganisation.mock.calls[0][5]).toBe("userone");
   });
 
   it("then it should return 201 if user was created", async () => {
@@ -117,7 +110,7 @@ describe("when setting a users access within an organisation", () => {
 
     expect(getOrganisationsAssociatedToUser).toHaveBeenCalledTimes(1);
     expect(getNextUserOrgNumericIdentifier).toHaveBeenCalledTimes(0);
-    expect(setUserAccessToOrganisation.mock.calls[0][5]).toBe(951236);
+    expect(setUserAccessToOrganisation.mock.calls[0][4]).toBe(951236);
   });
 
   it("then it should get next user identifier when numericIdentifier not set and generateUserOrgIdentifiers is true", async () => {
@@ -129,7 +122,7 @@ describe("when setting a users access within an organisation", () => {
     await putUserInOrg(req, res);
 
     expect(getNextUserOrgNumericIdentifier).toHaveBeenCalledTimes(1);
-    expect(setUserAccessToOrganisation.mock.calls[0][5]).toBe(789456);
+    expect(setUserAccessToOrganisation.mock.calls[0][4]).toBe(789456);
   });
 
   it("then it should store undefined when numericIdentifier not set and generateUserOrgIdentifiers is false", async () => {
@@ -137,7 +130,7 @@ describe("when setting a users access within an organisation", () => {
 
     await putUserInOrg(req, res);
 
-    expect(setUserAccessToOrganisation.mock.calls[0][5]).toBe(undefined);
+    expect(setUserAccessToOrganisation.mock.calls[0][4]).toBe(undefined);
   });
 
   it("then it should get existing user text identifier when textIdentifier not set and user already has access to org", async () => {
@@ -153,7 +146,7 @@ describe("when setting a users access within an organisation", () => {
 
     expect(getOrganisationsAssociatedToUser).toHaveBeenCalledTimes(1);
     expect(getUserOrganisationByTextIdentifier).toHaveBeenCalledTimes(0);
-    expect(setUserAccessToOrganisation.mock.calls[0][6]).toBe("sdofkpdf");
+    expect(setUserAccessToOrganisation.mock.calls[0][5]).toBe("sdofkpdf");
   });
 
   it("then it should use encoded numericIdentifier for textIdentifier when textIdentifier not set and generateUserOrgIdentifiers is true", async () => {
@@ -165,7 +158,7 @@ describe("when setting a users access within an organisation", () => {
     await putUserInOrg(req, res);
 
     expect(getUserOrganisationByTextIdentifier).toHaveBeenCalledTimes(1);
-    expect(setUserAccessToOrganisation.mock.calls[0][6]).toBe("opt1");
+    expect(setUserAccessToOrganisation.mock.calls[0][5]).toBe("opt1");
   });
 
   it("then it should use other encoded numericIdentifier options for textIdentifier when textIdentifier not set and generateUserOrgIdentifiers is true and earlier options already in use by another user", async () => {
@@ -181,7 +174,7 @@ describe("when setting a users access within an organisation", () => {
     await putUserInOrg(req, res);
 
     expect(getUserOrganisationByTextIdentifier).toHaveBeenCalledTimes(3);
-    expect(setUserAccessToOrganisation.mock.calls[0][6]).toBe("opt3");
+    expect(setUserAccessToOrganisation.mock.calls[0][5]).toBe("opt3");
   });
 
   it("then it should throw error when textIdentifier not set and generateUserOrgIdentifiers is true and not text identifier options are available", async () => {
@@ -219,7 +212,7 @@ describe("when setting a users access within an organisation", () => {
     await putUserInOrg(req, res);
 
     expect(getUserOrganisationByTextIdentifier).toHaveBeenCalledTimes(1);
-    expect(setUserAccessToOrganisation.mock.calls[0][6]).toBe("opt1");
+    expect(setUserAccessToOrganisation.mock.calls[0][5]).toBe("opt1");
   });
 
   it("then it should store undefined when textIdentifier not set and generateUserOrgIdentifiers is false", async () => {
@@ -227,7 +220,7 @@ describe("when setting a users access within an organisation", () => {
 
     await putUserInOrg(req, res);
 
-    expect(setUserAccessToOrganisation.mock.calls[0][6]).toBe(undefined);
+    expect(setUserAccessToOrganisation.mock.calls[0][5]).toBe(undefined);
   });
 
   it("then it should raise notification of user update", async () => {

@@ -20,11 +20,6 @@ const define = (db, schema) => {
         allowNull: false,
         defaultValue: 0,
       },
-      status: {
-        type: Sequelize.SMALLINT,
-        allowNull: false,
-        defaultValue: 0,
-      },
       reason: {
         type: Sequelize.STRING,
         allowNull: true,
