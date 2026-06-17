@@ -2079,6 +2079,7 @@ const pagedListOfAllRequestTypes = async (
   pageSize = 25,
   filterStates = undefined,
   filterTypes = undefined,
+  filterUserId = undefined,
 ) => {
   const includeOrg =
     !filterTypes ||
@@ -2106,6 +2107,11 @@ const pagedListOfAllRequestTypes = async (
   if (filterStates && filterStates.length > 0) {
     orgQuery.where.status = { [Op.in]: filterStates };
     servQuery.where.status = { [Op.in]: filterStates };
+  }
+
+  if (filterUserId) {
+    orgQuery.where.user_id = filterUserId;
+    servQuery.where.user_id = filterUserId;
   }
 
   let orgResults = [];

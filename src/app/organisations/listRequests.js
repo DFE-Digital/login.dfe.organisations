@@ -29,8 +29,9 @@ const listRequests = async (req, res) => {
   const pageNumber = getPageNumber(req);
   const filterStates = fixMultiSelect(req.query.filterstatus);
   const filterTypes = fixMultiSelect(req.query.filtertype);
+  const filterUserId = req.query.filteruserid || undefined;
 
-  const page = await pagedListOfAllRequestTypes(pageNumber, pageSize, filterStates, filterTypes);
+  const page = await pagedListOfAllRequestTypes(pageNumber, pageSize, filterStates, filterTypes, filterUserId);
 
   return res.contentType("json").send({
     requests: page.requests,

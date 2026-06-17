@@ -118,4 +118,20 @@ describe("when getting requests that have been escalated to support", () => {
     expect(pagedListOfAllRequestTypes.mock.calls).toHaveLength(1);
     expect(pagedListOfAllRequestTypes.mock.calls[0][3]).toEqual(["service"]);
   });
+
+  it("then it should pass filterUserId to pagedListOfAllRequestTypes when filteruserid is in query", async () => {
+    req.query.filteruserid = "user-abc-123";
+
+    await getRequestsForSupport(req, res);
+
+    expect(pagedListOfAllRequestTypes.mock.calls).toHaveLength(1);
+    expect(pagedListOfAllRequestTypes.mock.calls[0][4]).toBe("user-abc-123");
+  });
+
+  it("then it should pass undefined as filterUserId when filteruserid is absent from query", async () => {
+    await getRequestsForSupport(req, res);
+
+    expect(pagedListOfAllRequestTypes.mock.calls).toHaveLength(1);
+    expect(pagedListOfAllRequestTypes.mock.calls[0][4]).toBeUndefined();
+  });
 });
