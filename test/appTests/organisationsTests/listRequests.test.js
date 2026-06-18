@@ -134,4 +134,13 @@ describe("when getting requests that have been escalated to support", () => {
     expect(pagedListOfAllRequestTypes.mock.calls).toHaveLength(1);
     expect(pagedListOfAllRequestTypes.mock.calls[0][4]).toBeUndefined();
   });
+
+  it("then it should pass undefined as filterUserId when filteruserid is an empty string", async () => {
+    req.query.filteruserid = "";
+
+    await getRequestsForSupport(req, res);
+
+    expect(pagedListOfAllRequestTypes.mock.calls).toHaveLength(1);
+    expect(pagedListOfAllRequestTypes.mock.calls[0][4]).toBeUndefined();
+  });
 });

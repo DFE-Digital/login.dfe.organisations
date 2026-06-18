@@ -29,21 +29,39 @@ describe("pagedListOfAllRequestTypes - filterUserId", () => {
   });
 
   it("adds user_id WHERE clause to org query when filterUserId is provided", async () => {
-    await pagedListOfAllRequestTypes(1, 25, undefined, undefined, "user-abc-123");
+    await pagedListOfAllRequestTypes(
+      1,
+      25,
+      undefined,
+      undefined,
+      "user-abc-123",
+    );
 
     const orgQuery = userOrganisationRequests.findAll.mock.calls[0][0];
     expect(orgQuery.where.user_id).toBe("user-abc-123");
   });
 
   it("adds user_id WHERE clause to service query when filterUserId is provided", async () => {
-    await pagedListOfAllRequestTypes(1, 25, undefined, ["service"], "user-abc-123");
+    await pagedListOfAllRequestTypes(
+      1,
+      25,
+      undefined,
+      ["service"],
+      "user-abc-123",
+    );
 
     const servQuery = userServiceRequests.findAll.mock.calls[0][0];
     expect(servQuery.where.user_id).toBe("user-abc-123");
   });
 
   it("adds user_id WHERE clause to service query when filterTypes is undefined", async () => {
-    await pagedListOfAllRequestTypes(1, 25, undefined, undefined, "user-abc-123");
+    await pagedListOfAllRequestTypes(
+      1,
+      25,
+      undefined,
+      undefined,
+      "user-abc-123",
+    );
 
     const servQuery = userServiceRequests.findAll.mock.calls[0][0];
     expect(servQuery.where.user_id).toBe("user-abc-123");
@@ -55,5 +73,42 @@ describe("pagedListOfAllRequestTypes - filterUserId", () => {
     const orgQuery = userOrganisationRequests.findAll.mock.calls[0][0];
     expect(orgQuery.where.user_id).toBe("user-abc-123");
     expect(orgQuery.where).toHaveProperty("status");
+  });
+
+  it("does not call userServiceRequests.findAll when filterTypes is organisation-only", async () => {
+    await pagedListOfAllRequestTypes(
+      1,
+      25,
+      undefined,
+      ["organisation"],
+      "user-abc-123",
+    );
+
+    expect(userOrganisationRequests.findAll).toHaveBeenCalledTimes(1);
+    expect(userServiceRequests.findAll).not.toHaveBeenCalled();
+    const orgQuery = userOrganisationRequests.findAll.mock.calls[0][0];
+    expect(orgQuery.where.user_id).toBe("user-abc-123");
+  });
+
+  it("does not call userOrganisationRequests.findAll when filterTypes is service-only", async () => {
+    await pagedListOfAllRequestTypes(
+      1,
+      25,
+      undefined,
+      ["service"],
+      "user-abc-123",
+    );
+
+    expect(userServiceRequests.findAll).toHaveBeenCalledTimes(1);
+    expect(userOrganisationRequests.findAll).not.toHaveBeenCalled();
+    const servQuery = userServiceRequests.findAll.mock.calls[0][0];
+    expect(servQuery.where.user_id).toBe("user-abc-123");
+  });
+
+  it("does not apply user_id filter when filterUserId is an empty string", async () => {
+    await pagedListOfAllRequestTypes(1, 25, undefined, undefined, "");
+
+    const orgQuery = userOrganisationRequests.findAll.mock.calls[0][0];
+    expect(orgQuery.where).not.toHaveProperty("user_id");
   });
 });
