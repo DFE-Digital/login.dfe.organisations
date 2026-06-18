@@ -29,6 +29,7 @@ const listRequests = async (req, res) => {
   const pageNumber = getPageNumber(req);
   const filterStates = fixMultiSelect(req.query.filterstatus);
   const filterTypes = fixMultiSelect(req.query.filtertype);
+  // || undefined coerces an explicit empty string (?filteruserid=) to undefined so the storage layer treats it as absent
   const filterUserId = req.query.filteruserid || undefined;
 
   const page = await pagedListOfAllRequestTypes(pageNumber, pageSize, filterStates, filterTypes, filterUserId);
