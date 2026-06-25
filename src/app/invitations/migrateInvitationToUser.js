@@ -39,7 +39,6 @@ const handler = async (req, res) => {
         userId,
         org.role.id,
         APPROVED_STATUS,
-        "",
         numericIdentifier,
         textIdentifier,
       );
