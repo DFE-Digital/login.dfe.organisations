@@ -1,7 +1,6 @@
-jest.mock("./../../../src/infrastructure/config", () => {
-  const singleton = {};
-  return () => singleton;
-});
+jest.mock("./../../../src/infrastructure/config", () => ({
+  notifications: { connectionString: "test-connection-string" },
+}));
 jest.mock("login.dfe.api-client/users", () => ({
   getUserRaw: jest.fn(),
 }));
