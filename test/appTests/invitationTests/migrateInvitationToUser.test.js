@@ -84,6 +84,7 @@ describe("when migrating an invitation to a user", () => {
     expect(args[0]).toBe("org1");
     expect(args[1]).toBe("user1");
     expect(args[2]).toBe(3);
+    expect(args[3]).toBe(1);
     expect(args[4]).toBe(123456);
     expect(args[5]).toBe("userone");
     expect(args).toHaveLength(6);
