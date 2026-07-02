@@ -76,6 +76,7 @@ const defineStatic = (model) => {
     { id: "051", name: "PIMS Training Providers" },
     { id: "052", name: "Billing Authority" },
     { id: "053", name: "Youth Custody Service" },
+    { id: "054", name: "UKRLP Providers" },
   ];
 
   model.establishmentTypes = [
