@@ -7,7 +7,6 @@ const invitationOrganisationsModel = require("./invitationOrganisations");
 const invitationsModel = require("./invitations");
 const roleModel = require("./role");
 const invitationServiceRolesModel = require("./invitationServiceRoles");
-const organisationAnnoucementsModel = require("./organisationAnnoucements");
 const organisationAssociationsModel = require("./organisationAssociations");
 const organisationsModel = require("./organisations");
 const servicesModel = require("./services");
@@ -198,7 +197,6 @@ buildDataModel(dataModel, db, [
   roleModel,
   invitationsModel,
   invitationServiceRolesModel,
-  organisationAnnoucementsModel,
   organisationAssociationsModel,
   organisationsModel,
   servicesModel,

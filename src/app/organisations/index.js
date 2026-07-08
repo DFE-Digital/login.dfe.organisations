@@ -20,9 +20,6 @@ const putUserInOrg = require("./putUserInOrg");
 const getUsersAssocatedWithOrganisationsForApproval = require("./getUsersAssociatedWithOrganisationForApproval");
 const deleteUserOrganisation = require("./deleteUserOrganisation");
 const getUsersForOrganisation = require("./getUsersForOrganisation");
-const listOrganisationAnnouncements = require("./listOrganisationAnnouncements");
-const upsertOrganisationAnnouncement = require("./upsertOrganisationAnnouncement");
-const listAllAnnouncements = require("./listAllAnnouncements");
 const createUserOrganisationRequest = require("./createUserOrganisationRequest");
 const getUserOrganisationRequest = require("./getUserOrganisationRequest");
 const getApproversForOrganisation = require("./getApproversForOrganisation");
@@ -65,7 +62,6 @@ const routes = () => {
   router.get("/invitations", asyncWrapper(listInvitationOrganisations));
   router.post("/", asyncWrapper(createOrganisation));
   router.patch("/:id", asyncWrapper(editOrganisation));
-  router.get("/announcements", asyncWrapper(listAllAnnouncements));
   router.get("/requests", asyncWrapper(listRequests));
   router.get("/service-requests/:rid", asyncWrapper(getServiceRequest));
 
@@ -86,11 +82,6 @@ const routes = () => {
     asyncWrapper(getUsersAssocatedWithOrganisationsForApproval),
   );
   router.get("/:id/users", asyncWrapper(getUsersForOrganisation));
-  router.get("/:id/announcements", asyncWrapper(listOrganisationAnnouncements));
-  router.post(
-    "/:id/announcements",
-    asyncWrapper(upsertOrganisationAnnouncement),
-  );
   router.get("/:id", asyncWrapper(getOrganisation));
   router.get("/v2/:id", asyncWrapper(getOrganisationV2));
   router.put("/:id/users/:uid", asyncWrapper(putUserInOrg));
