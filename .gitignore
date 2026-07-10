@@ -66,3 +66,4 @@ junit.xml
 #config
 /config/
 .npmrc
+.worktrees/
