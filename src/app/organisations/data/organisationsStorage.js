@@ -11,7 +11,6 @@ const {
   organisationUserStatus,
   regionCodes,
   phasesOfEducation,
-  organisationAnnouncements,
   userOrganisationRequests,
   organisationRequestStatus,
   serviceRequestStatus,
@@ -170,21 +169,6 @@ const mapOrganisationFromEntity = (entity) => {
     IsOnAPAR: entity.IsOnAPAR,
   };
 };
-const mapAnnouncementFromEntity = (entity) => {
-  return {
-    id: entity.announcement_id,
-    originId: entity.origin_id,
-    organisationId: entity.organisation_id,
-    type: entity.type,
-    title: entity.title,
-    summary: entity.summary,
-    body: entity.body,
-    publishedAt: entity.publishedAt,
-    expiresAt: entity.expiresAt,
-    published: entity.published,
-  };
-};
-
 const list = async (includeAssociations = false) => {
   try {
     const findOrgsOpts = {};
@@ -1449,91 +1433,6 @@ const getNextOrganisationLegacyId = async () => {
   return LEGACY_ID;
 };
 
-const listAnnouncements = async (
-  organisationId = undefined,
-  originId = undefined,
-  onlyPublishedAnnouncements = true,
-  pageNumber = 1,
-  pageSize = 25,
-) => {
-  const where = {};
-  if (onlyPublishedAnnouncements) {
-    where.published = {
-      [Op.eq]: true,
-    };
-  }
-  if (organisationId) {
-    where.organisation_id = {
-      [Op.eq]: organisationId,
-    };
-  }
-  if (originId) {
-    where.origin_id = {
-      [Op.eq]: originId,
-    };
-  }
-  const recordset = await organisationAnnouncements.findAndCountAll({
-    where,
-    limit: pageSize,
-    offset: (pageNumber - 1) * pageSize,
-  });
-
-  const totalNumberOfRecords = recordset.count;
-  const numberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
-  return {
-    announcements: recordset.rows.map(mapAnnouncementFromEntity),
-    page: pageNumber,
-    numberOfPages,
-    totalNumberOfRecords,
-  };
-};
-
-const upsertAnnouncement = async (
-  originId,
-  organisationId,
-  type,
-  title,
-  summary,
-  body,
-  publishedAt,
-  expiresAt,
-  published,
-) => {
-  let entity = await organisationAnnouncements.findOne({
-    where: {
-      origin_id: {
-        [Op.eq]: originId,
-      },
-    },
-  });
-  if (entity) {
-    entity.type = type;
-    entity.title = title;
-    entity.summary = summary;
-    entity.body = body;
-    entity.publishedAt = publishedAt;
-    entity.expiresAt = expiresAt;
-    entity.published = published;
-    await entity.save();
-    return mapAnnouncementFromEntity(entity);
-  }
-
-  entity = {
-    announcement_id: uuid.v4(),
-    origin_id: originId,
-    organisation_id: organisationId,
-    type,
-    title,
-    summary,
-    body,
-    publishedAt,
-    expiresAt,
-    published,
-  };
-  await organisationAnnouncements.create(entity);
-  return mapAnnouncementFromEntity(entity);
-};
-
 const getApproversForOrg = async (organisationId) => {
   const entites = await userOrganisations.findAll({
     where: {
@@ -2400,8 +2299,6 @@ module.exports = {
   hasUserOrganisationsByOrgId,
   getNextUserOrgNumericIdentifier,
   getNextOrganisationLegacyId,
-  listAnnouncements,
-  upsertAnnouncement,
   createUserOrgRequest,
   getUserOrgRequestById,
   getApproversForOrg,
