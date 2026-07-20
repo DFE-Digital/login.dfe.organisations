@@ -25,9 +25,15 @@ jest.mock("login.dfe.jobs-client", () => ({
 const httpMocks = require("node-mocks-http");
 const { getUserRaw } = require("login.dfe.api-client/users");
 const invitationsStorage = require("./../../../src/app/invitations/data/invitationsStorage");
-const { setUserAccessToOrganisation } = require("./../../../src/app/organisations/data/organisationsStorage");
-const { upsertServiceUser } = require("./../../../src/app/services/data/servicesStorage");
-const { getUserOrganisationIdentifiers } = require("./../../../src/app/organisations/utils");
+const {
+  setUserAccessToOrganisation,
+} = require("./../../../src/app/organisations/data/organisationsStorage");
+const {
+  upsertServiceUser,
+} = require("./../../../src/app/services/data/servicesStorage");
+const {
+  getUserOrganisationIdentifiers,
+} = require("./../../../src/app/organisations/utils");
 const migrateInvitationToUser = require("./../../../src/app/invitations/migrateInvitationToUser");
 
 describe("when migrating an invitation to a user", () => {
@@ -84,7 +90,7 @@ describe("when migrating an invitation to a user", () => {
     expect(args[0]).toBe("org1");
     expect(args[1]).toBe("user1");
     expect(args[2]).toBe(3);
-    expect(args[3]).toBe(1);
+    expect(args[3]).toBeUndefined();
     expect(args[4]).toBe(123456);
     expect(args[5]).toBe("userone");
     expect(args).toHaveLength(6);

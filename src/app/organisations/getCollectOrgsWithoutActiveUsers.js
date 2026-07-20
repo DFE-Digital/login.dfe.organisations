@@ -15,21 +15,21 @@ const getCollectOrgsWithoutActiveUsers = async (req, res) => {
         o.EstablishmentNumber     AS establishment_number,
         o.Category                AS category,
         o.Status                  AS status,
-        o.localAuthorityCode      AS local_authority_code,
+        o.DistrictAdministrativeCode AS local_authority_code,
         o.ClosedOn                AS closed_on,
         (
           SELECT COUNT(*)
           FROM user_services us2
           JOIN service s2 ON s2.id = us2.service_id
           WHERE us2.organisation_id = o.id
-            AND (s2.clientId = 'COLLECT' OR s2.name LIKE '%Collect%')
+            AND s2.name = 'Collect'
         ) AS total_user_service_records,
         (
           SELECT COUNT(*)
           FROM user_services us3
           JOIN service s3 ON s3.id = us3.service_id
           WHERE us3.organisation_id = o.id
-            AND (s3.clientId = 'COLLECT' OR s3.name LIKE '%Collect%')
+            AND s3.name = 'Collect'
             AND us3.status = 1
         ) AS active_user_count
       FROM organisation o
@@ -38,13 +38,13 @@ const getCollectOrgsWithoutActiveUsers = async (req, res) => {
           SELECT DISTINCT us.organisation_id
           FROM user_services us
           JOIN service s ON s.id = us.service_id
-          WHERE (s.clientId = 'COLLECT' OR s.name LIKE '%Collect%')
+          WHERE s.name = 'Collect'
         )
         AND o.id NOT IN (
           SELECT DISTINCT us.organisation_id
           FROM user_services us
           JOIN service s ON s.id = us.service_id
-          WHERE (s.clientId = 'COLLECT' OR s.name LIKE '%Collect%')
+          WHERE s.name = 'Collect'
             AND us.status = 1
         )
       ORDER BY o.name
