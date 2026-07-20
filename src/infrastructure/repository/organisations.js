@@ -170,17 +170,9 @@ const define = (db, schema) => {
   );
 };
 
-const extend = ({
-  organisations,
-  organisationAssociations,
-  organisationAnnouncements,
-}) => {
+const extend = ({ organisations, organisationAssociations }) => {
   organisations.hasMany(organisationAssociations, {
     as: "associations",
-    foreignKey: "organisation_id",
-  });
-  organisations.hasMany(organisationAnnouncements, {
-    as: "announcements",
     foreignKey: "organisation_id",
   });
 };
