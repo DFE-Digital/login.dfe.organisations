@@ -38,7 +38,7 @@ const handler = async (req, res) => {
         org.organisation.id,
         userId,
         org.role.id,
-        undefined,
+        "",
         numericIdentifier,
         textIdentifier,
       );
