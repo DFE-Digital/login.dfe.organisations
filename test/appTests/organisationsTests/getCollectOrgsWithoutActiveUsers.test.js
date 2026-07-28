@@ -6,7 +6,9 @@ jest.mock("./../../../src/infrastructure/repository", () => ({
 jest.mock("./../../../src/infrastructure/logger", () => ({
   error: jest.fn(),
 }));
-jest.mock("./../../../src/infrastructure/config", () => ({}));
+jest.mock("./../../../src/infrastructure/config", () => ({
+  legacyServices: { collectServiceId: "test-collect-service-id" },
+}));
 
 const getCollectOrgsWithoutActiveUsers = require("./../../../src/app/organisations/getCollectOrgsWithoutActiveUsers");
 
@@ -44,5 +46,18 @@ describe("getCollectOrgsWithoutActiveUsers", () => {
     await getCollectOrgsWithoutActiveUsers(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  it("binds the configured collect service id as a query replacement", async () => {
+    mockQuery.mockResolvedValue([]);
+
+    await getCollectOrgsWithoutActiveUsers(req, res);
+
+    expect(mockQuery).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        replacements: { collectServiceId: "test-collect-service-id" },
+      }),
+    );
   });
 });
