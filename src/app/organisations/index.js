@@ -39,6 +39,7 @@ const getOrgsServicesSubServicesRequests = require("./getOrgsServicesSubServices
 const getAllRequestsTypesAssociatedWithOrgs = require("./getAllRequestsTypesAssociatedWithOrgs");
 const getPendingRequestTypesForApproval = require("./getPendingRequestTypesForApproval");
 const getServiceRequest = require("./getServiceRequest");
+const getCollectOrgsWithoutActiveUsers = require("./getCollectOrgsWithoutActiveUsers");
 
 const router = express.Router();
 
@@ -82,6 +83,10 @@ const routes = () => {
     asyncWrapper(getUsersAssocatedWithOrganisationsForApproval),
   );
   router.get("/:id/users", asyncWrapper(getUsersForOrganisation));
+  router.get(
+    "/collect-without-active-users",
+    asyncWrapper(getCollectOrgsWithoutActiveUsers),
+  );
   router.get("/:id", asyncWrapper(getOrganisation));
   router.get("/v2/:id", asyncWrapper(getOrganisationV2));
   router.put("/:id/users/:uid", asyncWrapper(putUserInOrg));
