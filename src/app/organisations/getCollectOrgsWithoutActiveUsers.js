@@ -43,11 +43,16 @@ const getCollectOrgsWithoutActiveUsers = async (req, res) => {
           JOIN dbo.[service] s ON s.id = us.service_id
           WHERE s.id = :collectServiceId
         )
-        AND o.id NOT IN (
-          SELECT DISTINCT us.organisation_id
+        AND NOT EXISTS (
+          -- NOT EXISTS rather than NOT IN: user_services.organisation_id has
+          -- no NOT NULL constraint, and NOT IN against a subquery containing
+          -- even one NULL evaluates to UNKNOWN for every row, silently
+          -- returning zero rows for the whole query.
+          SELECT 1
           FROM dbo.[user_services] us
           JOIN dbo.[service] s ON s.id = us.service_id
-          WHERE s.id = :collectServiceId
+          WHERE us.organisation_id = o.id
+            AND s.id = :collectServiceId
             AND us.status = 1
         )
       ORDER BY o.name
