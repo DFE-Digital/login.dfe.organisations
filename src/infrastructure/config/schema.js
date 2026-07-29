@@ -33,6 +33,10 @@ const organisationRequestsSchema = new SimpleSchema({
   },
 });
 
+const legacyServicesSchema = new SimpleSchema({
+  collectServiceId: String,
+});
+
 const schema = new SimpleSchema({
   loggerSettings: schemas.loggerSettings,
   hostingEnvironment: schemas.hostingEnvironment,
@@ -49,6 +53,7 @@ const schema = new SimpleSchema({
     type: organisationRequestsSchema,
     optional: true,
   },
+  legacyServices: legacyServicesSchema,
 });
 module.exports.validate = () => {
   validateConfigAgainstSchema(config, schema, logger)
