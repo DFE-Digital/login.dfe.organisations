@@ -37,6 +37,13 @@ const getCollectOrgsWithoutActiveUsers = async (req, res) => {
         ) AS active_user_count
       FROM dbo.[organisation] o
       WHERE o.Status = 1
+        -- Only organisation types with a statutory Collect reporting
+        -- obligation: 001 = Establishment (schools, incl. School Census/
+        -- SLASC/EYC submitters), 002 = Local Authority (SEN2/S251/CIN
+        -- returns). Other active DSI categories (training providers,
+        -- software suppliers, government bodies, etc.) have no such
+        -- obligation and would otherwise show up as noise.
+        AND o.Category IN ('001', '002')
         AND NOT EXISTS (
           -- NOT EXISTS rather than NOT IN: user_services.organisation_id has
           -- no NOT NULL constraint, and NOT IN against a subquery containing
