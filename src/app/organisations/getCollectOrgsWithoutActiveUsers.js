@@ -37,12 +37,6 @@ const getCollectOrgsWithoutActiveUsers = async (req, res) => {
         ) AS active_user_count
       FROM dbo.[organisation] o
       WHERE o.Status = 1
-        AND o.id IN (
-          SELECT DISTINCT us.organisation_id
-          FROM dbo.[user_services] us
-          JOIN dbo.[service] s ON s.id = us.service_id
-          WHERE s.id = :collectServiceId
-        )
         AND NOT EXISTS (
           -- NOT EXISTS rather than NOT IN: user_services.organisation_id has
           -- no NOT NULL constraint, and NOT IN against a subquery containing
