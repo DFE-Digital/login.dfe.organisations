@@ -36,7 +36,10 @@ const getCollectOrgsWithoutActiveUsers = async (req, res) => {
       `Error fetching COLLECT orgs without active users - ${e.message}`,
       { correlationId, stack: e.stack },
     );
-    return res.status(500).send(e.message || "Server error");
+    // Deliberately generic: the detail is in the log with the correlation id.
+    // Sibling handlers return e.message, which can put database detail in a
+    // response body.
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 

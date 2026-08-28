@@ -27,6 +27,7 @@ describe("getCollectOrgsWithoutActiveUsers", () => {
     res = {
       status: jest.fn().mockReturnThis(),
       send: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis(),
     };
     pagedList.mockReset().mockResolvedValue(emptyPage);
   });
@@ -92,5 +93,16 @@ describe("getCollectOrgsWithoutActiveUsers", () => {
     await getCollectOrgsWithoutActiveUsers(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  it("does not put the underlying error detail in the 500 response", async () => {
+    pagedList.mockRejectedValue(
+      new Error("Invalid column name 'DistrictAdministrativeCode'"),
+    );
+
+    await getCollectOrgsWithoutActiveUsers(req, res);
+
+    expect(res.json).toHaveBeenCalledWith({ message: "Internal server error" });
+    expect(JSON.stringify(res.json.mock.calls)).not.toContain("Invalid column");
   });
 });

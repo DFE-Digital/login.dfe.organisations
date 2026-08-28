@@ -549,10 +549,15 @@ const collectOrgsWithoutActiveUsersFrom = `
         -- rows for the whole query.
         SELECT 1
         FROM dbo.[user_services] us
-        JOIN dbo.[service] s ON s.id = us.service_id
+        JOIN dbo.[user] u ON u.sub = us.user_id
         WHERE us.organisation_id = o.id
-          AND s.id = :collectServiceId
+          AND us.service_id = :collectServiceId
+          -- Both statuses matter. Deactivating a user changes only the user
+          -- record, leaving their user_services row active, so checking the
+          -- access row alone would treat an organisation whose only Collect
+          -- users are deactivated as covered - the exact gap this reports on.
           AND us.status = 1
+          AND u.status = 1
       )`;
 
 const pagedListOfCollectOrgsWithoutActiveUsers = async (
