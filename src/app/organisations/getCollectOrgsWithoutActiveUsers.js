@@ -1,78 +1,42 @@
-const { QueryTypes } = require("sequelize");
-const repository = require("../../infrastructure/repository");
-const logger = require("../../infrastructure/logger");
-const config = require("../../infrastructure/config");
+const logger = require("./../../infrastructure/logger");
+const config = require("./../../infrastructure/config");
+const organisationsStorage = require("./data/organisationsStorage");
+
+const extractNumber = (req, key, defaultValue) => {
+  if (!req.query || req.query[key] === undefined) return defaultValue;
+
+  const num = parseInt(req.query[key], 10);
+  return isNaN(num) ? 0 : num;
+};
 
 const getCollectOrgsWithoutActiveUsers = async (req, res) => {
-  const correlationId = req.get
-    ? req.get("x-correlation-id")
-    : req.headers && req.headers["x-correlation-id"];
+  const correlationId = req.get ? req.get("x-correlation-id") : undefined;
 
   try {
-    const rows = await repository.sequelize.query(
-      `
-      SELECT DISTINCT
-        o.id                      AS org_id,
-        o.name                    AS org_name,
-        o.URN                     AS urn,
-        o.EstablishmentNumber     AS establishment_number,
-        o.Category                AS category,
-        o.Status                  AS status,
-        o.DistrictAdministrativeCode AS local_authority_code,
-        o.ClosedOn                AS closed_on,
-        (
-          SELECT COUNT(*)
-          FROM dbo.[user_services] us2
-          JOIN dbo.[service] s2 ON s2.id = us2.service_id
-          WHERE us2.organisation_id = o.id
-            AND s2.id = :collectServiceId
-        ) AS total_user_service_records,
-        (
-          SELECT COUNT(*)
-          FROM dbo.[user_services] us3
-          JOIN dbo.[service] s3 ON s3.id = us3.service_id
-          WHERE us3.organisation_id = o.id
-            AND s3.id = :collectServiceId
-            AND us3.status = 1
-        ) AS active_user_count
-      FROM dbo.[organisation] o
-      WHERE o.Status = 1
-        -- Only organisation types with a statutory Collect reporting
-        -- obligation: 001 = Establishment (schools, incl. School Census/
-        -- SLASC/EYC submitters), 002 = Local Authority (SEN2/S251/CIN
-        -- returns). Other active DSI categories (training providers,
-        -- software suppliers, government bodies, etc.) have no such
-        -- obligation and would otherwise show up as noise.
-        AND o.Category IN ('001', '002')
-        AND NOT EXISTS (
-          -- NOT EXISTS rather than NOT IN: user_services.organisation_id has
-          -- no NOT NULL constraint, and NOT IN against a subquery containing
-          -- even one NULL evaluates to UNKNOWN for every row, silently
-          -- returning zero rows for the whole query.
-          SELECT 1
-          FROM dbo.[user_services] us
-          JOIN dbo.[service] s ON s.id = us.service_id
-          WHERE us.organisation_id = o.id
-            AND s.id = :collectServiceId
-            AND us.status = 1
-        )
-      ORDER BY o.name
-      `,
-      {
-        replacements: {
-          collectServiceId: config.legacyServices.collectServiceId,
-        },
-        type: QueryTypes.SELECT,
-      },
-    );
+    const pageNumber = extractNumber(req, "page", 1);
+    if (pageNumber < 1)
+      return res.status(400).send("Page number must be greater than 0");
 
-    return res.status(200).json(rows ?? []);
+    const pageSize = extractNumber(req, "pageSize", 25);
+    if (pageSize < 1 || pageSize > 50)
+      return res
+        .status(400)
+        .send("Page size must be between 1 and 50 inclusive");
+
+    const pagedResult =
+      await organisationsStorage.pagedListOfCollectOrgsWithoutActiveUsers(
+        config.legacyServices.collectServiceId,
+        pageNumber,
+        pageSize,
+      );
+
+    return res.status(200).send(pagedResult);
   } catch (e) {
     logger.error(
       `Error fetching COLLECT orgs without active users - ${e.message}`,
       { correlationId, stack: e.stack },
     );
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).send(e.message || "Server error");
   }
 };
 

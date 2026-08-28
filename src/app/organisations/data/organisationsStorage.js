@@ -18,6 +18,7 @@ const {
   getNextNumericId,
   getNextLegacyId,
   userServiceRequests,
+  sequelize,
 } = require("./../../../infrastructure/repository");
 const Sequelize = require("sequelize");
 const { uniq, trim, orderBy } = require("lodash");
@@ -521,6 +522,86 @@ const pagedListOfCategory = async (
   const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
   return {
     organisations: orgs,
+    totalNumberOfPages,
+    totalNumberOfRecords,
+  };
+};
+
+// Organisations that Collect expects data from but which currently have nobody
+// able to submit it - no active Collect access in DSI at all. Includes
+// organisations that have never had Collect access, not only those that lost
+// it: the narrower "previously had access" query returns no rows in production,
+// and an organisation that was never set up cannot submit either.
+const collectOrgsWithoutActiveUsersFrom = `
+    FROM dbo.[organisation] o
+    WHERE o.Status = 1
+      -- Only organisation types with a statutory Collect reporting obligation,
+      -- confirmed with the data collections team: 001 = Establishment
+      -- (School Census / SLASC / EYC submitters), 002 = Local Authority
+      -- (SEN2 / S251 / CIN returns). Other active DSI categories - training
+      -- providers, software suppliers, government bodies - have no such
+      -- obligation and would otherwise swamp the report.
+      AND o.Category IN ('001', '002')
+      AND NOT EXISTS (
+        -- NOT EXISTS rather than NOT IN: user_services.organisation_id has no
+        -- NOT NULL constraint, and NOT IN against a subquery containing even
+        -- one NULL evaluates to UNKNOWN for every row, silently returning zero
+        -- rows for the whole query.
+        SELECT 1
+        FROM dbo.[user_services] us
+        JOIN dbo.[service] s ON s.id = us.service_id
+        WHERE us.organisation_id = o.id
+          AND s.id = :collectServiceId
+          AND us.status = 1
+      )`;
+
+const pagedListOfCollectOrgsWithoutActiveUsers = async (
+  collectServiceId,
+  pageNumber = 1,
+  pageSize = 25,
+) => {
+  const offset = (pageNumber - 1) * pageSize;
+  const replacements = { collectServiceId, offset, limit: pageSize };
+
+  const dataSql = `
+    SELECT
+      o.id                         AS org_id,
+      o.name                       AS org_name,
+      o.URN                        AS urn,
+      o.EstablishmentNumber        AS establishment_number,
+      o.Category                   AS category,
+      o.Status                     AS status,
+      o.DistrictAdministrativeCode AS local_authority_code,
+      o.ClosedOn                   AS closed_on,
+      (
+        SELECT COUNT(*)
+        FROM dbo.[user_services] us2
+        JOIN dbo.[service] s2 ON s2.id = us2.service_id
+        WHERE us2.organisation_id = o.id
+          AND s2.id = :collectServiceId
+      ) AS total_user_service_records
+    ${collectOrgsWithoutActiveUsersFrom}
+    ORDER BY o.name
+    OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY`;
+
+  const countSql = `
+    SELECT COUNT_BIG(1) AS total
+    ${collectOrgsWithoutActiveUsersFrom}`;
+
+  const organisationsPage = await sequelize.query(dataSql, {
+    replacements,
+    type: Sequelize.QueryTypes.SELECT,
+  });
+
+  const [{ total }] = await sequelize.query(countSql, {
+    replacements,
+    type: Sequelize.QueryTypes.SELECT,
+  });
+
+  const totalNumberOfRecords = Number(total);
+  const totalNumberOfPages = Math.ceil(totalNumberOfRecords / pageSize);
+  return {
+    organisations: organisationsPage,
     totalNumberOfPages,
     totalNumberOfRecords,
   };
@@ -2292,6 +2373,7 @@ module.exports = {
   getUsersPendingApprovalByUser,
   getUsersPendingApproval,
   pagedListOfCategory,
+  pagedListOfCollectOrgsWithoutActiveUsers,
   getUsersAssociatedWithOrganisation,
   pagedListOfUsers,
   pagedListOfInvitations,

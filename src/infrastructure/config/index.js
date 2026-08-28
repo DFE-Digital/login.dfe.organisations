@@ -81,11 +81,13 @@ const config = {
   },
   legacyServices: {
     // Default is the id database_scripts/mssql/014_add_s2s_kts-sa_collect_services.sql
-    // inserts as a hardcoded literal (confirmed against production 2026-07-24). This is
-    // an env override, not a code constant, precisely because this repo has no proven
-    // mechanism guaranteeing that migration has run identically, unmodified, in every
-    // environment - if a different environment's Collect service row ever has a
-    // different id, set COLLECT_SERVICE_ID there rather than changing code.
+    // inserts as a hardcoded literal (confirmed against production 2026-07-24), so every
+    // environment that ran that migration has this exact id - it is not generated per
+    // environment. It stays an env override rather than a code constant because that
+    // migration is guarded by IF NOT EXISTS: an environment whose Collect service row
+    // predates it, or was created by hand, would silently keep a different id. If the
+    // report returns nothing where rows are expected, check the id there first and set
+    // COLLECT_SERVICE_ID rather than changing code.
     collectServiceId: process.env.COLLECT_SERVICE_ID || "4fd40032-61a6-4beb-a6c4-6b39a3af81c1"
   },
   schedules: {
