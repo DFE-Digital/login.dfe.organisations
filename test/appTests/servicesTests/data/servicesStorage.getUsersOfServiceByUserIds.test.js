@@ -166,4 +166,48 @@ describe("When using the getUsersOfServiceByUserIds function", () => {
     expect(firstCall[0]).toContain("AND u.updatedAt <= :to");
     expect(firstCall[1].replacements.to).toEqual(to);
   });
+
+  // dbo.[user] is an external table without statistics: without HASH JOIN the
+  // optimiser can read it once per row, which timed out for small services (NSA-10138).
+  it("forces a hash join to the external user table in the data and count queries when unfiltered", async () => {
+    repository.sequelize.query.mockResolvedValueOnce([mockRow]);
+    repository.sequelize.query.mockResolvedValueOnce([{ total: 1 }]);
+    repository.users.findOne.mockResolvedValue(mockUserService);
+
+    await getUsersOfServiceByUserIds(
+      sid,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      1,
+      25,
+      correlationId,
+    );
+
+    const [dataCall, countCall] = repository.sequelize.query.mock.calls;
+    expect(dataCall[0]).toContain("OPTION (FORCE ORDER, HASH JOIN);");
+    expect(countCall[0]).toContain("OPTION (FORCE ORDER, HASH JOIN);");
+  });
+
+  it("forces a hash join to the external user table in the data and count queries when filtered", async () => {
+    repository.sequelize.query.mockResolvedValueOnce([mockRow]);
+    repository.sequelize.query.mockResolvedValueOnce([{ total: 1 }]);
+    repository.users.findOne.mockResolvedValue(mockUserService);
+
+    await getUsersOfServiceByUserIds(
+      sid,
+      userIds,
+      1,
+      from,
+      to,
+      1,
+      25,
+      correlationId,
+    );
+
+    const [dataCall, countCall] = repository.sequelize.query.mock.calls;
+    expect(dataCall[0]).toContain("OPTION (FORCE ORDER, HASH JOIN);");
+    expect(countCall[0]).toContain("OPTION (FORCE ORDER, HASH JOIN);");
+  });
 });
