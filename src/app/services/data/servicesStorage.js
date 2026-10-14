@@ -307,6 +307,13 @@ const getAllUsersOfService = async (id, page, pageSize, correlationId) => {
   );
 };
 
+// dbo.[user] is an external (elastic query) table with no statistics, so the
+// optimiser can pick a nested loop that reads the whole external table once per
+// row (about 0.6s each, 35s+ for a small service such as SAP). HASH JOIN rules
+// that plan out so the external table is read once per query. FORCE ORDER is
+// from NSA-9537. See NSA-10138.
+const EXTERNAL_USER_JOIN_HINT = "OPTION (FORCE ORDER, HASH JOIN)";
+
 const getUsersOfServiceByUserIds = async (
   id,
   userIds,
@@ -350,7 +357,7 @@ const getUsersOfServiceByUserIds = async (
       }
     ORDER BY us.user_id ASC, us.organisation_id ASC
     OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY
-    OPTION (FORCE ORDER);`;
+    ${EXTERNAL_USER_JOIN_HINT};`;
 
     const countSql = `
     SELECT COUNT_BIG(1) AS total
@@ -371,7 +378,7 @@ const getUsersOfServiceByUserIds = async (
               ? "AND u.updatedAt <= :to"
               : ""
       }
-    OPTION (FORCE ORDER);`;
+    ${EXTERNAL_USER_JOIN_HINT};`;
 
     const replacements = {
       serviceId: id,
