@@ -307,12 +307,23 @@ const getAllUsersOfService = async (id, page, pageSize, correlationId) => {
   );
 };
 
-// dbo.[user] is an external (elastic query) table with no statistics, so the
-// optimiser can pick a nested loop that reads the whole external table once per
-// row (about 0.6s each, 35s+ for a small service such as SAP). HASH JOIN rules
-// that plan out so the external table is read once per query. FORCE ORDER is
-// from NSA-9537. See NSA-10138.
-const EXTERNAL_USER_JOIN_HINT = "OPTION (FORCE ORDER, HASH JOIN)";
+// Services this small can be mis-estimated at 1 row, so they need the hash join (NSA-10138).
+const SMALL_SERVICE_MAX_ROWS = 5000;
+
+// Bounded count of a service's rows, so the check stays cheap for large services.
+const isSmallService = async (serviceId) => {
+  const [{ serviceRows }] = await sequelize.query(
+    `SELECT COUNT_BIG(1) AS serviceRows
+    FROM (SELECT TOP (:cap) 1 AS present
+          FROM dbo.[user_services]
+          WHERE service_id = :serviceId) AS s;`,
+    {
+      replacements: { serviceId, cap: SMALL_SERVICE_MAX_ROWS + 1 },
+      type: QueryTypes.SELECT,
+    },
+  );
+  return Number(serviceRows) <= SMALL_SERVICE_MAX_ROWS;
+};
 
 const getUsersOfServiceByUserIds = async (
   id,
@@ -329,6 +340,10 @@ const getUsersOfServiceByUserIds = async (
       `Calling getAllUsersOfService for services storage for request ${correlationId}`,
       { correlationId },
     );
+
+    const joinHint = (await isSmallService(id))
+      ? "OPTION (FORCE ORDER, HASH JOIN)"
+      : "OPTION (FORCE ORDER)";
 
     const dataSql = `
     SELECT
@@ -357,7 +372,7 @@ const getUsersOfServiceByUserIds = async (
       }
     ORDER BY us.user_id ASC, us.organisation_id ASC
     OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY
-    ${EXTERNAL_USER_JOIN_HINT};`;
+    ${joinHint};`;
 
     const countSql = `
     SELECT COUNT_BIG(1) AS total
@@ -378,7 +393,7 @@ const getUsersOfServiceByUserIds = async (
               ? "AND u.updatedAt <= :to"
               : ""
       }
-    ${EXTERNAL_USER_JOIN_HINT};`;
+    ${joinHint};`;
 
     const replacements = {
       serviceId: id,
